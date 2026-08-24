@@ -1,0 +1,45 @@
+name: Feature
+description: Propose gameplay, XR, art, instrumentation, or documentation work
+title: "[Feature] "
+labels: []
+body:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options: [Must, Should, Stretch]
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe the user or research outcome, not only a list of files.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Safety, data, comfort, and determinism risks
+    validations:
+      required: true
+  - type: input
+    id: owner
+    attributes:
+      label: Owner
+    validations:
+      required: true
+  - type: input
+    id: reviewer
+    attributes:
+      label: Reviewer
+    validations:
+      required: true
+
