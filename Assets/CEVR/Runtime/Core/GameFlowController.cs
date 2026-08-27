@@ -95,6 +95,7 @@ namespace ChulaEarthquakeVR
         public void StartTutorial()
         {
             if (runRoutine != null) return;
+            RuntimeStageRepair.EnsurePlayableStage();
             if (!ValidateSetup(out string error))
             {
                 Debug.LogError(error, this);

@@ -30,7 +30,7 @@ namespace ChulaEarthquakeVR
 
         [Header("Training prompts")]
         [SerializeField] private string orientationPrompt =
-            "Look around the engineering lab and learn the controls.";
+            "Look around the lab. Turn around to find the pink chair beside the sturdy brown table.";
         [SerializeField] private string activityPrompt =
             "Complete the two lab setup tasks before the class begins.";
         [SerializeField] private string quakePrompt =

@@ -2,7 +2,7 @@
 
 CEVR is a Unity prototype for studying human decisions during a simulated earthquake in a virtual engineering teaching laboratory. The environment is fictional and only inspired by a Thai university engineering context. It is not an official Chulalongkorn University product, architectural digital twin, structural-analysis tool, or emergency guidance system.
 
-> Status: CEVR 0.3.0 implementation-ready tutorial prototype. The repository contains versioned one-click stage generation, runtime systems, automated EditMode tests, research-mode safeguards, desktop interaction guidance, and complete setup documentation. Unity compilation, OpenXR validation, headset performance, ethics approval, and human-participant pilot testing remain mandatory machine-side gates.
+> Status: CEVR 0.3.1 implementation-ready tutorial prototype. The repository contains a self-repairing playable tutorial scene, versioned one-click stage generation, runtime systems, automated EditMode tests, research-mode safeguards, desktop interaction guidance, and complete setup documentation. Unity compilation, OpenXR validation, headset performance, ethics approval, and human-participant pilot testing remain mandatory machine-side gates.
 
 ## Implemented gameplay
 

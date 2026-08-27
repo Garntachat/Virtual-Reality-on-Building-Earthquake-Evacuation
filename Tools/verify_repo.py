@@ -21,6 +21,7 @@ REQUIRED = (
     "Assets/CEVR/Editor/ChulaTutorialStageBuilder.cs",
     "Assets/CEVR/Runtime/Core/GeneratedStageInfo.cs",
     "Assets/CEVR/Runtime/Core/GameFlowController.cs",
+    "Assets/CEVR/Runtime/Core/RuntimeStageRepair.cs",
     "Assets/CEVR/Runtime/Player/DesktopGrabInteractor.cs",
     "Assets/CEVR/Runtime/Player/MovableFurniture.cs",
     "Assets/CEVR/Tests/EditMode/StageIntegrityTests.cs",
@@ -101,7 +102,7 @@ def check_project_safety_defaults(errors: list[str]) -> None:
         "runInBackground: 1",
         "submitAnalytics: 0",
         "resizableWindow: 1",
-        "bundleVersion: 0.3.0",
+        "bundleVersion: 0.3.1",
         "enableFrameTimingStats: 1",
     )
     for value in expected_settings:
@@ -140,6 +141,37 @@ def check_csharp_policies(errors: list[str]) -> None:
             fail(errors, f"tab indentation found: {path.relative_to(ROOT)}")
 
 
+def check_runtime_repair_contract(errors: list[str]) -> None:
+    repair_path = ROOT / "Assets/CEVR/Runtime/Core/RuntimeStageRepair.cs"
+    flow_path = ROOT / "Assets/CEVR/Runtime/Core/GameFlowController.cs"
+    try:
+        repair = repair_path.read_text(encoding="utf-8")
+        flow = flow_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        fail(errors, f"could not read runtime repair contract: {exc}")
+        return
+
+    required_repairs = (
+        'GameObject.Find("StageDisclaimer")',
+        'GameObject.Find("ExitSign")',
+        'GameObject.Find("DynamicProps")',
+        "RenderMode.ScreenSpaceOverlay",
+        "AddComponent<DesktopGrabInteractor>()",
+        'new GameObject("MovableChair_StrongTableApproach")',
+        "AddComponent<Rigidbody>()",
+        "AddComponent<MovableFurniture>()",
+        "TryAddXrGrabInteractable(chair)",
+    )
+    for fragment in required_repairs:
+        if fragment not in repair:
+            fail(errors, f"runtime legacy-scene repair is missing: {fragment}")
+
+    repair_call = flow.find("RuntimeStageRepair.EnsurePlayableStage();")
+    validation_call = flow.find("ValidateSetup(out string error)")
+    if repair_call < 0 or validation_call < 0 or repair_call > validation_call:
+        fail(errors, "GameFlowController must repair the committed scene before validating it")
+
+
 def check_git_hygiene(errors: list[str]) -> None:
     for name in FORBIDDEN_TRACKED_DIRS:
         if (ROOT / name).exists():
@@ -171,6 +203,7 @@ def main() -> int:
     check_project_safety_defaults(errors)
     check_meta_files(errors)
     check_csharp_policies(errors)
+    check_runtime_repair_contract(errors)
     check_git_hygiene(errors)
     check_english_only(errors)
     if errors:

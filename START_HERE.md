@@ -1,4 +1,4 @@
-# Start Here — CEVR 0.3.0
+# Start Here — CEVR 0.3.1
 
 This repository is the complete Unity project. The tutorial scene is generated from source so the scene and builder must remain synchronized.
 

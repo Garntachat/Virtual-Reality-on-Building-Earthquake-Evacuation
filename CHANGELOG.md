@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1 - 2026-08-28
+
+- Added runtime repair for the committed legacy scene so Play no longer depends on a manual rebuild
+- Automatically hides the oversized mirrored wall disclaimer and converts the desktop HUD to a readable screen overlay
+- Automatically creates the missing pink physics chair and attaches desktop/XR grab support before tutorial validation
+- Added clearer initial navigation guidance and static regression coverage for the exact legacy-scene failure
+
 ## 0.3.0 - 2026-08-28
 
 - Added generated-scene versioning and clear stale-scene rejection

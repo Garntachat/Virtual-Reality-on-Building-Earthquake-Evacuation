@@ -5,7 +5,7 @@ namespace ChulaEarthquakeVR
     [DisallowMultipleComponent]
     public sealed class GeneratedStageInfo : MonoBehaviour
     {
-        public const string CurrentVersion = "0.3.0";
+        public const string CurrentVersion = "0.3.1";
 
         [SerializeField] private string buildVersion = "unbuilt";
 

@@ -98,7 +98,7 @@ namespace ChulaEarthquakeVR
         }
 
         private static string DefaultPrompt() =>
-            "WASD MOVE  •  MOUSE LOOK  •  TURN TOWARD THE PINK CHAIR  •  C CROUCH";
+            "WASD MOVE  •  MOUSE LOOK  •  TURN 180° TO FIND THE PINK CHAIR  •  C CROUCH";
 
         private void EnsureGuiStyles()
         {

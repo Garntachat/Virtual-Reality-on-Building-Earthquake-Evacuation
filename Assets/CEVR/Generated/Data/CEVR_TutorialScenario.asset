@@ -27,7 +27,7 @@ MonoBehaviour:
   requireAllNormalActivityTasks: 1
   damageEnabled: 1
   maximumHealth: 100
-  orientationPrompt: Look around the engineering lab and learn the controls.
+  orientationPrompt: Turn around to find the pink chair beside the sturdy brown table.
   activityPrompt: Complete the two lab setup tasks before the class begins.
   quakePrompt: 'EARTHQUAKE: Drop, take cover under the sturdy table, and hold on.'
   evacuationPrompt: Shaking has stopped. Walk to the green exit and assembly point.
