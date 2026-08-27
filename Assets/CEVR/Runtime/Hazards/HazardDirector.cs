@@ -10,10 +10,15 @@ namespace ChulaEarthquakeVR
         [SerializeField, Min(0.05f)] private float releaseIntervalSeconds = 1.2f;
         [SerializeField, Min(0f)] private float firstReleaseDelaySeconds = 2f;
         private Coroutine releaseRoutine;
+        private Vector3[] initialPositions = System.Array.Empty<Vector3>();
+        private Quaternion[] initialRotations = System.Array.Empty<Quaternion>();
+
+        private void Awake() => CaptureInitialPoses();
 
         public void Configure(IEnumerable<Rigidbody> hazards)
         {
             stagedHazards = hazards == null ? new List<Rigidbody>() : new List<Rigidbody>(hazards);
+            CaptureInitialPoses();
             ResetHazards();
         }
 
@@ -40,13 +45,33 @@ namespace ChulaEarthquakeVR
         public void ResetHazards()
         {
             StopHazards();
-            foreach (Rigidbody body in stagedHazards)
+            if (initialPositions.Length != stagedHazards.Count) CaptureInitialPoses();
+            for (int i = 0; i < stagedHazards.Count; i++)
             {
+                Rigidbody body = stagedHazards[i];
                 if (body == null) continue;
                 body.isKinematic = true;
                 body.useGravity = false;
                 body.linearVelocity = Vector3.zero;
                 body.angularVelocity = Vector3.zero;
+                if (i < initialPositions.Length)
+                {
+                    body.position = initialPositions[i];
+                    body.rotation = initialRotations[i];
+                }
+            }
+        }
+
+        private void CaptureInitialPoses()
+        {
+            initialPositions = new Vector3[stagedHazards.Count];
+            initialRotations = new Quaternion[stagedHazards.Count];
+            for (int i = 0; i < stagedHazards.Count; i++)
+            {
+                Rigidbody body = stagedHazards[i];
+                if (body == null) continue;
+                initialPositions[i] = body.position;
+                initialRotations[i] = body.rotation;
             }
         }
 

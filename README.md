@@ -2,7 +2,7 @@
 
 CEVR is a Unity prototype for studying human decisions during a simulated earthquake in a virtual engineering teaching laboratory. The environment is fictional and only inspired by a Thai university engineering context. It is not an official Chulalongkorn University product, architectural digital twin, structural-analysis tool, or emergency guidance system.
 
-> Status: implementation-ready tutorial prototype. The repository contains a one-click stage builder, runtime systems, automated EditMode tests, research-mode safeguards, and complete setup documentation. Unity compilation, OpenXR validation, headset performance, ethics approval, and human-participant pilot testing remain mandatory machine-side gates.
+> Status: CEVR 0.3.0 implementation-ready tutorial prototype. The repository contains versioned one-click stage generation, runtime systems, automated EditMode tests, research-mode safeguards, desktop interaction guidance, and complete setup documentation. Unity compilation, OpenXR validation, headset performance, ethics approval, and human-participant pilot testing remain mandatory machine-side gates.
 
 ## Implemented gameplay
 
@@ -11,7 +11,7 @@ CEVR is a Unity prototype for studying human decisions during a simulated earthq
 3. The earthquake begins after at least 30 seconds once the tasks are complete, or after a 120-second watchdog timeout.
 4. A deterministic 20-second motion profile applies inertial acceleration to physical objects without moving the camera or XR Origin.
 5. Four overhead objects and one unsecured cabinet are released in a repeatable sequence.
-6. A floor-constrained movable chair blocks the direct approach to the strong-table cover, so the participant must move around it or deliberately slide it away.
+6. A clearly marked pink, floor-constrained chair sits partly under the strong table, so the participant must deliberately slide it away before entering cover.
 7. Entering the strong-table cover zone reduces hazard damage by 80 percent.
 8. Reaching the assembly point during shaking is logged as an unsafe early-exit attempt and does not count as success.
 9. After shaking stops, reaching the outdoor assembly point completes the tutorial. Health depletion or evacuation timeout causes failure.
@@ -26,9 +26,11 @@ CEVR is a Unity prototype for studying human decisions during a simulated earthq
 5. Select `Tools > CEVR > 1. Build Chula Engineering Tutorial Stage`.
 6. Open `Assets/CEVR/Generated/Scenes/CEVR_ChulaEngineering_Tutorial.unity`.
 7. Select `Tools > CEVR > 2. Validate Open Tutorial Scene`.
-8. Press Play for desktop testing. Controls: `WASD`, mouse look, `E` or left click to grab/drop a task item or slide the chair, `C` or `Ctrl` to crouch, and `F12` or `Backspace` for emergency stop.
+8. Press Play for desktop testing. Controls: `WASD`, mouse look, `E` or left click to grab/drop a task item or slide the chair, mouse wheel to adjust hold distance, `C` or `Ctrl` to crouch, and `F12` or `Backspace` for emergency stop.
 
 Follow [Unity Setup](docs/UNITY_SETUP.md) from the beginning if this is the first time opening the project. Complete [XR Setup](docs/XR_SETUP.md) before using a headset.
+
+Always rebuild after pulling changes to the stage builder. A version check now blocks stale generated scenes and tells the operator exactly which menu command to run.
 
 ## Repository structure
 

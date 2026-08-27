@@ -35,6 +35,7 @@ namespace ChulaEarthquakeVR.Editor
             var dynamicProps = new GameObject("DynamicProps");
             var tutorialObjects = new GameObject("TutorialObjects");
             var zones = new GameObject("SafetyZones");
+            gameplay.AddComponent<GeneratedStageInfo>().ConfigureCurrent();
 
             Material concrete = MaterialAsset("Concrete", new Color(0.62f, 0.64f, 0.66f));
             Material wall = MaterialAsset("WallWhite", new Color(0.89f, 0.90f, 0.91f));
@@ -61,7 +62,7 @@ namespace ChulaEarthquakeVR.Editor
 
             CoverZone coverZone = BuildStrongTableAndCoverZone(
                 environment.transform, dynamicProps.transform, zones.transform,
-                new Vector3(2.5f, 0f, 0.8f), wood, dark, motion, logger);
+                new Vector3(2.5f, 0f, 0.8f), wood, dark, pink, motion, logger);
             ExitAssemblyZone assembly = BuildAssemblyZone(zones.transform, green);
 
             List<TutorialTask> tasks = BuildTutorialTasks(
@@ -92,7 +93,8 @@ namespace ChulaEarthquakeVR.Editor
             Debug.Log($"CEVR tutorial stage generated at {ScenePath}. Press Play for desktop testing.");
             EditorUtility.DisplayDialog(
                 "Stage built",
-                "Open the generated scene and press Play. Desktop controls: WASD, mouse look, E or left click to grab/drop, C/Ctrl to crouch, F12 or Backspace for emergency stop.",
+                $"Generated stage {GeneratedStageInfo.CurrentVersion} is open and ready.\n\n" +
+                "Desktop controls: WASD, mouse look, E or left click to grab/drop, mouse wheel to adjust hold distance, C/Ctrl to crouch, and F12/Backspace for emergency stop.",
                 "OK");
         }
 
@@ -120,6 +122,14 @@ namespace ChulaEarthquakeVR.Editor
                 "The generated stage requires four overhead hazards and one cabinet hazard.");
             errors += CountError(UnityEngine.Object.FindObjectsByType<MovableFurniture>(FindObjectsSortMode.None).Length >= 1,
                 "At least one movable furniture obstacle is required.");
+            GeneratedStageInfo[] stageInfo = UnityEngine.Object.FindObjectsByType<GeneratedStageInfo>(FindObjectsSortMode.None);
+            errors += CountError(stageInfo.Length == 1,
+                "Exactly one GeneratedStageInfo is required. Rebuild the stage.");
+            if (stageInfo.Length == 1)
+                errors += CountError(stageInfo[0].IsCurrent,
+                    $"Generated scene version '{stageInfo[0].BuildVersion}' is stale; expected '{GeneratedStageInfo.CurrentVersion}'. Rebuild the stage.");
+            errors += CountError(UnityEngine.Object.FindObjectsByType<TaskItem>(FindObjectsSortMode.None).Length == 2,
+                "Exactly two grabbable TaskItem objects are required.");
             foreach (Camera camera in UnityEngine.Object.FindObjectsByType<Camera>(FindObjectsSortMode.None))
                 errors += CountError(camera.GetComponentInParent<InertialRigidbody>() == null,
                     $"Camera '{camera.name}' must never be parented under an inertial quake object.");
@@ -171,9 +181,9 @@ namespace ChulaEarthquakeVR.Editor
             BuildWhiteboard(parent, wall, pink);
             BuildLighting(parent);
             CreateTextSign("StageDisclaimer", "CEVR ENGINEERING TUTORIAL LAB\nFICTIONAL TRAINING ENVIRONMENT",
-                new Vector3(0f, 2.35f, 5.65f), Quaternion.Euler(0f, 180f, 0f), pink, parent, 0.14f, TextAnchor.MiddleCenter);
+                new Vector3(0f, 2.35f, 5.65f), Quaternion.identity, pink, parent, 0.035f, TextAnchor.MiddleCenter);
             CreateTextSign("ExitSign", "EXIT  /  ASSEMBLY POINT", new Vector3(5f, 2.85f, -5.72f),
-                Quaternion.identity, green, parent, 0.11f, TextAnchor.MiddleCenter);
+                Quaternion.Euler(0f, 180f, 0f), green, parent, 0.035f, TextAnchor.MiddleCenter);
         }
 
         private static void BuildLabBench(Transform parent, Vector3 origin, Material top, Material legs)
@@ -186,7 +196,8 @@ namespace ChulaEarthquakeVR.Editor
 
         private static CoverZone BuildStrongTableAndCoverZone(
             Transform environment, Transform dynamicParent, Transform zoneParent, Vector3 origin,
-            Material wood, Material legs, GroundMotionPlayer motion, SessionLogger logger)
+            Material wood, Material legs, Material chairAccent,
+            GroundMotionPlayer motion, SessionLogger logger)
         {
             Cube("SturdyCoverTableTop", origin + new Vector3(0f, 0.86f, 0f), new Vector3(3.2f, 0.18f, 1.6f), wood, environment, true);
             foreach (float x in new[] { -1.35f, 1.35f })
@@ -200,7 +211,10 @@ namespace ChulaEarthquakeVR.Editor
             trigger.isTrigger = true;
             CoverZone cover = zoneObject.AddComponent<CoverZone>();
             cover.Configure("cover-sturdy-table-01");
-            BuildMovableChair(dynamicParent, origin + new Vector3(0f, 0f, 1.35f), wood, legs, motion, logger);
+            BuildMovableChair(dynamicParent, origin + new Vector3(0f, 0f, 1.0f), chairAccent, legs, motion, logger);
+            CreateTextSign("CoverInteractionSign", "MOVE CHAIR  •  CROUCH UNDER TABLE",
+                origin + new Vector3(0f, 1.52f, 0.76f), Quaternion.Euler(0f, 180f, 0f),
+                chairAccent, environment, 0.022f, TextAnchor.MiddleCenter);
             return cover;
         }
 
@@ -212,11 +226,13 @@ namespace ChulaEarthquakeVR.Editor
             chair.transform.SetParent(parent);
             chair.transform.position = position;
 
-            ChairPart("ChairSeat", new Vector3(0f, 0.48f, 0f), new Vector3(0.9f, 0.12f, 0.9f), seatMaterial, chair.transform);
+            ChairPart("ChairSeat_Accent", new Vector3(0f, 0.48f, 0f), new Vector3(0.9f, 0.12f, 0.9f), seatMaterial, chair.transform);
             foreach (float x in new[] { -0.35f, 0.35f })
             foreach (float z in new[] { -0.35f, 0.35f })
                 ChairPart("ChairLeg", new Vector3(x, 0.23f, z), new Vector3(0.1f, 0.46f, 0.1f), frameMaterial, chair.transform);
-            ChairPart("ChairBack", new Vector3(0f, 1.0f, 0.4f), new Vector3(0.85f, 1.0f, 0.1f), seatMaterial, chair.transform);
+            ChairPart("ChairBack_Accent", new Vector3(0f, 0.96f, 0.4f), new Vector3(0.72f, 0.34f, 0.1f), seatMaterial, chair.transform);
+            ChairPart("ChairBackPost_Left", new Vector3(-0.35f, 0.83f, 0.4f), new Vector3(0.08f, 0.72f, 0.08f), frameMaterial, chair.transform);
+            ChairPart("ChairBackPost_Right", new Vector3(0.35f, 0.83f, 0.4f), new Vector3(0.08f, 0.72f, 0.08f), frameMaterial, chair.transform);
 
             Rigidbody body = chair.AddComponent<Rigidbody>();
             body.mass = 7.5f;
@@ -347,8 +363,9 @@ namespace ChulaEarthquakeVR.Editor
             FallingHazard hazard = cabinet.AddComponent<FallingHazard>();
             hazard.Configure("unsecured-cabinet", 45f);
             for (int i = 0; i < 3; i++)
-                Cube($"CabinetWarningStripe_{i}", new Vector3(8.6f, 0.6f + i * 0.65f, 3.2f),
-                    new Vector3(0.85f, 0.08f, 0.03f), hazardMaterial, cabinet.transform, false);
+                ChildCubeWithWorldSize($"CabinetWarningStripe_{i + 1}",
+                    new Vector3(0f, (-0.65f + i * 0.65f) / 2.5f, -0.53f),
+                    new Vector3(0.85f, 0.08f, 0.03f), hazardMaterial, cabinet.transform);
             return body;
         }
 
@@ -415,25 +432,27 @@ namespace ChulaEarthquakeVR.Editor
             Canvas canvas = canvasObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace;
             RectTransform canvasRect = canvasObject.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(1920f, 1080f);
-            canvasRect.position = new Vector3(0f, 1.85f, 5.5f);
-            canvasRect.rotation = Quaternion.Euler(0f, 180f, 0f);
-            canvasRect.localScale = Vector3.one * 0.0022f;
+            canvasRect.sizeDelta = new Vector2(1000f, 600f);
+            canvasRect.position = new Vector3(0f, 2.15f, 5.5f);
+            canvasRect.rotation = Quaternion.identity;
+            canvasRect.localScale = Vector3.one * 0.0025f;
             CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920f, 1080f);
             canvasObject.AddComponent<GraphicRaycaster>();
 
             Image panel = UiImage("HUDPanel", canvas.transform, new Color(0.04f, 0.06f, 0.08f, 0.82f),
-                new Vector2(20f, -20f), new Vector2(760f, -245f), new Vector2(0f, 1f), new Vector2(0f, 1f));
-            Text phase = UiText("Phase", panel.transform, 28, FontStyle.Bold, new Vector2(20f, -15f), new Vector2(700f, -55f));
-            Text objective = UiText("Objective", panel.transform, 23, FontStyle.Normal, new Vector2(20f, -58f), new Vector2(700f, -125f));
-            Text timer = UiText("Timer", panel.transform, 24, FontStyle.Bold, new Vector2(20f, -135f), new Vector2(330f, -175f));
-            Text tasks = UiText("Tasks", panel.transform, 20, FontStyle.Normal, new Vector2(350f, -135f), new Vector2(700f, -215f));
+                new Vector2(20f, -20f), new Vector2(980f, -300f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+            Text phase = UiText("Phase", panel.transform, 32, FontStyle.Bold, new Vector2(24f, -18f), new Vector2(920f, -60f));
+            Text objective = UiText("Objective", panel.transform, 25, FontStyle.Normal, new Vector2(24f, -64f), new Vector2(920f, -132f));
+            Text timer = UiText("Timer", panel.transform, 26, FontStyle.Bold, new Vector2(24f, -142f), new Vector2(370f, -184f));
+            Text tasks = UiText("Tasks", panel.transform, 21, FontStyle.Normal, new Vector2(400f, -142f), new Vector2(920f, -225f));
+            Text controls = UiText("Controls", panel.transform, 17, FontStyle.Normal, new Vector2(400f, -230f), new Vector2(920f, -265f));
+            controls.text = "WASD MOVE  •  MOUSE LOOK  •  E GRAB  •  C CROUCH  •  F12 STOP";
 
-            Slider health = UiSlider("Health", panel.transform, new Vector2(20f, -190f), new Vector2(320f, -215f));
+            Slider health = UiSlider("Health", panel.transform, new Vector2(24f, -222f), new Vector2(370f, -252f));
             Image indicator = UiImage("QuakeIndicator", canvas.transform, new Color(0.95f, 0.18f, 0.10f, 0.7f),
-                Vector2.zero, new Vector2(1920f, 12f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+                Vector2.zero, new Vector2(1000f, 14f), new Vector2(0f, 1f), new Vector2(0f, 1f));
             indicator.enabled = false;
             TutorialHud hud = canvasObject.AddComponent<TutorialHud>();
             hud.Configure(phase, objective, timer, tasks, health, indicator);
@@ -536,6 +555,22 @@ namespace ChulaEarthquakeVR.Editor
             cube.transform.position = position;
             cube.transform.localScale = size;
             cube.isStatic = isStatic;
+            cube.GetComponent<Renderer>().sharedMaterial = material;
+            return cube;
+        }
+
+        private static GameObject ChildCubeWithWorldSize(
+            string name, Vector3 localPosition, Vector3 worldSize, Material material, Transform parent)
+        {
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.name = name;
+            cube.transform.SetParent(parent, false);
+            cube.transform.localPosition = localPosition;
+            Vector3 scale = parent.lossyScale;
+            cube.transform.localScale = new Vector3(
+                worldSize.x / Mathf.Max(0.0001f, Mathf.Abs(scale.x)),
+                worldSize.y / Mathf.Max(0.0001f, Mathf.Abs(scale.y)),
+                worldSize.z / Mathf.Max(0.0001f, Mathf.Abs(scale.z)));
             cube.GetComponent<Renderer>().sharedMaterial = material;
             return cube;
         }

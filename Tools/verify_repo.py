@@ -19,7 +19,12 @@ REQUIRED = (
     "Assets/CEVR/Editor/CEVR.Editor.asmdef",
     "Assets/CEVR/Tests/EditMode/CEVR.Tests.asmdef",
     "Assets/CEVR/Editor/ChulaTutorialStageBuilder.cs",
+    "Assets/CEVR/Runtime/Core/GeneratedStageInfo.cs",
     "Assets/CEVR/Runtime/Core/GameFlowController.cs",
+    "Assets/CEVR/Runtime/Player/DesktopGrabInteractor.cs",
+    "Assets/CEVR/Runtime/Player/MovableFurniture.cs",
+    "Assets/CEVR/Tests/EditMode/StageIntegrityTests.cs",
+    "START_HERE.md",
     "docs/UNITY_SETUP.md",
     "docs/TEST_PLAN.md",
     "docs/XR_SETUP.md",
@@ -79,6 +84,35 @@ def check_project_version(errors: list[str]) -> None:
         fail(errors, "ProjectVersion.txt does not declare Unity 6000.3.20f1")
 
 
+def check_project_safety_defaults(errors: list[str]) -> None:
+    settings_path = ROOT / "ProjectSettings/ProjectSettings.asset"
+    dynamics_path = ROOT / "ProjectSettings/DynamicsManager.asset"
+    time_path = ROOT / "ProjectSettings/TimeManager.asset"
+    try:
+        settings = settings_path.read_text(encoding="utf-8")
+        dynamics = dynamics_path.read_text(encoding="utf-8")
+        time_settings = time_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        fail(errors, f"could not read project safety settings: {exc}")
+        return
+    expected_settings = (
+        "companyName: CEVR Student Research Team",
+        "m_ActiveColorSpace: 1",
+        "runInBackground: 1",
+        "submitAnalytics: 0",
+        "resizableWindow: 1",
+        "bundleVersion: 0.3.0",
+        "enableFrameTimingStats: 1",
+    )
+    for value in expected_settings:
+        if value not in settings:
+            fail(errors, f"required PlayerSettings value is missing: {value}")
+    if "m_EnableEnhancedDeterminism: 1" not in dynamics:
+        fail(errors, "enhanced physics determinism must remain enabled")
+    if "Maximum Allowed Timestep: 0.1" not in time_settings:
+        fail(errors, "maximum allowed timestep must remain 0.1 seconds")
+
+
 def check_meta_files(errors: list[str]) -> None:
     assets = ROOT / "Assets"
     if not assets.is_dir():
@@ -134,6 +168,7 @@ def main() -> int:
     check_manifest(errors)
     check_json_files(errors)
     check_project_version(errors)
+    check_project_safety_defaults(errors)
     check_meta_files(errors)
     check_csharp_policies(errors)
     check_git_hygiene(errors)

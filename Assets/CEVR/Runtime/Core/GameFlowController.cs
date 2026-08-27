@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Globalization;
 using UnityEngine;
@@ -117,7 +118,18 @@ namespace ChulaEarthquakeVR
             if (config.Mode == StudyMode.Training)
                 motion.ConfigurePreview(config.EarthquakeSeconds, config.PreviewPeakG,
                     config.PreviewFrequencyHz, config.DeterministicSeed);
-            logger.BeginSession(participantCode, config.ScenarioId, config.Mode);
+            try
+            {
+                logger.BeginSession(participantCode, config.ScenarioId, config.Mode);
+            }
+            catch (Exception exception)
+            {
+                string message = $"Could not create the session log: {exception.Message}";
+                Debug.LogError(message, this);
+                hud.SetPhase(GameplayPhase.Failure, message);
+                CurrentPhase = GameplayPhase.Failure;
+                return;
+            }
             logger.LogEvent("scenario_configured",
                 $"{{\"location\":\"chula_engineering_inspired_fictional\"," +
                 $"\"previewMotion\":{motion.IsUsingPreview.ToString().ToLowerInvariant()}," +
@@ -275,6 +287,14 @@ namespace ChulaEarthquakeVR
 
         private bool ValidateSetup(out string error)
         {
+            GeneratedStageInfo stageInfo = FindFirstObjectByType<GeneratedStageInfo>();
+            if (stageInfo == null || !stageInfo.IsCurrent)
+            {
+                string found = stageInfo == null ? "missing" : stageInfo.BuildVersion;
+                error = $"Generated scene is stale (found {found}, expected {GeneratedStageInfo.CurrentVersion}). " +
+                        "Stop Play mode and run Tools > CEVR > 1. Build Chula Engineering Tutorial Stage.";
+                return false;
+            }
             if (config == null) { error = "Missing TutorialScenarioConfig."; return false; }
             if (motion == null || taskSequence == null || hazardDirector == null || health == null ||
                 coverZone == null || assemblyZone == null || hud == null || logger == null)

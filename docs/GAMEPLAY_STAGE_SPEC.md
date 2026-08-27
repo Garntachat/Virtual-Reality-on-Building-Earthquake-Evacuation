@@ -13,7 +13,7 @@ The stage is a fictional engineering teaching laboratory. Pink accents and gener
 | Spawn and orientation | Front-center of the room | Learn looking, movement, crouching, and stop control |
 | Laboratory benches A and B | Left side | Place a circuit module and safety canister |
 | Strong cover table | Center-right | Reduces hazard damage while the player body is inside the trigger |
-| Movable chair | In front of the strong table | Blocks direct cover access; can slide on the floor but cannot be lifted |
+| Movable pink chair | Partly under the strong table | Blocks direct cover access; can slide on the floor but cannot be lifted |
 | Hazard corridor | Center and right side | Four overhead objects and one unsecured cabinet |
 | Exit opening | Front wall | Records an unsafe attempt if crossed before the event ends |
 | Outdoor assembly point | Beyond the exit | Accepts success only during post-quake evacuation |
@@ -44,6 +44,7 @@ Each placement goal checks `TaskItem.ItemId`; an incorrect object cannot complet
 - Rigidbody constraints keep the chair on the floor and upright while allowing horizontal translation and yaw rotation.
 - The chair responds to horizontal earthquake acceleration at a reduced scale.
 - `furniture_displaced` records the first movement of at least 0.15 metres; desktop interaction also records grab start and release.
+- A center crosshair and context-sensitive desktop prompt expose the available interaction without a head-locked VR overlay.
 
 ## 6. Earthquake and hazard behavior
 

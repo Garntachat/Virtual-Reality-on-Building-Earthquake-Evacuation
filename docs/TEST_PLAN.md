@@ -29,6 +29,10 @@
 | F11 | Run two sessions | Log filenames are unique; neither overwrites the other |
 | F12 | Use Research mode with preview | Startup is rejected with a clear reason |
 | F13 | Use Research mode with valid recorded profile | Recorded motion starts successfully |
+| F14 | Open a stale generated scene | Startup is blocked with the exact stage-rebuild instruction |
+| F15 | Aim at task item and pink chair | Context prompt changes and each object can be grabbed/released |
+| F16 | Crouch under the table and release crouch | Player remains crouched until there is standing clearance |
+| F17 | Reset released hazards in the same scene | Every staged hazard returns to its captured pose and safe kinematic state |
 
 ## 3. VR comfort and physical safety
 
@@ -52,6 +56,7 @@ For each device build, record device, operating system, headset runtime, refresh
 5. Pose rate is approximately 10 Hz without degrading frame time.
 6. Task, cover, damage, unsafe exit, assembly, and outcome events match the functional test cases.
 7. Motion-profile ID, floor-response ID, duration, scenario ID, and build version are recorded.
+8. Pose samples include head position and orientation plus explicit left/right tracking availability.
 
 ## 6. Bug severity
 
@@ -59,4 +64,3 @@ For each device build, record device, operating system, headset runtime, refresh
 - **P1:** crash, blocked flow, or missing research data. Block the build.
 - **P2:** functional, visual, or audio defect with a workaround. Resolve before pilot when it affects a variable.
 - **P3:** cosmetic or documentation defect. Schedule against the milestone.
-

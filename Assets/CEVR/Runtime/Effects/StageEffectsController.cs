@@ -36,6 +36,19 @@ namespace ChulaEarthquakeVR
             }
         }
 
+        private void OnDisable()
+        {
+            if (rumble != null)
+            {
+                rumble.Stop();
+                rumble.volume = 0f;
+            }
+            if (baseIntensity == null) return;
+            for (int i = 0; i < baseIntensity.Length; i++)
+                if (labLights != null && i < labLights.Length && labLights[i] != null)
+                    labLights[i].intensity = baseIntensity[i];
+        }
+
         public void Configure(GroundMotionPlayer source, Light[] lights, AudioSource audioSource = null)
         {
             motion = source;

@@ -19,6 +19,8 @@ flowchart TD
 
 `GameFlowController` owns phase sequencing but does not calculate motion or directly manage rigidbody physics. Recorded profiles, art assets, and player rigs can therefore change without rewriting the state machine.
 
+`GeneratedStageInfo` versions the builder output. Both scene validation and runtime startup reject an old generated scene, preventing source changes such as a new interaction object from silently diverging from the committed `.unity` file.
+
 ## Assembly boundaries
 
 | Assembly | Platform | Responsibility |

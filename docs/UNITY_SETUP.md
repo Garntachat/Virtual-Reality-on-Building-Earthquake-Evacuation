@@ -32,13 +32,13 @@ Follow every gate in order. Do not continue after a failed gate.
 4. Select `Tools > CEVR > 2. Validate Open Tutorial Scene`.
 5. Save the project and inspect `git status`.
 
-**Gate C:** exactly one GameFlowController, GroundMotionPlayer, active PlayerHealth, AudioListener, and ExitAssemblyZone exist. Exactly two TutorialTasks, five FallingHazards, and at least one MovableFurniture exist. No camera is parented under an inertial object.
+**Gate C:** the `GeneratedStageInfo` version is current; exactly one GameFlowController, GroundMotionPlayer, active PlayerHealth, AudioListener, and ExitAssemblyZone exist; exactly two TutorialTasks, two TaskItems, five FallingHazards, and at least one MovableFurniture exist. No camera is parented under an inertial object.
 
 ## D. Desktop smoke test
 
 1. Press Play.
-2. Use the mouse to look, `WASD` to move, `E` or left click to grab/drop the task item at the center of view, and `C` or `Ctrl` to crouch.
-3. Aim at the chair in front of the strong table, press `E` or left click, move it sideways, and press the same control again to release it. Confirm it slides on the floor without being lifted.
+2. Click the Game view to capture the cursor. Use the mouse to look, `WASD` to move, `E` or left click to grab/drop the object at the center `+`, the mouse wheel to adjust hold distance, and `C` or `Ctrl` to crouch.
+3. Turn toward the brown strong table and its pink chair. Aim until **GRAB AND SLIDE CHAIR** appears, grab it, move it sideways, and release it. Confirm it slides on the floor without being lifted.
 4. Move both task objects into their green goals, or intentionally wait for the watchdog test.
 5. Confirm that the earthquake does not start before 30 seconds.
 6. During shaking, enter the strong-table cover zone and compare damage with an uncovered run.
@@ -72,8 +72,9 @@ Follow every gate in order. Do not continue after a failed gate.
 | Symptom | Check | Resolution |
 |---|---|---|
 | CEVR menu is missing | Compilation errors | Resolve all errors; Editor scripts do not load after a failed compile |
+| Play mode says the generated scene is stale | Builder and scene versions differ | Stop Play mode and run `Tools > CEVR > 1. Build Chula Engineering Tutorial Stage` |
 | VR object cannot be grabbed | XRI package, actions, interactors | Complete `XR_SETUP.md`, then rebuild the stage |
 | Object passes through floor | Collider and collision mode | Use primitive or convex colliders and Continuous collision detection |
-| HUD is missing | World-space canvas position | Confirm TutorialHUD is active and faces the spawn area |
+| HUD is missing or mirrored | Stale generated scene | Rebuild and validate; the current builder faces and scales all world-space text for the spawn area |
 | Research mode refuses to start | Preview profile still active | Import and assign a valid recorded QuakeProfile |
 | References disappear for another teammate | Missing `.meta` files | Recover the original GUID from Git; do not generate unrelated replacement metadata |

@@ -7,6 +7,7 @@ namespace ChulaEarthquakeVR
     {
         [SerializeField, Range(20f, 80f)] private float primaryFrequencyHz = 36f;
         [SerializeField, Range(0f, 0.5f)] private float harmonicMix = 0.22f;
+        private AudioClip generatedClip;
 
         private void Awake()
         {
@@ -21,13 +22,18 @@ namespace ChulaEarthquakeVR
                 float harmonic = Mathf.Sin(2f * Mathf.PI * primaryFrequencyHz * 1.37f * time);
                 samples[i] = (fundamental + harmonic * harmonicMix) * 0.35f;
             }
-            AudioClip clip = AudioClip.Create("CEVR_ProceduralRumble", samples.Length, 1, sampleRate, false);
-            clip.SetData(samples, 0);
-            source.clip = clip;
+            generatedClip = AudioClip.Create("CEVR_ProceduralRumble", samples.Length, 1, sampleRate, false);
+            generatedClip.SetData(samples, 0);
+            source.clip = generatedClip;
             source.loop = true;
             source.playOnAwake = false;
             source.spatialBlend = 0f;
             source.volume = 0f;
+        }
+
+        private void OnDestroy()
+        {
+            if (generatedClip != null) Destroy(generatedClip);
         }
     }
 }

@@ -14,6 +14,7 @@ namespace ChulaEarthquakeVR
 
         private CharacterController controller;
         private float pitch;
+        public static int PointerCaptureFrame { get; private set; } = -1;
 
         private void Awake()
         {
@@ -36,6 +37,24 @@ namespace ChulaEarthquakeVR
         private void Update()
         {
             if (Keyboard.current == null || Mouse.current == null || viewCamera == null) return;
+
+            if (Keyboard.current.escapeKey.wasPressedThisFrame)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                return;
+            }
+            if (Cursor.lockState != CursorLockMode.Locked)
+            {
+                if (Mouse.current.leftButton.wasPressedThisFrame)
+                {
+                    Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
+                    PointerCaptureFrame = Time.frameCount;
+                }
+                return;
+            }
+
             Vector2 move = Vector2.zero;
             if (Keyboard.current.wKey.isPressed) move.y += 1f;
             if (Keyboard.current.sKey.isPressed) move.y -= 1f;
@@ -51,15 +70,24 @@ namespace ChulaEarthquakeVR
 
             bool crouching = Keyboard.current.leftCtrlKey.isPressed || Keyboard.current.cKey.isPressed;
             float height = crouching ? crouchingHeight : standingHeight;
+            if (!crouching && controller.height < standingHeight && !HasStandingClearance())
+                height = crouchingHeight;
             controller.height = height;
             controller.center = new Vector3(0f, height * 0.5f, 0f);
             viewCamera.transform.localPosition = new Vector3(0f, height - 0.12f, 0f);
 
-            if (Keyboard.current.escapeKey.wasPressedThisFrame)
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            }
+        }
+
+        private bool HasStandingClearance()
+        {
+            float radius = Mathf.Min(controller.radius, standingHeight * 0.45f);
+            Vector3 bottom = transform.position + Vector3.up * radius;
+            Vector3 top = transform.position + Vector3.up * (standingHeight - radius);
+            Collider[] overlaps = Physics.OverlapCapsule(
+                bottom, top, radius, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+            foreach (Collider overlap in overlaps)
+                if (overlap != controller && !overlap.transform.IsChildOf(transform)) return false;
+            return true;
         }
 
         public void Configure(Camera camera) => viewCamera = camera;

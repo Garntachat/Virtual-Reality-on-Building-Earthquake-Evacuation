@@ -18,10 +18,13 @@ namespace ChulaEarthquakeVR
             nextSampleTime = Time.unscaledTime + 1f / sampleRateHz;
             Vector3 lp = leftHand == null ? Vector3.zero : leftHand.position;
             Vector3 rp = rightHand == null ? Vector3.zero : rightHand.position;
+            Quaternion hq = head.rotation;
             logger.LogEvent("pose_sample",
                 $"{{\"hx\":{N(head.position.x)},\"hy\":{N(head.position.y)},\"hz\":{N(head.position.z)}," +
+                $"\"hqx\":{N(hq.x)},\"hqy\":{N(hq.y)},\"hqz\":{N(hq.z)},\"hqw\":{N(hq.w)}," +
                 $"\"lx\":{N(lp.x)},\"ly\":{N(lp.y)},\"lz\":{N(lp.z)}," +
-                $"\"rx\":{N(rp.x)},\"ry\":{N(rp.y)},\"rz\":{N(rp.z)}}}");
+                $"\"rx\":{N(rp.x)},\"ry\":{N(rp.y)},\"rz\":{N(rp.z)}," +
+                $"\"leftTracked\":{B(leftHand != null)},\"rightTracked\":{B(rightHand != null)}}}");
         }
 
         public void Configure(SessionLogger sessionLogger, Transform headTransform, Transform left, Transform right)
@@ -33,5 +36,6 @@ namespace ChulaEarthquakeVR
         }
 
         private static string N(float value) => value.ToString("F3", CultureInfo.InvariantCulture);
+        private static string B(bool value) => value.ToString().ToLowerInvariant();
     }
 }
