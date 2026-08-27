@@ -23,14 +23,14 @@ CEVR is a Unity prototype for studying human decisions during a simulated earthq
 2. Clone the repository and run `git lfs pull`.
 3. Open the repository root in Unity Hub and wait for package resolution.
 4. Confirm that the Console has no compilation errors.
-5. Select `Tools > CEVR > 1. Build Chula Engineering Tutorial Stage`.
-6. Open `Assets/CEVR/Generated/Scenes/CEVR_ChulaEngineering_Tutorial.unity`.
-7. Select `Tools > CEVR > 2. Validate Open Tutorial Scene`.
-8. Press Play for desktop testing. Controls: `WASD`, mouse look, `E` or left click to grab/drop a task item or slide the chair, mouse wheel to adjust hold distance, `C` or `Ctrl` to crouch, and `F12` or `Backspace` for emergency stop.
+5. Open `Assets/CEVR/Generated/Scenes/CEVR_ChulaEngineering_Tutorial.unity`.
+6. Press Play. Version 0.3.1 repairs the committed legacy scene in memory before validation.
+7. Click the Game view and turn 180 degrees to find the sturdy brown table and bright pink chair.
+8. Controls: `WASD`, mouse look, `E` or left click to grab/drop a task item or slide the chair, mouse wheel to adjust hold distance, `C` or `Ctrl` to crouch, and `F12` or `Backspace` for emergency stop.
 
 Follow [Unity Setup](docs/UNITY_SETUP.md) from the beginning if this is the first time opening the project. Complete [XR Setup](docs/XR_SETUP.md) before using a headset.
 
-Always rebuild after pulling changes to the stage builder. A version check now blocks stale generated scenes and tells the operator exactly which menu command to run.
+For a persistent up-to-date scene, stop Play mode and run `Tools > CEVR > 1. Build Chula Engineering Tutorial Stage`, then run the scene validator. Runtime repair exists so the committed scene remains immediately playable after pulling code updates.
 
 ## Repository structure
 

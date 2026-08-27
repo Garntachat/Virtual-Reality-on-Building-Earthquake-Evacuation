@@ -24,7 +24,19 @@ Follow every gate in order. Do not continue after a failed gate.
 
 **Gate B:** the Console has zero errors and Package Manager resolves Input System, OpenXR, XR Interaction Toolkit, Test Framework, and UGUI.
 
-## C. Generate the tutorial stage
+## C. Immediate desktop launch
+
+1. Open `Assets/CEVR/Generated/Scenes/CEVR_ChulaEngineering_Tutorial.unity`.
+2. Press Play.
+3. Click inside the Game view to capture the pointer.
+4. Confirm that the HUD is readable and no oversized mirrored wall text blocks the view.
+5. Turn 180 degrees and confirm that the bright pink chair is beside the sturdy brown table.
+
+The committed legacy scene is repaired in memory before tutorial validation. This compatibility path creates the missing chair and desktop grab component and corrects the HUD/text. It does not modify the scene asset on disk.
+
+**Gate C:** Play mode begins without a stale-scene failure; the HUD is readable; the pink chair is visible after turning around; and aiming at it shows **GRAB AND SLIDE CHAIR**.
+
+## D. Optional persistent stage rebuild
 
 1. Select `Tools > CEVR > 1. Build Chula Engineering Tutorial Stage`.
 2. Read the replacement warning and select **Build**.
@@ -32,9 +44,9 @@ Follow every gate in order. Do not continue after a failed gate.
 4. Select `Tools > CEVR > 2. Validate Open Tutorial Scene`.
 5. Save the project and inspect `git status`.
 
-**Gate C:** the `GeneratedStageInfo` version is current; exactly one GameFlowController, GroundMotionPlayer, active PlayerHealth, AudioListener, and ExitAssemblyZone exist; exactly two TutorialTasks, two TaskItems, five FallingHazards, and at least one MovableFurniture exist. No camera is parented under an inertial object.
+**Gate D:** the `GeneratedStageInfo` version is current; exactly one GameFlowController, GroundMotionPlayer, active PlayerHealth, AudioListener, and ExitAssemblyZone exist; exactly two TutorialTasks, two TaskItems, five FallingHazards, and at least one MovableFurniture exist. No camera is parented under an inertial object.
 
-## D. Desktop smoke test
+## E. Desktop smoke test
 
 1. Press Play.
 2. Click the Game view to capture the cursor. Use the mouse to look, `WASD` to move, `E` or left click to grab/drop the object at the center `+`, the mouse wheel to adjust hold distance, and `C` or `Ctrl` to crouch.
@@ -47,9 +59,9 @@ Follow every gate in order. Do not continue after a failed gate.
 9. Start another run and press `F12` or `Backspace`; motion, hazards, and logging must stop.
 10. Locate logs under `Application.persistentDataPath/CEVRLogs` and confirm `furniture_displaced` appears after moving the chair.
 
-**Gate D:** chair movement, success, early-exit rejection, cover protection, and emergency stop work without exceptions. The camera does not shake.
+**Gate E:** chair movement, success, early-exit rejection, cover protection, and emergency stop work without exceptions. The camera does not shake.
 
-## E. Automated tests
+## F. Automated tests
 
 1. Open `Window > General > Test Runner`.
 2. Select EditMode.
@@ -57,7 +69,7 @@ Follow every gate in order. Do not continue after a failed gate.
 4. Confirm that rule timing, evacuation success, failure conditions, quake interpolation, validity, and health tests pass.
 5. Attach a screenshot of the result to the pull request.
 
-## F. Safe editing rules
+## G. Safe editing rules
 
 - Put reusable systems in `Assets/CEVR/Runtime`.
 - Put generation and import tooling in `Assets/CEVR/Editor`.
@@ -72,9 +84,9 @@ Follow every gate in order. Do not continue after a failed gate.
 | Symptom | Check | Resolution |
 |---|---|---|
 | CEVR menu is missing | Compilation errors | Resolve all errors; Editor scripts do not load after a failed compile |
-| Play mode says the generated scene is stale | Builder and scene versions differ | Stop Play mode and run `Tools > CEVR > 1. Build Chula Engineering Tutorial Stage` |
+| Play mode says the generated scene is stale | Runtime repair script is missing or did not compile | Confirm `RuntimeStageRepair.cs` exists and clear all Console errors; a persistent rebuild is optional after Play works |
 | VR object cannot be grabbed | XRI package, actions, interactors | Complete `XR_SETUP.md`, then rebuild the stage |
 | Object passes through floor | Collider and collision mode | Use primitive or convex colliders and Continuous collision detection |
-| HUD is missing or mirrored | Stale generated scene | Rebuild and validate; the current builder faces and scales all world-space text for the spawn area |
+| HUD is missing or mirrored | Runtime repair did not execute | Clear Console errors and confirm the project is version 0.3.1; then rebuild and validate if a persistent scene update is desired |
 | Research mode refuses to start | Preview profile still active | Import and assign a valid recorded QuakeProfile |
 | References disappear for another teammate | Missing `.meta` files | Recover the original GUID from Git; do not generate unrelated replacement metadata |
