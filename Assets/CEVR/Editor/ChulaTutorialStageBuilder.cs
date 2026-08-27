@@ -60,7 +60,8 @@ namespace ChulaEarthquakeVR.Editor
             sampler.Configure(logger, playerCamera.transform, null, null);
 
             CoverZone coverZone = BuildStrongTableAndCoverZone(
-                environment.transform, zones.transform, new Vector3(2.5f, 0f, 0.8f), wood, dark);
+                environment.transform, dynamicProps.transform, zones.transform,
+                new Vector3(2.5f, 0f, 0.8f), wood, dark, motion, logger);
             ExitAssemblyZone assembly = BuildAssemblyZone(zones.transform, green);
 
             List<TutorialTask> tasks = BuildTutorialTasks(
@@ -91,7 +92,7 @@ namespace ChulaEarthquakeVR.Editor
             Debug.Log($"CEVR tutorial stage generated at {ScenePath}. Press Play for desktop testing.");
             EditorUtility.DisplayDialog(
                 "Stage built",
-                "Open the generated scene and press Play. Desktop controls: WASD, mouse, C/Ctrl to crouch, F12 or Backspace for emergency stop.",
+                "Open the generated scene and press Play. Desktop controls: WASD, mouse look, E or left click to grab/drop, C/Ctrl to crouch, F12 or Backspace for emergency stop.",
                 "OK");
         }
 
@@ -117,6 +118,8 @@ namespace ChulaEarthquakeVR.Editor
                 "The tutorial stage requires exactly two normal-activity tasks.");
             errors += CountError(UnityEngine.Object.FindObjectsByType<FallingHazard>(FindObjectsSortMode.None).Length == 5,
                 "The generated stage requires four overhead hazards and one cabinet hazard.");
+            errors += CountError(UnityEngine.Object.FindObjectsByType<MovableFurniture>(FindObjectsSortMode.None).Length >= 1,
+                "At least one movable furniture obstacle is required.");
             foreach (Camera camera in UnityEngine.Object.FindObjectsByType<Camera>(FindObjectsSortMode.None))
                 errors += CountError(camera.GetComponentInParent<InertialRigidbody>() == null,
                     $"Camera '{camera.name}' must never be parented under an inertial quake object.");
@@ -182,7 +185,8 @@ namespace ChulaEarthquakeVR.Editor
         }
 
         private static CoverZone BuildStrongTableAndCoverZone(
-            Transform environment, Transform zoneParent, Vector3 origin, Material wood, Material legs)
+            Transform environment, Transform dynamicParent, Transform zoneParent, Vector3 origin,
+            Material wood, Material legs, GroundMotionPlayer motion, SessionLogger logger)
         {
             Cube("SturdyCoverTableTop", origin + new Vector3(0f, 0.86f, 0f), new Vector3(3.2f, 0.18f, 1.6f), wood, environment, true);
             foreach (float x in new[] { -1.35f, 1.35f })
@@ -196,7 +200,46 @@ namespace ChulaEarthquakeVR.Editor
             trigger.isTrigger = true;
             CoverZone cover = zoneObject.AddComponent<CoverZone>();
             cover.Configure("cover-sturdy-table-01");
+            BuildMovableChair(dynamicParent, origin + new Vector3(0f, 0f, 1.35f), wood, legs, motion, logger);
             return cover;
+        }
+
+        private static void BuildMovableChair(
+            Transform parent, Vector3 position, Material seatMaterial, Material frameMaterial,
+            GroundMotionPlayer motion, SessionLogger logger)
+        {
+            var chair = new GameObject("MovableChair_StrongTableApproach");
+            chair.transform.SetParent(parent);
+            chair.transform.position = position;
+
+            ChairPart("ChairSeat", new Vector3(0f, 0.48f, 0f), new Vector3(0.9f, 0.12f, 0.9f), seatMaterial, chair.transform);
+            foreach (float x in new[] { -0.35f, 0.35f })
+            foreach (float z in new[] { -0.35f, 0.35f })
+                ChairPart("ChairLeg", new Vector3(x, 0.23f, z), new Vector3(0.1f, 0.46f, 0.1f), frameMaterial, chair.transform);
+            ChairPart("ChairBack", new Vector3(0f, 1.0f, 0.4f), new Vector3(0.85f, 1.0f, 0.1f), seatMaterial, chair.transform);
+
+            Rigidbody body = chair.AddComponent<Rigidbody>();
+            body.mass = 7.5f;
+            body.linearDamping = 2.5f;
+            body.angularDamping = 4f;
+            body.collisionDetectionMode = CollisionDetectionMode.Continuous;
+            body.constraints = RigidbodyConstraints.FreezePositionY |
+                               RigidbodyConstraints.FreezeRotationX |
+                               RigidbodyConstraints.FreezeRotationZ;
+            chair.AddComponent<InertialRigidbody>().Configure(motion, 0.65f, false);
+            chair.AddComponent<MovableFurniture>().Configure("chair-strong-table-01", logger, motion);
+            TryAddXrGrabInteractable(chair);
+        }
+
+        private static void ChairPart(
+            string name, Vector3 localPosition, Vector3 localScale, Material material, Transform parent)
+        {
+            GameObject part = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            part.name = name;
+            part.transform.SetParent(parent, false);
+            part.transform.localPosition = localPosition;
+            part.transform.localScale = localScale;
+            part.GetComponent<Renderer>().sharedMaterial = material;
         }
 
         private static ExitAssemblyZone BuildAssemblyZone(Transform parent, Material green)
@@ -361,6 +404,7 @@ namespace ChulaEarthquakeVR.Editor
             camera.nearClipPlane = 0.05f;
             cameraObject.AddComponent<AudioListener>();
             player.AddComponent<DesktopDebugRig>().Configure(camera);
+            player.AddComponent<DesktopGrabInteractor>().Configure(camera);
             return health;
         }
 

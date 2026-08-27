@@ -11,10 +11,11 @@ CEVR is a Unity prototype for studying human decisions during a simulated earthq
 3. The earthquake begins after at least 30 seconds once the tasks are complete, or after a 120-second watchdog timeout.
 4. A deterministic 20-second motion profile applies inertial acceleration to physical objects without moving the camera or XR Origin.
 5. Four overhead objects and one unsecured cabinet are released in a repeatable sequence.
-6. Entering the strong-table cover zone reduces hazard damage by 80 percent.
-7. Reaching the assembly point during shaking is logged as an unsafe early-exit attempt and does not count as success.
-8. After shaking stops, reaching the outdoor assembly point completes the tutorial. Health depletion or evacuation timeout causes failure.
-9. Semantic events and head/hand poses are recorded as anonymous JSONL data using a participant code rather than a name.
+6. A floor-constrained movable chair blocks the direct approach to the strong-table cover, so the participant must move around it or deliberately slide it away.
+7. Entering the strong-table cover zone reduces hazard damage by 80 percent.
+8. Reaching the assembly point during shaking is logged as an unsafe early-exit attempt and does not count as success.
+9. After shaking stops, reaching the outdoor assembly point completes the tutorial. Health depletion or evacuation timeout causes failure.
+10. Semantic events, chair displacement, and head/hand poses are recorded as anonymous JSONL data using a participant code rather than a name.
 
 ## Fastest clean-clone setup
 
@@ -25,7 +26,7 @@ CEVR is a Unity prototype for studying human decisions during a simulated earthq
 5. Select `Tools > CEVR > 1. Build Chula Engineering Tutorial Stage`.
 6. Open `Assets/CEVR/Generated/Scenes/CEVR_ChulaEngineering_Tutorial.unity`.
 7. Select `Tools > CEVR > 2. Validate Open Tutorial Scene`.
-8. Press Play for desktop testing. Controls: `WASD`, mouse look, `C` or `Ctrl` to crouch, and `F12` or `Backspace` for emergency stop.
+8. Press Play for desktop testing. Controls: `WASD`, mouse look, `E` or left click to grab/drop a task item or slide the chair, `C` or `Ctrl` to crouch, and `F12` or `Backspace` for emergency stop.
 
 Follow [Unity Setup](docs/UNITY_SETUP.md) from the beginning if this is the first time opening the project. Complete [XR Setup](docs/XR_SETUP.md) before using a headset.
 
@@ -82,4 +83,3 @@ Change the mode in `Assets/CEVR/Generated/Data/CEVR_TutorialScenario.asset` afte
 - Unity XR Interaction Toolkit 3.1: https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit@3.1/
 - XRI general setup: https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit@3.1/manual/general-setup.html
 - GitHub Git LFS: https://docs.github.com/en/repositories/working-with-files/managing-large-files/configuring-git-large-file-storage
-

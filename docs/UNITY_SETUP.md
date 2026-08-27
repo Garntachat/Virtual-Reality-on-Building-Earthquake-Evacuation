@@ -32,21 +32,22 @@ Follow every gate in order. Do not continue after a failed gate.
 4. Select `Tools > CEVR > 2. Validate Open Tutorial Scene`.
 5. Save the project and inspect `git status`.
 
-**Gate C:** exactly one GameFlowController, GroundMotionPlayer, active PlayerHealth, AudioListener, and ExitAssemblyZone exist. Exactly two TutorialTasks and five FallingHazards exist. No camera is parented under an inertial object.
+**Gate C:** exactly one GameFlowController, GroundMotionPlayer, active PlayerHealth, AudioListener, and ExitAssemblyZone exist. Exactly two TutorialTasks, five FallingHazards, and at least one MovableFurniture exist. No camera is parented under an inertial object.
 
 ## D. Desktop smoke test
 
 1. Press Play.
-2. Use the mouse to look, `WASD` to move, and `C` or `Ctrl` to crouch.
-3. Push both task objects into their green goals, or intentionally wait for the watchdog test.
-4. Confirm that the earthquake does not start before 30 seconds.
-5. During shaking, enter the strong-table cover zone and compare damage with an uncovered run.
-6. Enter the assembly point while shaking; the run must not succeed.
-7. After shaking ends, enter the assembly point; the run must reach Success and Debrief.
-8. Start another run and press `F12` or `Backspace`; motion, hazards, and logging must stop.
-9. Locate logs under `Application.persistentDataPath/CEVRLogs`.
+2. Use the mouse to look, `WASD` to move, `E` or left click to grab/drop the task item at the center of view, and `C` or `Ctrl` to crouch.
+3. Aim at the chair in front of the strong table, press `E` or left click, move it sideways, and press the same control again to release it. Confirm it slides on the floor without being lifted.
+4. Move both task objects into their green goals, or intentionally wait for the watchdog test.
+5. Confirm that the earthquake does not start before 30 seconds.
+6. During shaking, enter the strong-table cover zone and compare damage with an uncovered run.
+7. Enter the assembly point while shaking; the run must not succeed.
+8. After shaking ends, enter the assembly point; the run must reach Success and Debrief.
+9. Start another run and press `F12` or `Backspace`; motion, hazards, and logging must stop.
+10. Locate logs under `Application.persistentDataPath/CEVRLogs` and confirm `furniture_displaced` appears after moving the chair.
 
-**Gate D:** success, early-exit rejection, cover protection, and emergency stop work without exceptions. The camera does not shake.
+**Gate D:** chair movement, success, early-exit rejection, cover protection, and emergency stop work without exceptions. The camera does not shake.
 
 ## E. Automated tests
 
@@ -76,4 +77,3 @@ Follow every gate in order. Do not continue after a failed gate.
 | HUD is missing | World-space canvas position | Confirm TutorialHUD is active and faces the spawn area |
 | Research mode refuses to start | Preview profile still active | Import and assign a valid recorded QuakeProfile |
 | References disappear for another teammate | Missing `.meta` files | Recover the original GUID from Git; do not generate unrelated replacement metadata |
-

@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18c9536acd0149bd73e0f25053998c5e, type: 3}
+  m_Name: CEVR_TutorialScenario
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.TutorialScenarioConfig
+  scenarioId: CEVR_CHULA_LAB_TUTORIAL_V1
+  mode: 0
+  locationNote: Fictionalized Chulalongkorn Engineering-inspired teaching lab. Not
+    an official digital twin.
+  orientationSeconds: 6
+  normalActivitySeconds: 30
+  taskWatchdogSeconds: 120
+  earthquakeSeconds: 20
+  evacuationTimeoutSeconds: 60
+  previewPeakG: 0.16
+  previewFrequencyHz: 2.1
+  deterministicSeed: 20260824
+  requireAllNormalActivityTasks: 1
+  damageEnabled: 1
+  maximumHealth: 100
+  orientationPrompt: Look around the engineering lab and learn the controls.
+  activityPrompt: Complete the two lab setup tasks before the class begins.
+  quakePrompt: 'EARTHQUAKE: Drop, take cover under the sturdy table, and hold on.'
+  evacuationPrompt: Shaking has stopped. Walk to the green exit and assembly point.
+  neutralActivityPrompt: Continue the assigned activity naturally.
+  neutralQuakePrompt: An environmental event has started. Act as you think appropriate.
+    You may stop at any time.
+  neutralEvacuationPrompt: The environmental event has ended. Continue as you think
+    appropriate.

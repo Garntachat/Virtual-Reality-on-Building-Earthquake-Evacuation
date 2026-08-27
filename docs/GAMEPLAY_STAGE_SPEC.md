@@ -13,6 +13,7 @@ The stage is a fictional engineering teaching laboratory. Pink accents and gener
 | Spawn and orientation | Front-center of the room | Learn looking, movement, crouching, and stop control |
 | Laboratory benches A and B | Left side | Place a circuit module and safety canister |
 | Strong cover table | Center-right | Reduces hazard damage while the player body is inside the trigger |
+| Movable chair | In front of the strong table | Blocks direct cover access; can slide on the floor but cannot be lifted |
 | Hazard corridor | Center and right side | Four overhead objects and one unsecured cabinet |
 | Exit opening | Front wall | Records an unsafe attempt if crossed before the event ends |
 | Outdoor assembly point | Beyond the exit | Accepts success only during post-quake evacuation |
@@ -34,9 +35,17 @@ The stage is a fictional engineering teaching laboratory. Pink accents and gener
 1. `task-circuit-module`: place the circuit module in the green test tray.
 2. `task-safety-canister`: place the safety canister in the green storage slot.
 
-Each placement goal checks `TaskItem.ItemId`; an incorrect object cannot complete a task. The builder attempts to add `XRGrabInteractable` when XR Interaction Toolkit is available. In desktop debug mode, objects can also be pushed into their goals for a basic smoke test.
+Each placement goal checks `TaskItem.ItemId`; an incorrect object cannot complete a task. The builder attempts to add `XRGrabInteractable` when XR Interaction Toolkit is available. In desktop debug mode, `E` or left click grabs and releases a task object.
 
-## 5. Earthquake and hazard behavior
+## 5. Movable chair interaction
+
+- A chair blocks the direct approach to the strong-table cover zone.
+- The participant can grab and slide the chair in desktop or XR mode, or choose to navigate around it.
+- Rigidbody constraints keep the chair on the floor and upright while allowing horizontal translation and yaw rotation.
+- The chair responds to horizontal earthquake acceleration at a reduced scale.
+- `furniture_displaced` records the first movement of at least 0.15 metres; desktop interaction also records grab start and release.
+
+## 6. Earthquake and hazard behavior
 
 - `GroundMotionPlayer` outputs acceleration in metres per second squared.
 - `InertialRigidbody` applies `-acceleration` with `ForceMode.Acceleration`.
@@ -46,7 +55,7 @@ Each placement goal checks `TaskItem.ItemId`; an incorrect object cannot complet
 - The main camera and XR Origin are never moved by earthquake code.
 - A procedural low-frequency rumble and deterministic light flicker provide environmental cues without head motion.
 
-## 6. Win, failure, and safety rules
+## 7. Win, failure, and safety rules
 
 - Cover reduces incoming hazard damage to 20 percent of raw damage.
 - Early entry into the assembly zone is logged but rejected.
@@ -54,7 +63,7 @@ Each placement goal checks `TaskItem.ItemId`; an incorrect object cannot complet
 - Failure occurs when health is zero, evacuation exceeds 60 seconds, or the session is stopped.
 - Emergency stop must stop the coroutine, motion, hazards, and log writer.
 
-## 7. User-experience requirements
+## 8. User-experience requirements
 
 - No camera shake, artificial head roll, or forced locomotion.
 - The HUD is a world-space panel, not a head-locked overlay.
@@ -62,7 +71,7 @@ Each placement goal checks `TaskItem.ItemId`; an incorrect object cannot complet
 - Training prompts may teach Drop-Cover-Hold. Research prompts must remain neutral unless the protocol explicitly studies instruction.
 - Audio volume must be calibrated on the actual headset and kept within the approved protocol.
 
-## 8. Definition of Done
+## 9. Definition of Done
 
 - The stage can be generated from a clean clone.
 - Unity Console contains no errors.
@@ -70,6 +79,6 @@ Each placement goal checks `TaskItem.ItemId`; an incorrect object cannot complet
 - Success, early-exit, cover, damage, timeout, and emergency-stop paths pass.
 - Headset frame pacing meets the device target without sustained drops.
 - No earthquake component changes camera or XR Origin transforms.
+- The chair blocks the direct cover approach, slides without lifting, and produces displacement telemetry.
 - Every JSONL line parses, each run has a unique filename, and no identifying data is recorded.
 - Two team members independently reproduce the clean-clone setup.
-
