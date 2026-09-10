@@ -8,6 +8,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/CEVR/Generated/Scenes/CEVR_ChulaEngineering_Tutorial.unity
     guid: e6f9372c24f254c7293b29475ad85ac5
+  - enabled: 1
+    path: Assets/CEVR/Generated/Scenes/House.unity
+    guid: 2b8bc09b8438c0144a052521dc922980
   m_configObjects:
     com.unity.xr.openxr.settings4: {fileID: 11400000, guid: b08aaff0b4924443193a92ebd5a7e7fc, type: 2}
   m_UseUCBPForAssetBundles: 0

@@ -30,11 +30,11 @@ namespace ChulaEarthquakeVR
 
         [Header("Training prompts")]
         [SerializeField] private string orientationPrompt =
-            "Look around the lab. Turn around to find the pink chair beside the sturdy brown table.";
+            "Explore the lab. Four chairs can move; find the shoes, pillow, marked chair, sturdy table, windows, and exit.";
         [SerializeField] private string activityPrompt =
-            "Complete the two lab setup tasks before the class begins.";
+            "Normal routine: complete both lab setup minigames. The earthquake cannot begin before 30 seconds.";
         [SerializeField] private string quakePrompt =
-            "EARTHQUAKE: Drop, take cover under the sturdy table, and hold on.";
+            "EARTHQUAKE: Hold the pillow over your head or move the marked chair, press Z, and crawl under the sturdy table.";
         [SerializeField] private string evacuationPrompt =
             "Shaking has stopped. Walk to the green exit and assembly point.";
 

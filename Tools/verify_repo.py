@@ -22,7 +22,17 @@ REQUIRED = (
     "Assets/CEVR/Runtime/Core/GeneratedStageInfo.cs",
     "Assets/CEVR/Runtime/Core/GameFlowController.cs",
     "Assets/CEVR/Runtime/Core/RuntimeStageRepair.cs",
+    "Assets/CEVR/Runtime/Core/UniversalSceneGameplayBootstrap.cs",
+    "Assets/CEVR/Runtime/Core/HouseScenarioController.cs",
+    "Assets/CEVR/Runtime/Effects/TutorialVisualPolish.cs",
+    "Assets/CEVR/Runtime/Effects/BreakableWindow.cs",
+    "Assets/CEVR/Runtime/Hazards/ToppleableFurniture.cs",
+    "Assets/CEVR/Runtime/Hazards/BrokenGlassHazard.cs",
     "Assets/CEVR/Runtime/Player/DesktopGrabInteractor.cs",
+    "Assets/CEVR/Runtime/Player/ProtectivePillow.cs",
+    "Assets/CEVR/Runtime/Player/WearableShoes.cs",
+    "Assets/CEVR/Runtime/Player/ThirdPersonViewController.cs",
+    "Assets/CEVR/Runtime/Player/LocalMultiplayerManager.cs",
     "Assets/CEVR/Runtime/Player/MovableFurniture.cs",
     "Assets/CEVR/Tests/EditMode/StageIntegrityTests.cs",
     "START_HERE.md",
@@ -30,6 +40,7 @@ REQUIRED = (
     "docs/TEST_PLAN.md",
     "docs/XR_SETUP.md",
     "docs/GAMEPLAY_STAGE_SPEC.md",
+    "docs/SCENE_FEATURES.md",
     "docs/GITHUB_WORKFLOW.md",
     "docs/RESEARCH_AND_DATA.md",
     "docs/GROUND_MOTION.md",
@@ -108,6 +119,12 @@ def check_project_safety_defaults(errors: list[str]) -> None:
     for value in expected_settings:
         if value not in settings:
             fail(errors, f"required PlayerSettings value is missing: {value}")
+    version_marker = (ROOT / "Assets/CEVR/Runtime/Core/GeneratedStageInfo.cs").read_text(encoding="utf-8")
+    if 'CurrentVersion = "0.5.0"' not in version_marker:
+        fail(errors, "CEVR release marker must declare version 0.5.0")
+    logger = (ROOT / "Assets/CEVR/Runtime/Logging/SessionLogger.cs").read_text(encoding="utf-8")
+    if "buildVersion = GeneratedStageInfo.CurrentVersion" not in logger:
+        fail(errors, "session logs must use the CEVR release marker")
     if "m_EnableEnhancedDeterminism: 1" not in dynamics:
         fail(errors, "enhanced physics determinism must remain enabled")
     if "Maximum Allowed Timestep: 0.1" not in time_settings:
@@ -157,7 +174,10 @@ def check_runtime_repair_contract(errors: list[str]) -> None:
         'GameObject.Find("DynamicProps")',
         "RenderMode.ScreenSpaceOverlay",
         "AddComponent<DesktopGrabInteractor>()",
-        'new GameObject("MovableChair_StrongTableApproach")',
+        '"MovableChair_StrongTableApproach", "chair-strong-table-01"',
+        '"MovableChair_LabBenchNorth", "chair-lab-north-01"',
+        '"MovableChair_LabBenchSouth", "chair-lab-south-01"',
+        '"MovableChair_Spare", "chair-spare-01"',
         "AddComponent<Rigidbody>()",
         "AddComponent<MovableFurniture>()",
         "TryAddXrGrabInteractable(chair)",
@@ -170,6 +190,138 @@ def check_runtime_repair_contract(errors: list[str]) -> None:
     validation_call = flow.find("ValidateSetup(out string error)")
     if repair_call < 0 or validation_call < 0 or repair_call > validation_call:
         fail(errors, "GameFlowController must repair the committed scene before validating it")
+
+
+def check_crawl_contract(errors: list[str]) -> None:
+    path = ROOT / "Assets/CEVR/Runtime/Player/DesktopDebugRig.cs"
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        fail(errors, f"could not read desktop crawl controller: {exc}")
+        return
+    required = (
+        "Keyboard.current.zKey.wasPressedThisFrame",
+        "crawlingHeight = 0.58f",
+        "crawlMoveMultiplier = 0.42f",
+        "HasClearance(requestedHeight)",
+        "ApplyHeight(requestedHeight)",
+    )
+    for fragment in required:
+        if fragment not in text:
+            fail(errors, f"desktop crawl contract is missing: {fragment}")
+
+
+def check_visual_polish_contract(errors: list[str]) -> None:
+    path = ROOT / "Assets/CEVR/Runtime/Effects/TutorialVisualPolish.cs"
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        fail(errors, f"could not read tutorial visual polish: {exc}")
+        return
+    required = (
+        "ApplyScenePalette()",
+        "ConfigureLightingAndCamera()",
+        "BuildWayfindingAndSafetyMarkers()",
+        "PolishHud()",
+        "BuildCoverOutline()",
+        "BuildExitPath()",
+        "BuildChairBeacon()",
+        "BuildHazardBoundary()",
+        "BuildEngineeringWorkstations()",
+        "BuildSafetyEquipment()",
+        "BuildComfortAndStorageDecor()",
+        "RenderMode.ScreenSpaceOverlay",
+        "collider.enabled = false",
+    )
+    repair = (ROOT / "Assets/CEVR/Runtime/Core/RuntimeStageRepair.cs").read_text(encoding="utf-8")
+    for fragment in required:
+        if fragment not in text and fragment not in repair:
+            fail(errors, f"final visual-polish contract is missing: {fragment}")
+    if "TutorialVisualPolish.EnsureApplied()" not in repair:
+        fail(errors, "runtime scene preparation must apply TutorialVisualPolish")
+    if "playerCamera.transform" in text or "Camera.main.transform" in text:
+        fail(errors, "visual polish must never move or rotate the participant camera")
+
+    grab = (ROOT / "Assets/CEVR/Runtime/Player/DesktopGrabInteractor.cs").read_text(encoding="utf-8")
+    for fragment in ("HasGrabbableTarget()", "targetAvailable", "GUI.backgroundColor"):
+        if fragment not in grab:
+            fail(errors, f"final interaction-feedback contract is missing: {fragment}")
+
+    hud = (ROOT / "Assets/CEVR/Runtime/UI/TutorialHud.cs").read_text(encoding="utf-8")
+    if "PhaseColor(phase)" not in hud:
+        fail(errors, "final HUD must provide phase-specific status colors")
+
+
+def check_cross_scene_feature_contract(errors: list[str]) -> None:
+    bootstrap_path = ROOT / "Assets/CEVR/Runtime/Core/UniversalSceneGameplayBootstrap.cs"
+    house_scene = ROOT / "Assets/CEVR/Generated/Scenes/House.unity"
+    build_settings = ROOT / "ProjectSettings/EditorBuildSettings.asset"
+    try:
+        bootstrap = bootstrap_path.read_text(encoding="utf-8")
+        settings = build_settings.read_text(encoding="utf-8")
+    except OSError as exc:
+        fail(errors, f"could not read cross-scene feature contract: {exc}")
+        return
+    required = (
+        "RuntimeInitializeOnLoadMethod",
+        'sceneName.Contains("house")',
+        "InstallTutorialFeatures()",
+        "InstallHouseScenario()",
+        'CreateChair("HouseChair_CoverObstacle"',
+        'CreateChair("HouseChair_DiningLeft"',
+        'CreateChair("HouseChair_DiningRight"',
+        'CreateChair("HouseChair_Spare"',
+        "EnsureShoes(",
+        "EnsurePillow(",
+        "BuildHouseWindows(",
+        "CreateTopplingCabinet(",
+        "CreateFallingProp(",
+        "HouseScenarioController",
+        "ThirdPersonViewController",
+        "LocalMultiplayerManager",
+        "WearableSafetyShoes_P2",
+    )
+    for fragment in required:
+        if fragment not in bootstrap:
+            fail(errors, f"cross-scene gameplay installer is missing: {fragment}")
+    if not house_scene.is_file() or house_scene.stat().st_size < 1_000_000:
+        fail(errors, "the hand-built House.unity scene is missing or unexpectedly replaced")
+    if "Assets/CEVR/Generated/Scenes/House.unity" not in settings:
+        fail(errors, "House.unity must be enabled in EditorBuildSettings")
+
+    feature_contracts = {
+        "Assets/CEVR/Runtime/Effects/BreakableWindow.cs": ("NormalizedIntensity", "window_cracked"),
+        "Assets/CEVR/Runtime/Hazards/ToppleableFurniture.cs": ("AddForceAtPosition", "IsPlaying"),
+        "Assets/CEVR/Runtime/Player/WearableShoes.cs": ("Equip(", "footwear_equipped"),
+        "Assets/CEVR/Runtime/Player/ProtectivePillow.cs": ("SetProtection", "pillow_cover_started"),
+        "Assets/CEVR/Runtime/Player/ThirdPersonViewController.cs": ("tKey.wasPressedThisFrame", "SphereCast"),
+        "Assets/CEVR/Runtime/Player/LocalMultiplayerManager.cs": ("f2Key.wasPressedThisFrame", "LocalPlayer2", "Configure(secondCamera, true)"),
+        "Assets/CEVR/Runtime/Core/HouseScenarioController.cs": ("preparationSeconds = 30f", "house_tutorial_success"),
+    }
+    for relative, fragments in feature_contracts.items():
+        try:
+            text = (ROOT / relative).read_text(encoding="utf-8")
+        except OSError as exc:
+            fail(errors, f"could not read feature contract {relative}: {exc}")
+            continue
+        for fragment in fragments:
+            if fragment not in text:
+                fail(errors, f"feature contract {relative} is missing: {fragment}")
+
+    health = (ROOT / "Assets/CEVR/Runtime/Player/PlayerHealth.cs").read_text(encoding="utf-8")
+    if "HashSet<string> protectionSources" not in health:
+        fail(errors, "cover and pillow protection must use independent protection sources")
+    if "HasProtectiveFootwear" not in health:
+        fail(errors, "player health must retain the equipped footwear state")
+
+    glass = (ROOT / "Assets/CEVR/Runtime/Hazards/BrokenGlassHazard.cs").read_text(encoding="utf-8")
+    for fragment in ("glass-barefoot", "glass-with-footwear", "HasProtectiveFootwear"):
+        if fragment not in glass:
+            fail(errors, f"functional broken-glass footwear contract is missing: {fragment}")
+    grab = (ROOT / "Assets/CEVR/Runtime/Player/DesktopGrabInteractor.cs").read_text(encoding="utf-8")
+    for fragment in ("rightShiftKey.wasPressedThisFrame", "ClaimedBodies.Contains(body)", "ClaimedBodies.Add(body)"):
+        if fragment not in grab:
+            fail(errors, f"local multiplayer interaction ownership is missing: {fragment}")
 
 
 def check_git_hygiene(errors: list[str]) -> None:
@@ -190,7 +342,7 @@ def check_english_only(errors: list[str]) -> None:
     for path in ROOT.rglob("*"):
         if not path.is_file() or path.suffix.lower() not in text_suffixes:
             continue
-        if thai.search(path.read_text(encoding="utf-8")):
+        if thai.search(path.read_text(encoding="utf-8", errors="replace")):
             fail(errors, f"Thai text remains in English-only deliverable: {path.relative_to(ROOT)}")
 
 
@@ -204,6 +356,9 @@ def main() -> int:
     check_meta_files(errors)
     check_csharp_policies(errors)
     check_runtime_repair_contract(errors)
+    check_crawl_contract(errors)
+    check_visual_polish_contract(errors)
+    check_cross_scene_feature_contract(errors)
     check_git_hygiene(errors)
     check_english_only(errors)
     if errors:

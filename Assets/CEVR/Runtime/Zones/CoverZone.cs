@@ -9,7 +9,7 @@ namespace ChulaEarthquakeVR
     {
         [SerializeField] private string zoneId = "cover-01";
         private readonly HashSet<Collider> participantColliders = new HashSet<Collider>();
-        private PlayerHealth occupant;
+        private readonly Dictionary<PlayerHealth, int> occupantColliderCounts = new Dictionary<PlayerHealth, int>();
         public bool IsOccupied => participantColliders.Count > 0;
         public string ZoneId => zoneId;
         public event Action<bool, string> OccupancyChanged;
@@ -19,30 +19,36 @@ namespace ChulaEarthquakeVR
         private void OnTriggerEnter(Collider other)
         {
             PlayerHealth health = other.GetComponentInParent<PlayerHealth>();
+            bool wasOccupied = IsOccupied;
             if (health == null || !participantColliders.Add(other)) return;
-            occupant = health;
-            if (participantColliders.Count == 1)
+            occupantColliderCounts.TryGetValue(health, out int count);
+            occupantColliderCounts[health] = count + 1;
+            if (count == 0)
             {
-                occupant.SetProtected(true);
-                OccupancyChanged?.Invoke(true, zoneId);
+                health.SetProtection("cover:" + zoneId, true);
             }
+            if (!wasOccupied) OccupancyChanged?.Invoke(true, zoneId);
         }
 
         private void OnTriggerExit(Collider other)
         {
             if (!participantColliders.Remove(other)) return;
-            if (participantColliders.Count == 0)
+            PlayerHealth health = other.GetComponentInParent<PlayerHealth>();
+            if (health == null || !occupantColliderCounts.TryGetValue(health, out int count)) return;
+            if (count <= 1)
             {
-                occupant?.SetProtected(false);
-                occupant = null;
-                OccupancyChanged?.Invoke(false, zoneId);
+                occupantColliderCounts.Remove(health);
+                health.SetProtection("cover:" + zoneId, false);
             }
+            else occupantColliderCounts[health] = count - 1;
+            if (!IsOccupied) OccupancyChanged?.Invoke(false, zoneId);
         }
 
         private void OnDisable()
         {
-            occupant?.SetProtected(false);
-            occupant = null;
+            foreach (PlayerHealth health in occupantColliderCounts.Keys)
+                if (health != null) health.SetProtection("cover:" + zoneId, false);
+            occupantColliderCounts.Clear();
             participantColliders.Clear();
         }
 

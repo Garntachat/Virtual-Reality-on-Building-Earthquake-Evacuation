@@ -51,7 +51,7 @@ namespace ChulaEarthquakeVR
                 sessionTimeSeconds = Time.realtimeSinceStartup - sessionStartRealtime,
                 participantCode = ParticipantCode,
                 scenarioId = ScenarioId,
-                buildVersion = Application.version,
+                buildVersion = GeneratedStageInfo.CurrentVersion,
                 eventType = string.IsNullOrWhiteSpace(eventType) ? "unspecified" : eventType,
                 payloadJson = string.IsNullOrWhiteSpace(payloadJson) ? "{}" : payloadJson
             };

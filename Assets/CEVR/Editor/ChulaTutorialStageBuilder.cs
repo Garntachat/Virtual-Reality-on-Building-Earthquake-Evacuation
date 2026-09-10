@@ -37,14 +37,14 @@ namespace ChulaEarthquakeVR.Editor
             var zones = new GameObject("SafetyZones");
             gameplay.AddComponent<GeneratedStageInfo>().ConfigureCurrent();
 
-            Material concrete = MaterialAsset("Concrete", new Color(0.62f, 0.64f, 0.66f));
-            Material wall = MaterialAsset("WallWhite", new Color(0.89f, 0.90f, 0.91f));
-            Material pink = MaterialAsset("ChulaPinkAccent", new Color(0.84f, 0.16f, 0.42f));
-            Material dark = MaterialAsset("BenchDark", new Color(0.16f, 0.19f, 0.22f));
-            Material wood = MaterialAsset("BenchWood", new Color(0.48f, 0.30f, 0.18f));
-            Material green = MaterialAsset("SafetyGreen", new Color(0.12f, 0.58f, 0.25f));
-            Material yellow = MaterialAsset("HazardYellow", new Color(0.95f, 0.68f, 0.08f));
-            Material glass = MaterialAsset("WindowBlue", new Color(0.32f, 0.55f, 0.72f));
+            Material concrete = MaterialAsset("Concrete", new Color(0.47f, 0.51f, 0.56f));
+            Material wall = MaterialAsset("WallWhite", new Color(0.82f, 0.85f, 0.88f));
+            Material pink = MaterialAsset("ChulaPinkAccent", new Color(0.88f, 0.08f, 0.40f));
+            Material dark = MaterialAsset("BenchDark", new Color(0.08f, 0.11f, 0.15f));
+            Material wood = MaterialAsset("BenchWood", new Color(0.39f, 0.20f, 0.10f));
+            Material green = MaterialAsset("SafetyGreen", new Color(0.05f, 0.62f, 0.31f));
+            Material yellow = MaterialAsset("HazardYellow", new Color(1f, 0.56f, 0.04f));
+            Material glass = MaterialAsset("WindowBlue", new Color(0.10f, 0.32f, 0.48f));
 
             BuildEnvironment(environment.transform, concrete, wall, pink, dark, glass, green);
             GroundMotionPlayer motion = gameplay.AddComponent<GroundMotionPlayer>();
@@ -63,6 +63,7 @@ namespace ChulaEarthquakeVR.Editor
             CoverZone coverZone = BuildStrongTableAndCoverZone(
                 environment.transform, dynamicProps.transform, zones.transform,
                 new Vector3(2.5f, 0f, 0.8f), wood, dark, pink, motion, logger);
+            BuildAdditionalChairs(dynamicProps.transform, pink, dark, motion, logger);
             ExitAssemblyZone assembly = BuildAssemblyZone(zones.transform, green);
 
             List<TutorialTask> tasks = BuildTutorialTasks(
@@ -94,7 +95,7 @@ namespace ChulaEarthquakeVR.Editor
             EditorUtility.DisplayDialog(
                 "Stage built",
                 $"Generated stage {GeneratedStageInfo.CurrentVersion} is open and ready.\n\n" +
-                "Desktop controls: WASD, mouse look, E or left click to grab/drop, mouse wheel to adjust hold distance, C/Ctrl to crouch, and F12/Backspace for emergency stop.",
+                "Desktop controls: WASD, mouse look, E or left click to use/grab, mouse wheel for hold distance, Z crawl, C/Ctrl crouch, T camera view, F2 local co-op, and F12/Backspace emergency stop.",
                 "OK");
         }
 
@@ -120,8 +121,8 @@ namespace ChulaEarthquakeVR.Editor
                 "The tutorial stage requires exactly two normal-activity tasks.");
             errors += CountError(UnityEngine.Object.FindObjectsByType<FallingHazard>(FindObjectsSortMode.None).Length == 5,
                 "The generated stage requires four overhead hazards and one cabinet hazard.");
-            errors += CountError(UnityEngine.Object.FindObjectsByType<MovableFurniture>(FindObjectsSortMode.None).Length >= 1,
-                "At least one movable furniture obstacle is required.");
+            errors += CountError(UnityEngine.Object.FindObjectsByType<MovableFurniture>(FindObjectsSortMode.None).Length >= 4,
+                "At least four independently grabbable chairs are required.");
             GeneratedStageInfo[] stageInfo = UnityEngine.Object.FindObjectsByType<GeneratedStageInfo>(FindObjectsSortMode.None);
             errors += CountError(stageInfo.Length == 1,
                 "Exactly one GeneratedStageInfo is required. Rebuild the stage.");
@@ -211,8 +212,9 @@ namespace ChulaEarthquakeVR.Editor
             trigger.isTrigger = true;
             CoverZone cover = zoneObject.AddComponent<CoverZone>();
             cover.Configure("cover-sturdy-table-01");
-            BuildMovableChair(dynamicParent, origin + new Vector3(0f, 0f, 1.0f), chairAccent, legs, motion, logger);
-            CreateTextSign("CoverInteractionSign", "MOVE CHAIR  •  CROUCH UNDER TABLE",
+            BuildMovableChair(dynamicParent, origin + new Vector3(0f, 0f, 1.0f), chairAccent, legs,
+                motion, logger, "MovableChair_StrongTableApproach", "chair-strong-table-01", 0f);
+            CreateTextSign("CoverInteractionSign", "MOVE CHAIR  •  Z CRAWL UNDER TABLE",
                 origin + new Vector3(0f, 1.52f, 0.76f), Quaternion.Euler(0f, 180f, 0f),
                 chairAccent, environment, 0.022f, TextAnchor.MiddleCenter);
             return cover;
@@ -220,11 +222,13 @@ namespace ChulaEarthquakeVR.Editor
 
         private static void BuildMovableChair(
             Transform parent, Vector3 position, Material seatMaterial, Material frameMaterial,
-            GroundMotionPlayer motion, SessionLogger logger)
+            GroundMotionPlayer motion, SessionLogger logger,
+            string objectName, string furnitureId, float yaw)
         {
-            var chair = new GameObject("MovableChair_StrongTableApproach");
+            var chair = new GameObject(objectName);
             chair.transform.SetParent(parent);
             chair.transform.position = position;
+            chair.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
 
             ChairPart("ChairSeat_Accent", new Vector3(0f, 0.48f, 0f), new Vector3(0.9f, 0.12f, 0.9f), seatMaterial, chair.transform);
             foreach (float x in new[] { -0.35f, 0.35f })
@@ -243,8 +247,20 @@ namespace ChulaEarthquakeVR.Editor
                                RigidbodyConstraints.FreezeRotationX |
                                RigidbodyConstraints.FreezeRotationZ;
             chair.AddComponent<InertialRigidbody>().Configure(motion, 0.65f, false);
-            chair.AddComponent<MovableFurniture>().Configure("chair-strong-table-01", logger, motion);
+            chair.AddComponent<MovableFurniture>().Configure(furnitureId, logger, motion);
             TryAddXrGrabInteractable(chair);
+        }
+
+        private static void BuildAdditionalChairs(
+            Transform parent, Material seatMaterial, Material frameMaterial,
+            GroundMotionPlayer motion, SessionLogger logger)
+        {
+            BuildMovableChair(parent, new Vector3(-3.8f, 0f, 2.6f), seatMaterial, frameMaterial,
+                motion, logger, "MovableChair_LabBenchNorth", "chair-lab-north-01", 180f);
+            BuildMovableChair(parent, new Vector3(-3.8f, 0f, -0.6f), seatMaterial, frameMaterial,
+                motion, logger, "MovableChair_LabBenchSouth", "chair-lab-south-01", 180f);
+            BuildMovableChair(parent, new Vector3(0.5f, 0f, -2.2f), seatMaterial, frameMaterial,
+                motion, logger, "MovableChair_Spare", "chair-spare-01", 90f);
         }
 
         private static void ChairPart(
@@ -441,14 +457,14 @@ namespace ChulaEarthquakeVR.Editor
             scaler.referenceResolution = new Vector2(1920f, 1080f);
             canvasObject.AddComponent<GraphicRaycaster>();
 
-            Image panel = UiImage("HUDPanel", canvas.transform, new Color(0.04f, 0.06f, 0.08f, 0.82f),
-                new Vector2(20f, -20f), new Vector2(980f, -300f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+            Image panel = UiImage("HUDPanel", canvas.transform, new Color(0.025f, 0.045f, 0.075f, 0.94f),
+                new Vector2(20f, -20f), new Vector2(780f, -290f), new Vector2(0f, 1f), new Vector2(0f, 1f));
             Text phase = UiText("Phase", panel.transform, 32, FontStyle.Bold, new Vector2(24f, -18f), new Vector2(920f, -60f));
             Text objective = UiText("Objective", panel.transform, 25, FontStyle.Normal, new Vector2(24f, -64f), new Vector2(920f, -132f));
             Text timer = UiText("Timer", panel.transform, 26, FontStyle.Bold, new Vector2(24f, -142f), new Vector2(370f, -184f));
             Text tasks = UiText("Tasks", panel.transform, 21, FontStyle.Normal, new Vector2(400f, -142f), new Vector2(920f, -225f));
             Text controls = UiText("Controls", panel.transform, 17, FontStyle.Normal, new Vector2(400f, -230f), new Vector2(920f, -265f));
-            controls.text = "WASD MOVE  •  MOUSE LOOK  •  E GRAB  •  C CROUCH  •  F12 STOP";
+            controls.text = "WASD MOVE  •  E USE/GRAB  •  Z CRAWL  •  T VIEW  •  F2 CO-OP  •  F12 STOP";
 
             Slider health = UiSlider("Health", panel.transform, new Vector2(24f, -222f), new Vector2(370f, -252f));
             Image indicator = UiImage("QuakeIndicator", canvas.transform, new Color(0.95f, 0.18f, 0.10f, 0.7f),
@@ -531,7 +547,8 @@ namespace ChulaEarthquakeVR.Editor
             sun.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
             Light directional = sun.AddComponent<Light>();
             directional.type = LightType.Directional;
-            directional.intensity = 0.75f;
+            directional.intensity = 0.62f;
+            directional.color = new Color(1f, 0.94f, 0.86f);
             directional.shadows = LightShadows.Soft;
             for (int i = 0; i < 4; i++)
             {
@@ -541,8 +558,8 @@ namespace ChulaEarthquakeVR.Editor
                 Light light = lightObject.AddComponent<Light>();
                 light.type = LightType.Point;
                 light.range = 7f;
-                light.intensity = 1.5f;
-                light.color = new Color(0.91f, 0.95f, 1f);
+                light.intensity = 0.82f;
+                light.color = new Color(0.82f, 0.9f, 1f);
                 LabLights.Add(light);
             }
         }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ChulaEarthquakeVR
@@ -10,9 +11,11 @@ namespace ChulaEarthquakeVR
         [SerializeField, Min(0f)] private float hitInvulnerabilitySeconds = 0.35f;
 
         private float lastHitTime = float.NegativeInfinity;
+        private readonly HashSet<string> protectionSources = new HashSet<string>();
         public float CurrentHealth { get; private set; }
         public float MaximumHealth => maximumHealth;
-        public bool IsProtected { get; private set; }
+        public bool IsProtected => protectionSources.Count > 0;
+        public bool HasProtectiveFootwear { get; private set; }
         public bool IsDead => CurrentHealth <= 0f;
 
         public event Action<float, float, string> Damaged;
@@ -29,11 +32,21 @@ namespace ChulaEarthquakeVR
         public void ResetHealth()
         {
             CurrentHealth = maximumHealth;
-            IsProtected = false;
+            protectionSources.Clear();
+            HasProtectiveFootwear = false;
             lastHitTime = float.NegativeInfinity;
         }
 
-        public void SetProtected(bool value) => IsProtected = value;
+        public void EquipProtectiveFootwear() => HasProtectiveFootwear = true;
+
+        public void SetProtected(bool value) => SetProtection("legacy-cover", value);
+
+        public void SetProtection(string sourceId, bool value)
+        {
+            string key = string.IsNullOrWhiteSpace(sourceId) ? "unknown-protection" : sourceId;
+            if (value) protectionSources.Add(key);
+            else protectionSources.Remove(key);
+        }
 
         public bool ApplyDamage(float rawDamage, string sourceId)
         {

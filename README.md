@@ -2,7 +2,7 @@
 
 CEVR is a Unity prototype for studying human decisions during a simulated earthquake in a virtual engineering teaching laboratory. The environment is fictional and only inspired by a Thai university engineering context. It is not an official Chulalongkorn University product, architectural digital twin, structural-analysis tool, or emergency guidance system.
 
-> Status: CEVR 0.3.1 implementation-ready tutorial prototype. The repository contains a self-repairing playable tutorial scene, versioned one-click stage generation, runtime systems, automated EditMode tests, research-mode safeguards, desktop interaction guidance, and complete setup documentation. Unity compilation, OpenXR validation, headset performance, ethics approval, and human-participant pilot testing remain mandatory machine-side gates.
+> Status: CEVR 0.5.0 cross-scene gameplay candidate. The repository preserves the new hand-built house scene and adds reusable gameplay to both the engineering tutorial and house: deterministic shaking, falling furniture, four grabbable chairs per scenario, wearable shoes, protective pillow cover, visual window cracking, desktop third-person view, local split-screen multiplayer, crawl-under-table interaction, health, and evacuation outcomes. Unity compilation, OpenXR validation, headset performance, ethics approval, and human-participant pilot testing remain mandatory machine-side gates.
 
 ## Implemented gameplay
 
@@ -11,11 +11,14 @@ CEVR is a Unity prototype for studying human decisions during a simulated earthq
 3. The earthquake begins after at least 30 seconds once the tasks are complete, or after a 120-second watchdog timeout.
 4. A deterministic 20-second motion profile applies inertial acceleration to physical objects without moving the camera or XR Origin.
 5. Four overhead objects and one unsecured cabinet are released in a repeatable sequence.
-6. A clearly marked pink, floor-constrained chair sits partly under the strong table, so the participant must deliberately slide it away before entering cover.
+6. Four pink, floor-constrained chairs can be grabbed independently; the clearly marked primary chair sits partly under the strong table and must be moved before entering cover.
 7. Entering the strong-table cover zone reduces hazard damage by 80 percent.
 8. Reaching the assembly point during shaking is logged as an unsafe early-exit attempt and does not count as success.
 9. After shaking stops, reaching the outdoor assembly point completes the tutorial. Health depletion or evacuation timeout causes failure.
 10. Semantic events, chair displacement, and head/hand poses are recorded as anonymous JSONL data using a participant code rather than a name.
+11. Every supported scene receives two wearable-shoe pairs, a protective pillow, deterministic window cracking with a footwear-sensitive debris zone, and a desktop `T` third-person option.
+12. `House.unity` receives a complete 30-second preparation, 20-second earthquake, hazard/health, cover, and post-quake assembly flow without altering the original house mesh.
+13. `F2` enables same-device local split-screen evaluation; Player 2 uses `IJKL`, `U`/`O`, and right `Shift` to interact.
 
 ## Fastest clean-clone setup
 
@@ -23,10 +26,10 @@ CEVR is a Unity prototype for studying human decisions during a simulated earthq
 2. Clone the repository and run `git lfs pull`.
 3. Open the repository root in Unity Hub and wait for package resolution.
 4. Confirm that the Console has no compilation errors.
-5. Open `Assets/CEVR/Generated/Scenes/CEVR_ChulaEngineering_Tutorial.unity`.
-6. Press Play. Version 0.3.1 repairs the committed legacy scene in memory before validation.
+5. Open either `Assets/CEVR/Generated/Scenes/CEVR_ChulaEngineering_Tutorial.unity` or `Assets/CEVR/Generated/Scenes/House.unity`.
+6. Press Play. Version 0.5.0 installs the correct scenario before gameplay starts.
 7. Click the Game view and turn 180 degrees to find the sturdy brown table and bright pink chair.
-8. Controls: `WASD`, mouse look, `E` or left click to grab/drop a task item or slide the chair, mouse wheel to adjust hold distance, `C` or `Ctrl` to crouch, and `F12` or `Backspace` for emergency stop.
+8. Controls: `WASD`, mouse look, `E` or left click to wear shoes or grab/drop an item, `Z` to crawl, `C` or `Ctrl` to crouch, `T` for third person, `F2` for local split-screen, and `F12` or `Backspace` for emergency stop.
 
 Follow [Unity Setup](docs/UNITY_SETUP.md) from the beginning if this is the first time opening the project. Complete [XR Setup](docs/XR_SETUP.md) before using a headset.
 
@@ -64,6 +67,7 @@ Change the mode in `Assets/CEVR/Generated/Data/CEVR_TutorialScenario.asset` afte
 ## Documentation
 
 - [Gameplay and stage specification](docs/GAMEPLAY_STAGE_SPEC.md)
+- [Cross-scene feature guide](docs/SCENE_FEATURES.md)
 - [Unity setup](docs/UNITY_SETUP.md)
 - [OpenXR and headset setup](docs/XR_SETUP.md)
 - [Architecture](docs/ARCHITECTURE.md)
