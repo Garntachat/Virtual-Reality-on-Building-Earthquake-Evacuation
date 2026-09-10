@@ -1,5 +1,14 @@
 # Changelog
 
+## Student avatar and gameplay clarity repair
+
+- Replaced both capsule avatars with a stylized white-shirt, dark-trouser student character and walking motion.
+- Fixed kinematic velocity warnings during hazard reset.
+- Corrected third-person self-collider targeting and added shoulder camera mouse aiming.
+- Added explicit next-task instructions, labelled placement trays, and accurate task-wait countdowns.
+- Static checks passed; Unity Play-mode and headset validation remain pending.
+
+
 ## 0.5.0 - 2026-09-10
 
 - Preserved the new 2.3 MB hand-built `House.unity` scene and enabled it in Build Settings

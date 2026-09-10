@@ -26,11 +26,16 @@ namespace ChulaEarthquakeVR
         {
             if (phaseText != null)
             {
-                phaseText.text = phase.ToString().ToUpperInvariant();
+                phaseText.text = System.Text.RegularExpressions.Regex.Replace(phase.ToString(), "([a-z])([A-Z])", "$1 $2").ToUpperInvariant();
                 phaseText.color = PhaseColor(phase);
             }
             if (objectiveText != null) objectiveText.text = objective ?? string.Empty;
             SetQuakeIndicator(phase == GameplayPhase.Earthquake, 0f);
+        }
+
+        public void SetObjective(string text)
+        {
+            if (objectiveText != null) objectiveText.text = text;
         }
 
         public void SetTimer(float seconds, string label)

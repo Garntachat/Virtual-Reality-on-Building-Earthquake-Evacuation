@@ -12,6 +12,16 @@ namespace ChulaEarthquakeVR
         public bool AllComplete => TotalCount == 0 || CompletedCount >= TotalCount;
         public event Action<int, int, TutorialTask> ProgressChanged;
 
+        public TutorialTask NextIncomplete
+        {
+            get
+            {
+                foreach (TutorialTask task in tasks)
+                    if (task != null && !task.IsComplete) return task;
+                return null;
+            }
+        }
+
         private void OnEnable()
         {
             foreach (TutorialTask task in tasks) if (task != null) task.Completed += OnTaskCompleted;

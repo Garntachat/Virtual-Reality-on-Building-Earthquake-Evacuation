@@ -20,6 +20,19 @@ namespace ChulaEarthquakeVR.Tests
         public void TearDown() => Object.DestroyImmediate(root);
 
         [Test]
+        public void HazardReset_KeepsStagedBodyKinematicWithoutWarnings()
+        {
+            Rigidbody body = root.AddComponent<Rigidbody>();
+            body.isKinematic = true;
+            HazardDirector director = root.AddComponent<HazardDirector>();
+            director.Configure(new[] { body });
+            director.ResetHazards();
+            Assert.IsTrue(body.isKinematic);
+            Assert.IsFalse(body.useGravity);
+            UnityEngine.TestTools.LogAssert.NoUnexpectedReceived();
+        }
+
+        [Test]
         public void UnprotectedHit_AppliesFullDamage()
         {
             Assert.IsTrue(health.ApplyDamage(25f, "test"));

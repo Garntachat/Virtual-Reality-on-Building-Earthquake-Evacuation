@@ -38,14 +38,7 @@ namespace ChulaEarthquakeVR
             controller.center = new Vector3(0f, 0.875f, 0f);
             secondPlayer.AddComponent<PlayerHealth>();
 
-            GameObject avatar = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            avatar.name = "Player2Avatar";
-            avatar.transform.SetParent(secondPlayer.transform, false);
-            avatar.transform.localPosition = new Vector3(0f, 0.88f, 0f);
-            avatar.transform.localScale = new Vector3(0.42f, 0.84f, 0.42f);
-            Collider avatarCollider = avatar.GetComponent<Collider>();
-            if (avatarCollider != null) avatarCollider.enabled = false;
-            avatar.GetComponent<Renderer>().material.color = new Color(0.02f, 0.62f, 0.72f);
+            StudentAvatar.Build(secondPlayer.transform, "Player2Avatar");
 
             GameObject cameraObject = new GameObject("Player2Camera");
             cameraObject.transform.SetParent(secondPlayer.transform, true);

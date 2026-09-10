@@ -50,10 +50,13 @@ namespace ChulaEarthquakeVR
             {
                 Rigidbody body = stagedHazards[i];
                 if (body == null) continue;
+                if (!body.isKinematic)
+                {
+                    body.linearVelocity = Vector3.zero;
+                    body.angularVelocity = Vector3.zero;
+                }
                 body.isKinematic = true;
                 body.useGravity = false;
-                body.linearVelocity = Vector3.zero;
-                body.angularVelocity = Vector3.zero;
                 if (i < initialPositions.Length)
                 {
                     body.position = initialPositions[i];

@@ -36,8 +36,11 @@ namespace ChulaEarthquakeVR
         private void LateUpdate()
         {
             if (!IsThirdPerson || viewCamera == null || viewCamera.stereoEnabled) return;
-            Vector3 focus = transform.position + Vector3.up * shoulderHeight;
-            Vector3 desired = focus - transform.forward * followDistance + Vector3.up * 0.45f;
+            CharacterController controller = GetComponent<CharacterController>();
+            float height = controller == null ? shoulderHeight : controller.height - 0.12f;
+            Vector3 focus = transform.position + Vector3.up * height;
+            Quaternion look = viewCamera.transform.rotation;
+            Vector3 desired = focus - (look * Vector3.forward) * followDistance + transform.right * 0.65f;
             Vector3 direction = desired - focus;
             float distance = direction.magnitude;
             float nearest = distance;
@@ -54,25 +57,15 @@ namespace ChulaEarthquakeVR
             }
             desired = focus + direction.normalized * nearest;
             viewCamera.transform.position = desired;
-            viewCamera.transform.rotation = Quaternion.LookRotation(focus - desired, Vector3.up);
+            viewCamera.transform.rotation = look;
         }
 
         public void Configure(Camera camera) => viewCamera = camera;
 
         private void BuildAvatar()
         {
-            if (transform.Find("ThirdPersonAvatar") != null) return;
-            GameObject body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            body.name = "ThirdPersonAvatar";
-            body.transform.SetParent(transform, false);
-            body.transform.localPosition = new Vector3(0f, 0.88f, 0f);
-            body.transform.localScale = new Vector3(0.42f, 0.84f, 0.42f);
-            Collider bodyCollider = body.GetComponent<Collider>();
-            if (bodyCollider != null) bodyCollider.enabled = false;
-            Renderer renderer = body.GetComponent<Renderer>();
-            if (renderer != null) renderer.material.color = new Color(0.88f, 0.08f, 0.4f);
-            avatar = body.transform;
-            body.SetActive(false);
+            avatar = StudentAvatar.Build(transform, "ThirdPersonAvatar");
+            avatar.gameObject.SetActive(false);
         }
     }
 }

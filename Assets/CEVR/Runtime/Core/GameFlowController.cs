@@ -153,6 +153,8 @@ namespace ChulaEarthquakeVR
             logger?.EndSession();
         }
 
+        public bool IsTraining => config != null && config.Mode == StudyMode.Training;
+
         public void RestartCurrentScene()
         {
             logger?.EndSession();
@@ -174,7 +176,15 @@ namespace ChulaEarthquakeVR
                        config.TaskWatchdogSeconds))
             {
                 activityElapsed += Time.unscaledDeltaTime;
-                hud.SetTimer(config.NormalActivitySeconds - activityElapsed, "EVENT IN");
+                bool waitingForTasks = activityElapsed >= config.NormalActivitySeconds && !taskSequence.AllComplete;
+                hud.SetTimer(waitingForTasks ? config.TaskWatchdogSeconds - activityElapsed :
+                    config.NormalActivitySeconds - activityElapsed, waitingForTasks ? "TASK TIME LEFT" : "PREPARATION");
+                if (config.Mode == StudyMode.Training)
+                {
+                    TutorialTask next = taskSequence.NextIncomplete;
+                    hud.SetObjective(next == null ? "Tasks complete. Find the sturdy table and prepare for shaking." :
+                        $"STEP {taskSequence.CompletedCount + 1}/{taskSequence.TotalCount}: {next.Description} Aim at the yellow item, press E, then move it into its green tray.");
+                }
                 yield return null;
             }
             if (aborted) yield break;

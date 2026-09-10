@@ -103,12 +103,26 @@ namespace ChulaEarthquakeVR
                 InteractionPrompt(), promptStyle);
         }
 
+        private bool RaycastTarget(Ray ray, out RaycastHit target)
+        {
+            target = default;
+            float nearest = float.PositiveInfinity;
+            foreach (RaycastHit hit in Physics.RaycastAll(ray, maximumGrabDistance,
+                         Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            {
+                if (hit.transform == transform || hit.transform.IsChildOf(transform)) continue;
+                if (hit.distance >= nearest) continue;
+                nearest = hit.distance;
+                target = hit;
+            }
+            return !float.IsPositiveInfinity(nearest);
+        }
+
         private bool HasGrabbableTarget()
         {
             if (viewCamera == null) return false;
             Ray ray = new Ray(viewCamera.transform.position, viewCamera.transform.forward);
-            if (!Physics.Raycast(ray, out RaycastHit hit, maximumGrabDistance,
-                    Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore)) return false;
+            if (!RaycastTarget(ray, out RaycastHit hit)) return false;
             return hit.collider.GetComponentInParent<MovableFurniture>() != null ||
                    hit.collider.GetComponentInParent<TaskItem>() != null ||
                    hit.collider.GetComponentInParent<ProtectivePillow>() != null ||
@@ -125,8 +139,7 @@ namespace ChulaEarthquakeVR
             if (viewCamera == null) return DefaultPrompt();
 
             Ray ray = new Ray(viewCamera.transform.position, viewCamera.transform.forward);
-            if (!Physics.Raycast(ray, out RaycastHit hit, maximumGrabDistance,
-                    Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            if (!RaycastTarget(ray, out RaycastHit hit))
                 return DefaultPrompt();
             if (hit.collider.GetComponentInParent<MovableFurniture>() != null)
                 return $"{use}: GRAB AND SLIDE CHAIR";
@@ -168,8 +181,7 @@ namespace ChulaEarthquakeVR
         private void TryGrab()
         {
             Ray ray = new Ray(viewCamera.transform.position, viewCamera.transform.forward);
-            if (!Physics.Raycast(ray, out RaycastHit hit, maximumGrabDistance,
-                    Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore)) return;
+            if (!RaycastTarget(ray, out RaycastHit hit)) return;
 
             TaskItem item = hit.collider.GetComponentInParent<TaskItem>();
             MovableFurniture furniture = hit.collider.GetComponentInParent<MovableFurniture>();
