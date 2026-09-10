@@ -6,14 +6,17 @@ The tutorial teaches locomotion, object placement, protective cover, event respo
 
 The stage is a fictional engineering teaching laboratory. Pink accents and general laboratory furniture suggest a Thai university context, but the layout is not copied from an actual Chulalongkorn University building and contains no official logo.
 
+The separate `House.unity` scene preserves the team's hand-built residential architecture. A cross-scene runtime installer supplies the same earthquake-response vocabulary plus a self-contained house preparation, cover, health, and evacuation loop. See [Cross-Scene Gameplay Features](SCENE_FEATURES.md).
+
 ## 2. Functional layout
 
 | Zone | Approximate location | Function |
 |---|---|---|
-| Spawn and orientation | Front-center of the room | Learn looking, movement, crouching, and stop control |
-| Laboratory benches A and B | Left side | Place a circuit module and safety canister |
+| Spawn and orientation | Front-center of the room | Learn looking, movement, crouching, crawling, and stop control |
+| Visual guidance | Pink cover outline and chair beacon; green exit chevrons; amber cabinet boundary | Communicate affordances without forced camera motion |
+| Laboratory benches A and B | Left side | Place a circuit module and safety canister among monitors, manuals, and tools |
 | Strong cover table | Center-right | Reduces hazard damage while the player body is inside the trigger |
-| Movable pink chair | Partly under the strong table | Blocks direct cover access; can slide on the floor but cannot be lifted |
+| Four movable pink chairs | Table approach, two lab benches, and spare-work area | All can be grabbed and moved; the marked primary chair blocks direct cover access |
 | Hazard corridor | Center and right side | Four overhead objects and one unsecured cabinet |
 | Exit opening | Front wall | Records an unsafe attempt if crossed before the event ends |
 | Outdoor assembly point | Beyond the exit | Accepts success only during post-quake evacuation |
@@ -39,11 +42,11 @@ Each placement goal checks `TaskItem.ItemId`; an incorrect object cannot complet
 
 ## 5. Movable chair interaction
 
-- A chair blocks the direct approach to the strong-table cover zone.
-- The participant can grab and slide the chair in desktop or XR mode, or choose to navigate around it.
-- Rigidbody constraints keep the chair on the floor and upright while allowing horizontal translation and yaw rotation.
-- The chair responds to horizontal earthquake acceleration at a reduced scale.
-- `furniture_displaced` records the first movement of at least 0.15 metres; desktop interaction also records grab start and release.
+- Four uniquely identified chairs are available; the marked primary chair blocks the direct approach to the strong-table cover zone.
+- The participant can grab and slide every chair in desktop or XR mode, or choose to navigate around it.
+- Rigidbody constraints keep each chair on the floor and upright while allowing horizontal translation and yaw rotation.
+- Every chair responds to horizontal earthquake acceleration at a reduced scale.
+- `furniture_displaced` records each chair's first movement of at least 0.15 metres; desktop interaction also records grab start and release.
 - A center crosshair and context-sensitive desktop prompt expose the available interaction without a head-locked VR overlay.
 
 ## 6. Earthquake and hazard behavior
@@ -67,7 +70,7 @@ Each placement goal checks `TaskItem.ItemId`; an incorrect object cannot complet
 ## 8. User-experience requirements
 
 - No camera shake, artificial head roll, or forced locomotion.
-- The HUD is a world-space panel, not a head-locked overlay.
+- Desktop uses a compact screen overlay; XR retains a readable world-space panel and never uses scripted camera motion.
 - The participant may stop at any time without penalty.
 - Training prompts may teach Drop-Cover-Hold. Research prompts must remain neutral unless the protocol explicitly studies instruction.
 - Audio volume must be calibrated on the actual headset and kept within the approved protocol.
@@ -80,6 +83,9 @@ Each placement goal checks `TaskItem.ItemId`; an incorrect object cannot complet
 - Success, early-exit, cover, damage, timeout, and emergency-stop paths pass.
 - Headset frame pacing meets the device target without sustained drops.
 - No earthquake component changes camera or XR Origin transforms.
-- The chair blocks the direct cover approach, slides without lifting, and produces displacement telemetry.
+- Four chairs can be grabbed independently; the primary chair blocks direct cover access, slides without lifting, and produces displacement telemetry.
+- Monitors, safety equipment, plants, storage, and guidance decorations remain collider-free and cannot block the player or evacuation route.
 - Every JSONL line parses, each run has a unique filename, and no identifying data is recorded.
 - Two team members independently reproduce the clean-clone setup.
+- The house mesh remains unchanged while its runtime-installed feature set appears exactly once.
+- Shoes, pillow protection, window cracks, toppling furniture, third-person desktop view, and local split-screen pass cases F26-F35.

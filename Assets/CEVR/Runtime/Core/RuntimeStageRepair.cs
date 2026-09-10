@@ -15,11 +15,15 @@ namespace ChulaEarthquakeVR
             RepairLegacyText(repairs);
             RepairHud(repairs, legacyScene);
             EnsureDesktopGrabInteractor(repairs);
-            EnsureMovableChair(repairs);
+            EnsureMovableChairs(repairs);
+            if (TutorialVisualPolish.EnsureApplied())
+                repairs.Add("applied final lighting, materials, HUD, and wayfinding polish");
             if (legacyScene) EnsureCurrentStageInfo(stageInfo, repairs);
 
             if (repairs.Count == 0) return false;
-            Debug.LogWarning("CEVR repaired the generated scene at runtime: " + string.Join(", ", repairs));
+            string message = "CEVR prepared the tutorial scene at runtime: " + string.Join(", ", repairs);
+            if (legacyScene) Debug.LogWarning(message);
+            else Debug.Log(message);
             return repairs.Count > 0;
         }
 
@@ -90,26 +94,41 @@ namespace ChulaEarthquakeVR
             repairs?.Add("attached desktop grab controls");
         }
 
-        private static void EnsureMovableChair(List<string> repairs)
+        private static void EnsureMovableChairs(List<string> repairs)
         {
-            if (UnityEngine.Object.FindFirstObjectByType<MovableFurniture>() != null) return;
-
             GroundMotionPlayer motion = UnityEngine.Object.FindFirstObjectByType<GroundMotionPlayer>();
             SessionLogger logger = UnityEngine.Object.FindFirstObjectByType<SessionLogger>();
             GameObject dynamicParent = GameObject.Find("DynamicProps");
-            var chair = new GameObject("MovableChair_StrongTableApproach");
-            if (dynamicParent != null) chair.transform.SetParent(dynamicParent.transform);
-            chair.transform.position = new Vector3(2.5f, 0f, 1.8f);
+            int created = 0;
+            created += EnsureMovableChair("MovableChair_StrongTableApproach", "chair-strong-table-01",
+                new Vector3(2.5f, 0f, 1.8f), 0f, dynamicParent, motion, logger);
+            created += EnsureMovableChair("MovableChair_LabBenchNorth", "chair-lab-north-01",
+                new Vector3(-3.8f, 0f, 2.6f), 180f, dynamicParent, motion, logger);
+            created += EnsureMovableChair("MovableChair_LabBenchSouth", "chair-lab-south-01",
+                new Vector3(-3.8f, 0f, -0.6f), 180f, dynamicParent, motion, logger);
+            created += EnsureMovableChair("MovableChair_Spare", "chair-spare-01",
+                new Vector3(0.5f, 0f, -2.2f), 90f, dynamicParent, motion, logger);
+            if (created > 0) repairs.Add($"created {created} missing grabbable chair(s)");
+        }
 
-            Material accent = RuntimeMaterial("CEVR_RuntimeChairAccent", new Color(0.84f, 0.16f, 0.42f));
-            Material frame = RuntimeMaterial("CEVR_RuntimeChairFrame", new Color(0.16f, 0.19f, 0.22f));
-            ChairPart("ChairSeat_Accent", new Vector3(0f, 0.48f, 0f), new Vector3(0.9f, 0.12f, 0.9f), accent, chair.transform);
+        private static int EnsureMovableChair(
+            string objectName, string furnitureId, Vector3 position, float yaw,
+            GameObject dynamicParent, GroundMotionPlayer motion, SessionLogger logger)
+        {
+            if (GameObject.Find(objectName) != null) return 0;
+
+            var chair = new GameObject(objectName);
+            if (dynamicParent != null) chair.transform.SetParent(dynamicParent.transform);
+            chair.transform.position = position;
+            chair.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+
+            ChairPart("ChairSeat_Accent", new Vector3(0f, 0.48f, 0f), new Vector3(0.9f, 0.12f, 0.9f), null, chair.transform);
             foreach (float x in new[] { -0.35f, 0.35f })
             foreach (float z in new[] { -0.35f, 0.35f })
-                ChairPart("ChairLeg", new Vector3(x, 0.23f, z), new Vector3(0.1f, 0.46f, 0.1f), frame, chair.transform);
-            ChairPart("ChairBack_Accent", new Vector3(0f, 0.96f, 0.4f), new Vector3(0.72f, 0.34f, 0.1f), accent, chair.transform);
-            ChairPart("ChairBackPost_Left", new Vector3(-0.35f, 0.83f, 0.4f), new Vector3(0.08f, 0.72f, 0.08f), frame, chair.transform);
-            ChairPart("ChairBackPost_Right", new Vector3(0.35f, 0.83f, 0.4f), new Vector3(0.08f, 0.72f, 0.08f), frame, chair.transform);
+                ChairPart("ChairLeg", new Vector3(x, 0.23f, z), new Vector3(0.1f, 0.46f, 0.1f), null, chair.transform);
+            ChairPart("ChairBack_Accent", new Vector3(0f, 0.96f, 0.4f), new Vector3(0.72f, 0.34f, 0.1f), null, chair.transform);
+            ChairPart("ChairBackPost_Left", new Vector3(-0.35f, 0.83f, 0.4f), new Vector3(0.08f, 0.72f, 0.08f), null, chair.transform);
+            ChairPart("ChairBackPost_Right", new Vector3(0.35f, 0.83f, 0.4f), new Vector3(0.08f, 0.72f, 0.08f), null, chair.transform);
 
             Rigidbody body = chair.AddComponent<Rigidbody>();
             body.mass = 7.5f;
@@ -120,9 +139,9 @@ namespace ChulaEarthquakeVR
                                RigidbodyConstraints.FreezeRotationX |
                                RigidbodyConstraints.FreezeRotationZ;
             chair.AddComponent<InertialRigidbody>().Configure(motion, 0.65f, false);
-            chair.AddComponent<MovableFurniture>().Configure("chair-strong-table-01", logger, motion);
+            chair.AddComponent<MovableFurniture>().Configure(furnitureId, logger, motion);
             TryAddXrGrabInteractable(chair);
-            repairs.Add("created missing pink movable chair");
+            return 1;
         }
 
         private static void EnsureCurrentStageInfo(GeneratedStageInfo stageInfo, List<string> repairs)
@@ -144,18 +163,7 @@ namespace ChulaEarthquakeVR
             part.transform.SetParent(parent, false);
             part.transform.localPosition = localPosition;
             part.transform.localScale = localScale;
-            part.GetComponent<Renderer>().sharedMaterial = material;
-        }
-
-        private static Material RuntimeMaterial(string name, Color color)
-        {
-            Shader shader = Shader.Find("Universal Render Pipeline/Lit") ??
-                            Shader.Find("Standard") ??
-                            Shader.Find("Sprites/Default") ??
-                            Shader.Find("UI/Default");
-            if (shader == null)
-                throw new InvalidOperationException("CEVR could not find a built-in shader for the runtime chair.");
-            return new Material(shader) { name = name, color = color };
+            if (material != null) part.GetComponent<Renderer>().sharedMaterial = material;
         }
 
         private static void TryAddXrGrabInteractable(GameObject target)

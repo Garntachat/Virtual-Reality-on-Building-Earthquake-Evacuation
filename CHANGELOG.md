@@ -1,5 +1,48 @@
 # Changelog
 
+## 0.5.0 - 2026-09-10
+
+- Preserved the new 2.3 MB hand-built `House.unity` scene and enabled it in Build Settings
+- Added a runtime cross-scene installer for the engineering tutorial and house
+- Added a complete house loop with 30-second preparation, 20-second quake, damage/failure, and 60-second evacuation
+- Added four uniquely logged grabbable chairs to the house while retaining four in the engineering tutorial
+- Added deterministic shaking, four falling objects, and two toppling furniture hazards to the house
+- Added wearable safety shoes and a grabbable protective pillow to every supported scene
+- Added independent cover and pillow protection sources so one cannot incorrectly cancel the other
+- Added deterministic visual window cracking without dangerous glass-fragment simulation
+- Added desktop first-/third-person switching with camera collision avoidance
+- Added optional two-player local split-screen with independent Player 2 movement
+- Added cross-scene documentation, static contracts, and protection-source regression testing
+- Made footwear functional through deterministic cracked-window floor-debris damage, with two shoe pairs for local co-op
+- Corrected cover ownership for two simultaneous players and registered installation for subsequent supported scene loads
+
+## 0.4.1 - 2026-08-28
+
+- Expanded the scene to four uniquely identified, independently grabbable, earthquake-responsive chairs
+- Kept the marked primary chair as the deliberate obstacle that must be moved before crawling under the sturdy table
+- Added dual monitor workstations, keyboards, manuals, tools, first-aid equipment, fire extinguisher, emergency-stop station, plant, storage, and whiteboard details
+- Made every decorative object collider-free so visual improvements cannot obstruct movement, cover access, or evacuation
+- Strengthened orientation and normal-routine guidance for the two-minigame, 30-second earthquake-onset loop
+- Expanded scene validation, static verification, gameplay specifications, and acceptance tests for all chairs and decoration safety
+
+## 0.4.0 - 2026-08-28
+
+- Added a unified runtime visual-polish layer that upgrades both the committed legacy scene and rebuilt scenes on Play
+- Rebalanced ambient, directional, laboratory, cover, and exit lighting to remove the washed-out graybox appearance
+- Applied a cohesive charcoal, warm concrete, wood, Chula-pink, safety-green, hazard-amber, and window-blue material system
+- Rebuilt the desktop HUD as a compact high-contrast overlay with clearer typography, health styling, control guidance, and quake indicator
+- Added a pink cover outline, chair beacon, green evacuation chevrons, amber cabinet boundary, and visible ceiling light panels
+- Added green/pink interaction feedback to the desktop crosshair and prompt panel
+- Updated earthquake instructions to explicitly teach moving the chair and using `Z` to crawl under the sturdy table
+- Added static verification for the final visual, wayfinding, HUD, interaction, and runtime-preparation contracts
+
+## 0.3.2 - 2026-08-28
+
+- Added `Z` toggle crawling with a 0.58-metre controller stance that fits beneath the sturdy table
+- Added slower crawl locomotion, low camera placement, and overhead clearance checks that prevent standing through the tabletop
+- Updated HUD, prompts, setup instructions, acceptance testing, and static verification for crawling
+- Made the English-only verifier tolerate non-UTF-8 files instead of crashing before a push
+
 ## 0.3.1 - 2026-08-28
 
 - Added runtime repair for the committed legacy scene so Play no longer depends on a manual rebuild

@@ -27,9 +27,12 @@ MonoBehaviour:
   requireAllNormalActivityTasks: 1
   damageEnabled: 1
   maximumHealth: 100
-  orientationPrompt: Turn around to find the pink chair beside the sturdy brown table.
-  activityPrompt: Complete the two lab setup tasks before the class begins.
-  quakePrompt: 'EARTHQUAKE: Drop, take cover under the sturdy table, and hold on.'
+  orientationPrompt: Explore the lab. Four chairs can move; find the shoes, pillow, marked
+    chair, sturdy table, windows, and exit.
+  activityPrompt: 'Normal routine: complete both lab setup minigames. The earthquake cannot
+    begin before 30 seconds.'
+  quakePrompt: 'EARTHQUAKE: Hold the pillow over your head or move the marked chair,
+    press Z, and crawl under the sturdy table.'
   evacuationPrompt: Shaking has stopped. Walk to the green exit and assembly point.
   neutralActivityPrompt: Continue the assigned activity naturally.
   neutralQuakePrompt: An environmental event has started. Act as you think appropriate.

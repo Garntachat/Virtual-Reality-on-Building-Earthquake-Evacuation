@@ -35,6 +35,26 @@ namespace ChulaEarthquakeVR.Tests
         }
 
         [Test]
+        public void PillowProtection_RemainsWhenCoverZoneIsExited()
+        {
+            health.SetProtection("cover:test", true);
+            health.SetProtection("pillow:test", true);
+            health.SetProtection("cover:test", false);
+
+            Assert.IsTrue(health.IsProtected);
+            Assert.IsTrue(health.ApplyDamage(25f, "test"));
+            Assert.That(health.CurrentHealth, Is.EqualTo(95f).Within(0.001f));
+        }
+
+        [Test]
+        public void EquippingFootwear_SetsPersistentSafetyState()
+        {
+            health.EquipProtectiveFootwear();
+
+            Assert.IsTrue(health.HasProtectiveFootwear);
+        }
+
+        [Test]
         public void Health_NeverDropsBelowZero()
         {
             health.ApplyDamage(200f, "test");
