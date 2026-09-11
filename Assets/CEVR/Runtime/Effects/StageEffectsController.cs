@@ -10,17 +10,22 @@ namespace ChulaEarthquakeVR
         [SerializeField, Range(0f, 0.6f)] private float maximumFlicker = 0.25f;
         [SerializeField, Range(0f, 0.5f)] private float maximumRumbleVolume = 0.18f;
         private float[] baseIntensity;
+        private float smoothedIntensity;
 
-        private void Awake()
+        private void CaptureLightIntensities()
         {
             baseIntensity = new float[labLights?.Length ?? 0];
             for (int i = 0; i < baseIntensity.Length; i++)
                 baseIntensity[i] = labLights[i] == null ? 0f : labLights[i].intensity;
         }
 
+        private void Awake() => CaptureLightIntensities();
+
         private void Update()
         {
-            float intensity = motion != null && motion.IsPlaying ? motion.NormalizedIntensity : 0f;
+            float target = motion != null ? motion.PresentationIntensity : 0f;
+            smoothedIntensity = Mathf.Lerp(smoothedIntensity, target, 1f - Mathf.Exp(-8f * Time.deltaTime));
+            float intensity = smoothedIntensity;
             if (rumble != null)
             {
                 rumble.volume = intensity * maximumRumbleVolume;
@@ -54,6 +59,7 @@ namespace ChulaEarthquakeVR
             motion = source;
             labLights = lights;
             rumble = audioSource;
+            CaptureLightIntensities();
         }
     }
 }

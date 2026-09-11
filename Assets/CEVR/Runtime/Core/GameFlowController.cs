@@ -65,7 +65,7 @@ namespace ChulaEarthquakeVR
         private void Update()
         {
             if (hud != null && motion != null && CurrentPhase == GameplayPhase.Earthquake)
-                hud.SetQuakeIndicator(true, motion.NormalizedIntensity);
+                hud.SetQuakeIndicator(true, motion.PresentationIntensity);
         }
 
         public void Configure(

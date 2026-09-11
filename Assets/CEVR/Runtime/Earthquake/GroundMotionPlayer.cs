@@ -36,6 +36,20 @@ namespace ChulaEarthquakeVR
         public float NormalizedIntensity => Mathf.Clamp01(CurrentFloorAccelerationMs2.magnitude /
             Mathf.Max(0.001f, intensityReferenceMs2));
 
+        // Presentation follows the preview envelope, not individual acceleration zero crossings.
+        public float PresentationIntensity => !IsPlaying ? 0f : IsUsingPreview
+            ? PreviewEnvelope(elapsed + Mathf.Max(0f, Time.time - Time.fixedTime), DurationSeconds)
+            : NormalizedIntensity;
+
+        public static float PreviewEnvelope(float time, float duration)
+        {
+            float progress = Mathf.Clamp01(time / Mathf.Max(1f, duration));
+            // 70% gradual build, 20% at maximum, final 10% smooth release.
+            float rise = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(progress / 0.7f));
+            float release = 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((progress - 0.9f) / 0.1f));
+            return rise * release;
+        }
+
         public event Action QuakeStarted;
         public event Action QuakeEnded;
 
@@ -97,7 +111,7 @@ namespace ChulaEarthquakeVR
         {
             if (quakeProfile != null) return quakeProfile.Evaluate(time);
             float duration = Mathf.Max(1f, previewDurationSeconds);
-            float envelope = Mathf.Sin(Mathf.PI * Mathf.Clamp01(time / duration));
+            float envelope = PreviewEnvelope(time, duration);
             float seedOffset = previewSeed * 0.001f;
             float xNoise = Mathf.PerlinNoise(time * 1.7f, seedOffset) * 2f - 1f;
             float zNoise = Mathf.PerlinNoise(time * 1.3f, seedOffset + 17.3f) * 2f - 1f;

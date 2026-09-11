@@ -16,7 +16,7 @@ Twenty-two authored Kenney Furniture Kit meshes replace major generated furnitur
 
 The imported meshes retain original material colors. Runtime renderers use the active built-in/URP pipeline. Existing interactive object colliders, rigidbodies and scripts are retained; extra decorative props are visual-only. Collision shapes approximate the furniture and need in-editor alignment inspection. The house dressing uses the coordinates of the existing generated gameplay area; hand-authored rooms must be inspected for intersections.
 
-Ceiling motion is visual-only, with 1.2 cm translation at maximum intensity. It does not shake the tracked camera or represent a calibrated building response. Existing falling objects and window-crack mechanics remain separate.
+Ceiling motion is visual-only, with 3 cm target translation at maximum intensity. It does not shake the tracked camera or represent a calibrated building response. Existing falling objects and window-crack mechanics remain separate.
 
 ## Verification status
 
@@ -33,3 +33,7 @@ Only House and the engineering tutorial are covered; school and office scenes ar
 Run `python3 Tools/verify_repo.py` and `python3 Tools/verify_furniture.py`.
 The importer accepts the official Kenney Furniture Kit ZIP: `python3 Tools/import_kenney_furniture.py /path/to/kenney_furniture-kit.zip`.
 See `third-party/FURNITURE_SOURCE.md` and the included CC0 license for provenance.
+
+## Gradual shaking
+
+Both default 20-second previews rise smoothly for 14 seconds, hold maximum envelope for four seconds, and fade for two seconds. Furniture acceleration follows that envelope. Ceiling sway, the tutorial intensity indicator and configured audio/light effects follow the same progression, with frame-rate-independent smoothing for presentation. The maximum is the configured preview amplitude, not a guarantee that every loose object topples. Recorded research time histories remain unchanged. Unity runtime and headset smoothness still require testing.
