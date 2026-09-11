@@ -120,7 +120,15 @@ namespace ChulaEarthquakeVR
                     if (renderer.name.StartsWith(prefix, StringComparison.Ordinal)) renderer.enabled = false;
         }
         private void Decor(string model, Vector3 position, Vector3 size, float yaw = 0)
-            => Model(model, transform, position, size, Quaternion.Euler(0, yaw, 0));
+        {
+            GameObject decoration = Model(model, transform, position, size, Quaternion.Euler(0, yaw, 0));
+            if (decoration == null) return;
+            // Static authored collision preserves open space beneath coffee tables and between legs.
+            if (model == "loungeSofaLong" || model == "tableCoffee" || model == "bookcaseOpen" ||
+                model == "cabinetTelevision" || model.StartsWith("kitchen", StringComparison.Ordinal))
+                foreach (MeshFilter surface in decoration.GetComponentsInChildren<MeshFilter>())
+                    surface.gameObject.AddComponent<MeshCollider>().sharedMesh = surface.sharedMesh;
+        }
 
         private void DressHouse()
         {
@@ -135,6 +143,22 @@ namespace ChulaEarthquakeVR
             Decor("kitchenSink", new Vector3(3.35f, 0, 1.15f), new Vector3(1.1f, 0.9f, 0.65f));
             Decor("kitchenStove", new Vector3(4.45f, 0, 1.15f), new Vector3(0.9f, 0.9f, 0.65f));
             Decor("lampRoundFloor", new Vector3(-4.9f, 0, -4.9f), new Vector3(0.45f, 1.6f, 0.45f));
+            // Two restrained warm fills; no extra realtime shadow maps for the VR scene.
+            foreach (Vector3 position in new[] { new Vector3(-3.3f, 2.5f, -3.8f), new Vector3(2.6f, 2.5f, -0.5f) })
+            {
+                var lamp = new GameObject("HouseWarmFill");
+                lamp.transform.SetParent(transform, false);
+                lamp.transform.position = position;
+                Light light = lamp.AddComponent<Light>();
+                light.type = LightType.Point;
+                light.color = new Color(1f, 0.88f, 0.73f);
+                light.intensity = 0.8f;
+                light.range = 5.5f;
+                light.shadows = LightShadows.None;
+                GameObject fixture = Model("lampSquareCeiling", transform, position + Vector3.up * 0.75f,
+                    new Vector3(0.8f, 0.15f, 0.5f), Quaternion.identity);
+                if (fixture != null) fixture.AddComponent<VisualQuakeSway>();
+            }
         }
 
         private void DressTutorial()

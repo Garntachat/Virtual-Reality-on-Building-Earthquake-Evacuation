@@ -1,5 +1,13 @@
 # Changelog
 
+## Scene collision and co-op camera review
+
+- Added collision to large decorative furniture and warm house fill lighting.
+- Added player 2 crawl (N) with overhead clearance checks.
+- Fixed wall checks for player 2 camera and near-wall minimum distance for player 1.
+- Repository/mesh checks passed; Unity runtime acceptance remains pending.
+
+
 ## Authored furniture and simple training flow
 
 - Added 22 CC0 Kenney furniture meshes with source provenance and reproducible import.

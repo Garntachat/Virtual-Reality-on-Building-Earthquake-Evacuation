@@ -14,7 +14,7 @@ The existing House and engineering tutorial receive their furniture dressing aut
 
 Twenty-two authored Kenney Furniture Kit meshes replace major generated furniture and add sofas, kitchen fittings, plants, monitors, books, and lamps. They are stylized low-poly models, not photorealistic scanned furniture. The student avatar remains the existing stylized procedural character. Architecture and safety markers remain the existing scene geometry.
 
-The imported meshes retain original material colors. Runtime renderers use the active built-in/URP pipeline. Existing interactive object colliders, rigidbodies and scripts are retained; extra decorative props are visual-only. Collision shapes approximate the furniture and need in-editor alignment inspection. The house dressing uses the coordinates of the existing generated gameplay area; hand-authored rooms must be inspected for intersections.
+The imported meshes retain original material colors. Runtime renderers use the active built-in/URP pipeline. Existing interactive object colliders, rigidbodies and scripts are retained; large added decorative furniture has static mesh collision; small accessories remain visual-only. Collision shapes approximate the furniture and need in-editor alignment inspection. The house dressing uses the coordinates of the existing generated gameplay area; hand-authored rooms must be inspected for intersections.
 
 Ceiling motion is visual-only, with 3 cm target translation at maximum intensity. It does not shake the tracked camera or represent a calibrated building response. Existing falling objects and window-crack mechanics remain separate.
 
@@ -37,3 +37,12 @@ See `third-party/FURNITURE_SOURCE.md` and the included CC0 license for provenanc
 ## Gradual shaking
 
 Both default 20-second previews rise smoothly for 14 seconds, hold maximum envelope for four seconds, and fade for two seconds. Furniture acceleration follows that envelope. Ceiling sway, the tutorial intensity indicator and configured audio/light effects follow the same progression, with frame-rate-independent smoothing for presentation. The maximum is the configured preview amplitude, not a guarantee that every loose object topples. Recorded research time histories remain unchanged. Unity runtime and headset smoothness still require testing.
+
+## Collision and visual review follow-up
+
+- Added static mesh collision to added sofas, coffee tables, bookcases, TV cabinets and kitchen units. Interactive chair/pillow collision remains attached to its original physics body.
+- Added two warm, shadow-free house fill lights and visible ceiling fixtures, which use the gradual sway progression.
+- Player 2 now crawls with N, moves more slowly while crawling, and cannot stand into overhead collision.
+- Player 2 camera now checks walls; removed the minimum camera distance that could push player 1 camera through a nearby wall.
+
+Acceptance checks still requiring Unity: walk around all large furniture in both scenes; inspect table/seat collision alignment; press N under the house table as player 2 and confirm standing is blocked; test both cameras against walls; confirm a full 30-second preparation, shaking, and evacuation run with no Console errors. Check the house ceiling fixture positions against the hand-built mesh. No zero-bug or runtime performance claim is made.

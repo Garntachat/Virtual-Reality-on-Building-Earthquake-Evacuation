@@ -77,7 +77,7 @@ namespace ChulaEarthquakeVR
             }
             string message = secondPlayer == null
                 ? "F2: JOIN LOCAL PLAYER 2"
-                : "P2: IJKL MOVE | U/O TURN | RIGHT SHIFT USE | F2 LEAVE";
+                : "P2: IJKL MOVE | U/O TURN | N CRAWL | RSHIFT USE | F2 LEAVE";
             GUI.Label(new Rect(Screen.width * 0.52f, 12f, Screen.width * 0.46f, 44f), message, style);
         }
     }

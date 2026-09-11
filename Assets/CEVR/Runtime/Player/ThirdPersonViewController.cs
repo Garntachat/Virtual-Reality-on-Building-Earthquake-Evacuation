@@ -52,7 +52,7 @@ namespace ChulaEarthquakeVR
                 foreach (RaycastHit hit in hits)
                 {
                     if (hit.collider == null || hit.transform == transform || hit.transform.IsChildOf(transform)) continue;
-                    nearest = Mathf.Min(nearest, Mathf.Max(0.25f, hit.distance - collisionRadius));
+                    nearest = Mathf.Min(nearest, Mathf.Max(0f, hit.distance - 0.02f));
                 }
             }
             desired = focus + direction.normalized * nearest;
