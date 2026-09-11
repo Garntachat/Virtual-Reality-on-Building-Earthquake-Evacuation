@@ -181,9 +181,7 @@ namespace ChulaEarthquakeVR
                     config.NormalActivitySeconds - activityElapsed, waitingForTasks ? "TASK TIME LEFT" : "PREPARATION");
                 if (config.Mode == StudyMode.Training)
                 {
-                    TutorialTask next = taskSequence.NextIncomplete;
-                    hud.SetObjective(next == null ? "Tasks complete. Find the sturdy table and prepare for shaking." :
-                        $"STEP {taskSequence.CompletedCount + 1}/{taskSequence.TotalCount}: {next.Description} Aim at the yellow item, press E, then move it into its green tray.");
+                    hud.SetObjective("Explore for 30 seconds. E: move a chair or pick up an item. Find the sturdy table.");
                 }
                 yield return null;
             }

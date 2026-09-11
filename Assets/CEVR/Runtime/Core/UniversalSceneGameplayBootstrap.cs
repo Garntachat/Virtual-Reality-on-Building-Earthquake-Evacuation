@@ -34,6 +34,8 @@ namespace ChulaEarthquakeVR
         {
             if (houseScene) InstallHouseScenario();
             else InstallTutorialFeatures();
+            gameObject.AddComponent<FurnitureSceneDressing>();
+            gameObject.AddComponent<SimpleSceneGuide>();
         }
 
         private void InstallTutorialFeatures()
@@ -390,8 +392,7 @@ namespace ChulaEarthquakeVR
         {
             foreach (Material existing in materials)
                 if (existing != null && existing.name == materialName) return existing;
-            Shader shader = Shader.Find("Universal Render Pipeline/Lit") ??
-                            Shader.Find("Standard") ?? Shader.Find("Sprites/Default");
+            Shader shader = Shader.Find(UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline == null ? "Standard" : "Universal Render Pipeline/Lit") ?? Shader.Find("Sprites/Default");
             if (shader == null) return null;
             var material = new Material(shader) { name = materialName, color = color };
             materials.Add(material);

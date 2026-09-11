@@ -24,7 +24,7 @@ MonoBehaviour:
   previewPeakG: 0.16
   previewFrequencyHz: 2.1
   deterministicSeed: 20260824
-  requireAllNormalActivityTasks: 1
+  requireAllNormalActivityTasks: 0
   damageEnabled: 1
   maximumHealth: 100
   orientationPrompt: Explore the lab. Four chairs can move; find the shoes, pillow, marked

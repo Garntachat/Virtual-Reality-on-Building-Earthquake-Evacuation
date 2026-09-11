@@ -1,3 +1,5 @@
+> Latest update: [authored furniture and simple 30-second training flow](docs/FURNITURE_AND_SIMPLE_PLAY.md). Lab tasks are optional in Training. Runtime/VR testing remains pending.
+
 # Start Here — CEVR 0.5.0 Cross-Scene Gameplay Candidate
 
 This repository is the complete Unity project. Version 0.5.0 supports both the engineering tutorial and the new hand-built house scene. Gameplay is installed safely at runtime, so the house geometry remains untouched.

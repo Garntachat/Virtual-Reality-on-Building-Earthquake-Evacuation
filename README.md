@@ -1,3 +1,5 @@
+> Latest update: [authored furniture and simple 30-second training flow](docs/FURNITURE_AND_SIMPLE_PLAY.md). Lab tasks are optional in Training. Runtime/VR testing remains pending.
+
 # CEVR - Chula Engineering Earthquake VR Tutorial Stage
 
 CEVR is a Unity prototype for studying human decisions during a simulated earthquake in a virtual engineering teaching laboratory. The environment is fictional and only inspired by a Thai university engineering context. It is not an official Chulalongkorn University product, architectural digital twin, structural-analysis tool, or emergency guidance system.

@@ -320,17 +320,17 @@ namespace ChulaEarthquakeVR
                 rect.anchorMax = new Vector2(0f, 1f);
                 rect.pivot = new Vector2(0f, 1f);
                 rect.anchoredPosition = new Vector2(28f, -28f);
-                rect.sizeDelta = new Vector2(760f, 270f);
+                rect.sizeDelta = new Vector2(630f, 225f);
             }
 
             ConfigureText(canvas.transform, "Phase", 30, FontStyle.Bold,
-                new Color(1f, 0.25f, 0.55f), new Vector2(24f, -18f), new Vector2(700f, 38f));
+                new Color(1f, 0.25f, 0.55f), new Vector2(24f, -18f), new Vector2(580f, 38f));
             ConfigureText(canvas.transform, "Objective", 23, FontStyle.Normal,
-                Color.white, new Vector2(24f, -62f), new Vector2(700f, 72f));
+                Color.white, new Vector2(24f, -62f), new Vector2(580f, 72f));
             ConfigureText(canvas.transform, "Timer", 25, FontStyle.Bold,
                 new Color(1f, 0.72f, 0.2f), new Vector2(24f, -146f), new Vector2(250f, 38f));
             ConfigureText(canvas.transform, "Tasks", 19, FontStyle.Normal,
-                new Color(0.78f, 0.88f, 1f), new Vector2(300f, -146f), new Vector2(420f, 68f));
+                new Color(0.78f, 0.88f, 1f), new Vector2(300f, -146f), new Vector2(280f, 32f));
 
             Text controls = FindNamed<Text>(canvas.transform, "Controls");
             if (controls == null && panel != null)
@@ -342,18 +342,18 @@ namespace ChulaEarthquakeVR
             }
             if (controls != null)
             {
-                controls.text = "WASD MOVE  •  E USE/GRAB  •  Z CRAWL  •  T VIEW  •  F2 CO-OP  •  F12 STOP";
+                controls.text = "HEALTH";
                 controls.fontSize = 16;
                 controls.fontStyle = FontStyle.Bold;
                 controls.color = new Color(0.62f, 0.7f, 0.8f);
                 controls.alignment = TextAnchor.MiddleLeft;
-                SetRect(controls.rectTransform, new Vector2(300f, -225f), new Vector2(430f, 30f));
+                SetRect(controls.rectTransform, new Vector2(24f, -185f), new Vector2(100f, 24f));
             }
 
             Slider health = FindNamed<Slider>(canvas.transform, "Health");
             if (health != null)
             {
-                SetRect(health.GetComponent<RectTransform>(), new Vector2(24f, -218f), new Vector2(250f, 24f));
+                SetRect(health.GetComponent<RectTransform>(), new Vector2(130f, -187f), new Vector2(470f, 20f));
                 Image fill = FindNamed<Image>(health.transform, "Fill");
                 Image background = FindNamed<Image>(health.transform, "Background");
                 if (fill != null) fill.color = new Color(0.08f, 0.82f, 0.42f, 1f);
@@ -449,8 +449,7 @@ namespace ChulaEarthquakeVR
         private Material RuntimeMaterial(
             string name, Color color, float metallic, float smoothness, Color? emission = null)
         {
-            Shader shader = Shader.Find("Universal Render Pipeline/Lit") ??
-                            Shader.Find("Standard") ??
+            Shader shader = Shader.Find(UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline == null ? "Standard" : "Universal Render Pipeline/Lit") ??
                             Shader.Find("Sprites/Default") ??
                             Shader.Find("UI/Default");
             if (shader == null) return null;

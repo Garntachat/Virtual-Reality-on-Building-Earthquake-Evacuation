@@ -71,9 +71,11 @@ namespace ChulaEarthquakeVR
                 return;
             }
 
-            Vector3 target = viewCamera.transform.position + viewCamera.transform.forward * holdDistance;
+            CharacterController stance = GetComponent<CharacterController>();
+            Vector3 head = transform.position + Vector3.up * (stance == null ? 1.63f : stance.height - 0.12f);
+            Vector3 target = head + viewCamera.transform.forward * holdDistance;
             if (heldPillow != null)
-                target = viewCamera.transform.position + viewCamera.transform.forward * 0.48f + Vector3.up * 0.42f;
+                target = head + transform.forward * 0.35f + Vector3.up * 0.35f;
             if (heldFurniture != null) target.y = heldBody.position.y;
             heldBody.linearVelocity = Vector3.ClampMagnitude(
                 (target - heldBody.position) * followStrength, maximumFollowSpeed);
@@ -97,9 +99,10 @@ namespace ChulaEarthquakeVR
             GUI.backgroundColor = heldBody != null
                 ? new Color(0.88f, 0.08f, 0.4f, 0.95f)
                 : targetAvailable ? new Color(0.05f, 0.62f, 0.31f, 0.95f) : new Color(0.04f, 0.08f, 0.13f, 0.94f);
-            GUI.Box(new Rect(centerX - 250f, bottomY - 82f, 500f, 48f), GUIContent.none);
+            float width = Mathf.Min(500f, viewport.width * Screen.width - 24f);
+            GUI.Box(new Rect(centerX - width * 0.5f, bottomY - 72f, width, 54f), GUIContent.none);
             GUI.backgroundColor = previousBackground;
-            GUI.Label(new Rect(centerX - 240f, bottomY - 76f, 480f, 36f),
+            GUI.Label(new Rect(centerX - width * 0.5f + 8f, bottomY - 67f, width - 16f, 44f),
                 InteractionPrompt(), promptStyle);
         }
 
@@ -107,10 +110,11 @@ namespace ChulaEarthquakeVR
         {
             target = default;
             float nearest = float.PositiveInfinity;
-            foreach (RaycastHit hit in Physics.RaycastAll(ray, maximumGrabDistance,
+            foreach (RaycastHit hit in Physics.RaycastAll(ray, maximumGrabDistance + Vector3.Distance(ray.origin, transform.position),
                          Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             {
                 if (hit.transform == transform || hit.transform.IsChildOf(transform)) continue;
+                if (Vector3.Distance(hit.point, transform.position) > maximumGrabDistance) continue;
                 if (hit.distance >= nearest) continue;
                 nearest = hit.distance;
                 target = hit;
@@ -157,7 +161,7 @@ namespace ChulaEarthquakeVR
             if (desktopRig == null || !desktopRig.IsCrawling)
                 return secondaryPlayerControls
                     ? "P2: IJKL MOVE  •  U/O TURN  •  RIGHT SHIFT INTERACT"
-                    : "WASD MOVE  •  E INTERACT  •  Z CRAWL  •  T VIEW  •  F2 LOCAL CO-OP";
+                    : "WASD: MOVE   E: PICK UP / RELEASE   Z: CRAWL";
             return desktopRig.CrawlRequested
                 ? "CRAWLING  •  WASD MOVE  •  Z TRY TO STAND"
                 : "BLOCKED ABOVE  •  MOVE OUT FROM UNDER THE TABLE TO STAND";
@@ -171,7 +175,8 @@ namespace ChulaEarthquakeVR
             promptStyle = new GUIStyle(GUI.skin.label)
             {
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = 18,
+                fontSize = 15,
+                wordWrap = true,
                 fontStyle = FontStyle.Bold
             };
             promptStyle.normal.textColor = Color.white;

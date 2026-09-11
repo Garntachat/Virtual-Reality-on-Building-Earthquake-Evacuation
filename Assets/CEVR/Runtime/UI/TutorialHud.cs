@@ -46,8 +46,7 @@ namespace ChulaEarthquakeVR
         public void SetTaskProgress(int complete, int total, string latest)
         {
             if (taskText == null) return;
-            string detail = string.IsNullOrWhiteSpace(latest) ? string.Empty : $"\nCompleted: {latest}";
-            taskText.text = $"LAB TASKS: {complete}/{total}{detail}";
+            taskText.text = string.Empty;
         }
 
         public void SetHealth(float current, float maximum)

@@ -5,6 +5,21 @@ namespace ChulaEarthquakeVR.Tests
     public sealed class TutorialRunRulesTests
     {
         [Test]
+        public void TrainingConfig_DoesNotGateQuakeOnOptionalTasks()
+        {
+            var config = UnityEngine.ScriptableObject.CreateInstance<TutorialScenarioConfig>();
+            try
+            {
+                config.ConfigureForBuilder(StudyMode.Training);
+                Assert.AreEqual(0f, config.OrientationSeconds);
+                Assert.IsFalse(config.RequireAllNormalActivityTasks);
+                Assert.IsTrue(TutorialRunRules.CanStartEarthquake(30f, config.NormalActivitySeconds,
+                    config.RequireAllNormalActivityTasks, false, config.TaskWatchdogSeconds));
+            }
+            finally { UnityEngine.Object.DestroyImmediate(config); }
+        }
+
+        [Test]
         public void Earthquake_DoesNotStartBeforeMinimumTime()
         {
             Assert.IsFalse(TutorialRunRules.CanStartEarthquake(29.99f, 30f, false, false, 120f));

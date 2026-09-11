@@ -70,15 +70,15 @@ namespace ChulaEarthquakeVR
                 style = new GUIStyle(GUI.skin.label)
                 {
                     alignment = TextAnchor.UpperRight,
-                    fontSize = 15,
+                    fontSize = 12,
                     fontStyle = FontStyle.Bold
                 };
                 style.normal.textColor = new Color(0.78f, 0.9f, 1f);
             }
             string message = secondPlayer == null
                 ? "F2: JOIN LOCAL PLAYER 2"
-                : "LOCAL CO-OP  •  P2: IJKL, U/O, RIGHT SHIFT USE  •  F2 LEAVE";
-            GUI.Label(new Rect(Screen.width - 520f, 18f, 500f, 30f), message, style);
+                : "P2: IJKL MOVE | U/O TURN | RIGHT SHIFT USE | F2 LEAVE";
+            GUI.Label(new Rect(Screen.width * 0.52f, 12f, Screen.width * 0.46f, 44f), message, style);
         }
     }
 }

@@ -1,5 +1,15 @@
 # Changelog
 
+## Authored furniture and simple training flow
+
+- Added 22 CC0 Kenney furniture meshes with source provenance and reproducible import.
+- Runtime dressing replaces generated chairs, tables, cabinets, pillow and workstation decorations in House and tutorial.
+- Training begins with 30 seconds of exploration; lab tasks are optional.
+- Short cover/exit direction cue, reduced HUD clutter, and third-person grab reach repair.
+- Visual ceiling sway leaves camera tracking and architectural collision stable.
+- Asset checks and repository checks passed. Unity and headset gates remain pending.
+
+
 ## Student avatar and gameplay clarity repair
 
 - Replaced both capsule avatars with a stylized white-shirt, dark-trouser student character and walking motion.

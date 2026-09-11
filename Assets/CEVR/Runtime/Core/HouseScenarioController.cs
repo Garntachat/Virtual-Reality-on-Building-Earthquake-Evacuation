@@ -151,6 +151,10 @@ namespace ChulaEarthquakeVR
             logger?.EndSession();
         }
 
+        public bool IsQuaking => phase == HousePhase.Earthquake;
+        public bool HasEnded => phase == HousePhase.Success || phase == HousePhase.Failure;
+        public bool IsEvacuating => phase == HousePhase.Evacuation;
+
         private void OnGUI()
         {
             EnsureStyles();
@@ -179,9 +183,12 @@ namespace ChulaEarthquakeVR
                     objective = "The run ended. Press Play again when ready.";
                     break;
             }
-            GUI.Box(new Rect(Screen.width * 0.5f - 390f, 18f, 780f, 92f), GUIContent.none);
-            GUI.Label(new Rect(Screen.width * 0.5f - 370f, 25f, 740f, 30f), heading, headingStyle);
-            GUI.Label(new Rect(Screen.width * 0.5f - 370f, 56f, 740f, 46f), objective, objectiveStyle);
+            Camera camera = Camera.main;
+            if (camera != null && camera.stereoEnabled) return;
+            float width = Mathf.Min(620f, (camera == null ? Screen.width : camera.pixelWidth) - 24f);
+            GUI.Box(new Rect(12f, 18f, width, 138f), GUIContent.none);
+            GUI.Label(new Rect(24f, 25f, width - 24f, 50f), heading, headingStyle);
+            GUI.Label(new Rect(24f, 80f, width - 24f, 70f), objective, objectiveStyle);
         }
 
         private void EnsureStyles()
@@ -194,7 +201,7 @@ namespace ChulaEarthquakeVR
                 fontStyle = FontStyle.Bold
             };
             headingStyle.normal.textColor = new Color(1f, 0.3f, 0.58f);
-            objectiveStyle = new GUIStyle(headingStyle) { fontSize = 16, fontStyle = FontStyle.Normal };
+            objectiveStyle = new GUIStyle(headingStyle) { fontSize = 16, fontStyle = FontStyle.Normal, wordWrap = true };
             objectiveStyle.normal.textColor = Color.white;
         }
     }

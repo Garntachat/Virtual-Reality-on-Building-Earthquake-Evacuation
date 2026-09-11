@@ -24,7 +24,7 @@ namespace ChulaEarthquakeVR
         [SerializeField] private int deterministicSeed = 20260824;
 
         [Header("Rules")]
-        [SerializeField] private bool requireAllNormalActivityTasks = true;
+        [SerializeField] private bool requireAllNormalActivityTasks = false;
         [SerializeField] private bool damageEnabled = true;
         [SerializeField, Min(1f)] private float maximumHealth = 100f;
 
@@ -32,7 +32,7 @@ namespace ChulaEarthquakeVR
         [SerializeField] private string orientationPrompt =
             "Explore the lab. Four chairs can move; find the shoes, pillow, marked chair, sturdy table, windows, and exit.";
         [SerializeField] private string activityPrompt =
-            "Normal routine: complete both lab setup minigames. The earthquake cannot begin before 30 seconds.";
+            "Explore for 30 seconds. E: move a chair or pick up an item. Find the sturdy table.";
         [SerializeField] private string quakePrompt =
             "EARTHQUAKE: Hold the pillow over your head or move the marked chair, press Z, and crawl under the sturdy table.";
         [SerializeField] private string evacuationPrompt =
@@ -49,7 +49,7 @@ namespace ChulaEarthquakeVR
         public string ScenarioId => scenarioId;
         public StudyMode Mode => mode;
         public string LocationNote => locationNote;
-        public float OrientationSeconds => orientationSeconds;
+        public float OrientationSeconds => mode == StudyMode.Training ? 0f : orientationSeconds;
         public float NormalActivitySeconds => normalActivitySeconds;
         public float TaskWatchdogSeconds => taskWatchdogSeconds;
         public float EarthquakeSeconds => earthquakeSeconds;
@@ -57,7 +57,7 @@ namespace ChulaEarthquakeVR
         public float PreviewPeakG => previewPeakG;
         public float PreviewFrequencyHz => previewFrequencyHz;
         public int DeterministicSeed => deterministicSeed;
-        public bool RequireAllNormalActivityTasks => requireAllNormalActivityTasks;
+        public bool RequireAllNormalActivityTasks => mode == StudyMode.Research && requireAllNormalActivityTasks;
         public bool DamageEnabled => damageEnabled;
         public float MaximumHealth => maximumHealth;
 
