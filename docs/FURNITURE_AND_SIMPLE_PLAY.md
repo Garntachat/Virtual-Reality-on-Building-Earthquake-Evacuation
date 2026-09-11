@@ -12,7 +12,7 @@ The existing House and engineering tutorial receive their furniture dressing aut
 
 ## Visual assets
 
-Twenty-two authored Kenney Furniture Kit meshes replace major generated furniture and add sofas, kitchen fittings, plants, monitors, books, and lamps. They are stylized low-poly models, not photorealistic scanned furniture. The student avatar remains the existing stylized procedural character. Architecture and safety markers remain the existing scene geometry.
+Twenty-two authored Kenney Furniture Kit meshes replace major generated furniture and add sofas, kitchen fittings, plants, monitors, books, and lamps. They are stylized low-poly models, not photorealistic scanned furniture. The student avatar now uses the licensed Kenney skinned character, edited student texture and idle/run clips. Architecture and safety markers remain the existing scene geometry.
 
 The imported meshes retain original material colors. Runtime renderers use the active built-in/URP pipeline. Existing interactive object colliders, rigidbodies and scripts are retained; large added decorative furniture has static mesh collision; small accessories remain visual-only. Collision shapes approximate the furniture and need in-editor alignment inspection. The house dressing uses the coordinates of the existing generated gameplay area; hand-authored rooms must be inspected for intersections.
 
@@ -46,3 +46,19 @@ Both default 20-second previews rise smoothly for 14 seconds, hold maximum envel
 - Player 2 camera now checks walls; removed the minimum camera distance that could push player 1 camera through a nearby wall.
 
 Acceptance checks still requiring Unity: walk around all large furniture in both scenes; inspect table/seat collision alignment; press N under the house table as player 2 and confirm standing is blocked; test both cameras against walls; confirm a full 30-second preparation, shaking, and evacuation run with no Console errors. Check the house ceiling fixture positions against the hand-built mesh. No zero-bug or runtime performance claim is made.
+
+## Skinned student and remaining limits
+
+The primitive student assembly has been replaced by a CC0 Kenney skinned FBX character. White shirt, grey collar and dark trousers come from an edited source SVG skin. The runtime crossfades idle/run clips and keeps root motion separate from player collision. Import is configured automatically by StudentAssetImporter. No package installation or manual Animator setup is needed. The original gameplay CharacterController remains the collision body.
+
+Run StudentAssetTests in the Unity EditMode Test Runner to check skinned mesh, texture, legacy clip import and every animation binding path. This test has been added but could not be executed here. Inspect the character facing direction and floor alignment before a build. Crawl currently adapts visual height; it is not an authored crawl animation. Shoe pickups, architecture and safety markers still include primitive geometry. Small lab placeholders are now a laptop/book bundle and falling hazards use book meshes, retaining the old physics/IDs. Research task labels should be reviewed before an experiment.
+
+This update does not certify a finished or bug-free VR release. Unity compilation/import, animation playback, scene screenshots, complete gameplay and headset performance/comfort are remaining release gates. The source skin and license are included.
+
+## Team feedback update
+
+Safe-cover outlines in both current scenes are green. Chairs and their compound colliders are scaled together to approximately 60 cm wide and 1 m tall. Loose shelves remain affected by acceleration and toppling torque; the anchoredToStructure setting keeps built-in furniture kinematic. This is a training approximation, not structural engineering validation.
+
+Training lights receive a per-run seeded schedule: unaffected, flickering, outage, or bulb-burst particles with outage. Seeds and outcomes are logged. Directional/exit lights remain available for orientation. Bulb particles are visual effects, not simulated glass fracture or extra damage. Recorded research and tutorial Research mode do not receive these random events.
+
+The requested condo layout is the next map revision. House is preserved: no condo, corridor, stairwell or high-rise escape simulation is claimed in this update.

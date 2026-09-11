@@ -1,96 +1,114 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace ChulaEarthquakeVR
 {
-    // Stylized student uniform, without an official university emblem.
+    // Licensed skinned character, with an edited student uniform and imported animation.
     public sealed class StudentAvatar : MonoBehaviour
     {
-        private readonly List<Material> materials = new List<Material>();
-        private Transform leftLeg, rightLeg, leftArm, rightArm;
+        private Material uniform;
+        private Animation animationPlayer;
+        private Transform model;
         private Vector3 previousPosition;
-        private float gait;
+        private Vector3 standingPosition;
+        private Vector3 modelScale;
+        private Quaternion modelRotation;
+        private CharacterController controller;
+        private bool moving;
 
         public static Transform Build(Transform player, string objectName)
         {
             Transform existing = player.Find(objectName);
             if (existing != null) return existing;
-            GameObject root = new GameObject(objectName);
+            var root = new GameObject(objectName);
             root.transform.SetParent(player, false);
             root.AddComponent<StudentAvatar>().CreateUniform();
             return root.transform;
         }
 
-        private Material Fabric(Color color)
-        {
-            Shader shader = Shader.Find(UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline == null
-                ? "Standard" : "Universal Render Pipeline/Lit") ?? Shader.Find("Sprites/Default");
-            Material material = new Material(shader) { color = color };
-            materials.Add(material);
-            return material;
-        }
-
-        private Transform Part(string label, PrimitiveType shape, Vector3 position, Vector3 scale, Material material)
-        {
-            GameObject part = GameObject.CreatePrimitive(shape);
-            part.name = label;
-            part.transform.SetParent(transform, false);
-            part.transform.localPosition = position;
-            part.transform.localScale = scale;
-            part.GetComponent<Collider>().enabled = false;
-            part.GetComponent<Renderer>().sharedMaterial = material;
-            return part.transform;
-        }
-
         private void CreateUniform()
         {
-            Material white = Fabric(new Color(0.96f, 0.96f, 0.92f));
-            Material navy = Fabric(new Color(0.055f, 0.065f, 0.10f));
-            Material skin = Fabric(new Color(0.72f, 0.48f, 0.32f));
-            Material black = Fabric(new Color(0.025f, 0.025f, 0.03f));
-            Part("WhiteStudentShirt", PrimitiveType.Cube, new Vector3(0, 1.15f, 0), new Vector3(0.43f, 0.52f, 0.25f), white);
-            Part("BlackBelt", PrimitiveType.Cube, new Vector3(0, 0.91f, 0), new Vector3(0.44f, 0.045f, 0.26f), black);
-            Part("Head", PrimitiveType.Sphere, new Vector3(0, 1.56f, 0), new Vector3(0.27f, 0.32f, 0.27f), skin);
-            Part("ShortBlackHair", PrimitiveType.Sphere, new Vector3(0, 1.67f, -0.025f), new Vector3(0.28f, 0.16f, 0.27f), black);
-            for (int i = 0; i < 4; i++)
-                Part("ShirtButton", PrimitiveType.Sphere, new Vector3(0, 1.30f - i * 0.10f, 0.13f), Vector3.one * 0.018f, navy);
-            foreach (float side in new[] { -1f, 1f })
+            GameObject source = Resources.Load<GameObject>("Student/Student");
+            Texture2D texture = Resources.Load<Texture2D>("Student/StudentUniform");
+            if (source == null || texture == null)
             {
-                Transform arm = Part("ShirtSleeve", PrimitiveType.Capsule, new Vector3(side * 0.29f, 1.23f, 0), new Vector3(0.15f, 0.12f, 0.16f), white);
-                Part("Forearm", PrimitiveType.Capsule, new Vector3(side * 0.30f, 0.98f, 0), new Vector3(0.12f, 0.13f, 0.12f), skin);
-                Transform leg = Part("DarkTrousers", PrimitiveType.Capsule, new Vector3(side * 0.12f, 0.49f, 0), new Vector3(0.18f, 0.38f, 0.20f), navy);
-                Part("BlackShoe", PrimitiveType.Cube, new Vector3(side * 0.12f, 0.08f, 0.055f), new Vector3(0.19f, 0.12f, 0.32f), black);
-                if (side < 0) { leftLeg = leg; leftArm = arm; }
-                else { rightLeg = leg; rightArm = arm; }
+                Debug.LogError("CEVR student assets missing. Reimport Assets/CEVR/Resources/Student.");
+                return;
             }
+            model = Instantiate(source, transform, false).transform;
+            model.name = "StudentMesh";
+            Shader shader = Shader.Find(UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline == null
+                ? "Standard" : "Universal Render Pipeline/Lit");
+            if (shader == null) { Debug.LogError("Student shader unavailable for active render pipeline."); return; }
+            uniform = new Material(shader) { mainTexture = texture, color = Color.white };
+            if (uniform.HasProperty("_Smoothness")) uniform.SetFloat("_Smoothness", 0.15f);
+            if (uniform.HasProperty("_Glossiness")) uniform.SetFloat("_Glossiness", 0.15f);
+            Renderer[] renderers = model.GetComponentsInChildren<Renderer>();
+            if (renderers.Length == 0) { Debug.LogError("Student model has no renderers."); return; }
+            Bounds bounds = renderers[0].bounds;
+            foreach (Renderer renderer in renderers)
+            {
+                bounds.Encapsulate(renderer.bounds);
+                var slots = new Material[Mathf.Max(1, renderer.sharedMaterials.Length)];
+                for (int i = 0; i < slots.Length; i++) slots[i] = uniform;
+                renderer.sharedMaterials = slots;
+                if (renderer is SkinnedMeshRenderer skin) skin.updateWhenOffscreen = true;
+            }
+            float scale = 1.72f / Mathf.Max(0.01f, bounds.size.y);
+            model.localScale *= scale;
+            model.localPosition = Vector3.up * (transform.position.y - bounds.min.y) * scale;
+            standingPosition = model.localPosition;
+            modelScale = model.localScale;
+            modelRotation = model.localRotation;
+            foreach (Collider collider in model.GetComponentsInChildren<Collider>()) collider.enabled = false;
+            foreach (Animator animator in model.GetComponentsInChildren<Animator>()) animator.enabled = false;
+            animationPlayer = model.GetComponent<Animation>();
+            if (animationPlayer == null) animationPlayer = model.gameObject.AddComponent<Animation>();
+            animationPlayer.playAutomatically = false;
+            animationPlayer.cullingType = AnimationCullingType.AlwaysAnimate;
+            AddClip("Student/Idle", "idle");
+            AddClip("Student/Run", "move");
+            if (animationPlayer["idle"] != null) animationPlayer.Play("idle");
+            controller = transform.parent.GetComponent<CharacterController>();
             previousPosition = transform.parent.position;
+        }
+
+        private void AddClip(string resource, string name)
+        {
+            foreach (AnimationClip clip in Resources.LoadAll<AnimationClip>(resource))
+            {
+                if (clip.name.StartsWith("__preview__") || !clip.legacy) continue;
+                animationPlayer.AddClip(clip, name);
+                animationPlayer[name].wrapMode = WrapMode.Loop;
+                return;
+            }
+            Debug.LogError("CEVR missing legacy student animation: " + resource);
         }
 
         private void OnEnable()
         {
             if (transform.parent != null) previousPosition = transform.parent.position;
         }
-
         private void LateUpdate()
         {
-            if (leftLeg == null || transform.parent == null) return;
+            if (model == null || animationPlayer == null || transform.parent == null) return;
             Vector3 current = transform.parent.position;
-            Vector3 delta = current - previousPosition;
-            delta.y = 0;
+            Vector3 delta = current - previousPosition; delta.y = 0f;
             previousPosition = current;
-            gait += delta.magnitude * 8f;
-            float swing = delta.sqrMagnitude > 0.000001f ? Mathf.Sin(gait) * 18f : 0f;
-            leftLeg.localRotation = Quaternion.Euler(swing, 0, 0);
-            rightLeg.localRotation = Quaternion.Euler(-swing, 0, 0);
-            leftArm.localRotation = Quaternion.Euler(-swing, 0, 0);
-            rightArm.localRotation = Quaternion.Euler(swing, 0, 0);
-            CharacterController controller = transform.parent.GetComponent<CharacterController>();
+            float speed = delta.magnitude / Mathf.Max(0.001f, Time.deltaTime);
+            bool nextMoving = speed > (moving ? 0.05f : 0.12f);
+            if (nextMoving != moving)
+            {
+                moving = nextMoving;
+                string state = moving ? "move" : "idle";
+                if (animationPlayer[state] != null) animationPlayer.CrossFade(state, 0.18f);
+            }
+            if (animationPlayer["move"] != null) animationPlayer["move"].speed = Mathf.Clamp(speed / 2.4f, 0.35f, 1.5f);
+            // Root motion never drives gameplay collision. A dedicated crawl clip is still needed.
+            model.localPosition = standingPosition;
+            model.localScale = modelScale;
+            model.localRotation = modelRotation;
             transform.localScale = new Vector3(1f, controller == null ? 1f : Mathf.Clamp(controller.height / 1.75f, 0.3f, 1f), 1f);
         }
-
-        private void OnDestroy()
-        {
-            foreach (Material material in materials) if (material != null) Destroy(material);
-        }
+        private void OnDestroy() { if (uniform != null) Destroy(uniform); }
     }
 }

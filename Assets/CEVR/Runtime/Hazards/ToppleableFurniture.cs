@@ -7,6 +7,7 @@ namespace ChulaEarthquakeVR
     public sealed class ToppleableFurniture : MonoBehaviour
     {
         [SerializeField] private GroundMotionPlayer motion;
+        [SerializeField] private bool anchoredToStructure;
         [SerializeField, Min(0f)] private float upperForceScale = 1.35f;
         [SerializeField, Min(0.1f)] private float forceHeight = 1.4f;
         private Rigidbody body;
@@ -19,6 +20,11 @@ namespace ChulaEarthquakeVR
 
         private void FixedUpdate()
         {
+            if (anchoredToStructure)
+            {
+                if (!body.isKinematic) body.isKinematic = true;
+                return;
+            }
             if (motion == null || !motion.IsPlaying || body.isKinematic) return;
             Vector3 acceleration = motion.CurrentFloorAccelerationMs2;
             acceleration.y = 0f;

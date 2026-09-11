@@ -1,5 +1,13 @@
 # Changelog
 
+## Skinned student avatar
+
+- Replaced primitive body assembly with a licensed skinned FBX and idle/run clips.
+- Added edited student uniform texture and scoped automatic importer.
+- Replaced task-item and falling-object visuals with existing authored assets.
+- Added Unity import/animation-binding tests; execution requires Unity.
+
+
 ## Scene collision and co-op camera review
 
 - Added collision to large decorative furniture and warm house fill lighting.

@@ -74,7 +74,13 @@ namespace ChulaEarthquakeVR
         {
             bool house = SceneManager.GetActiveScene().name.ToLowerInvariant().Contains("house");
             foreach (MovableFurniture chair in FindObjectsByType<MovableFurniture>(FindObjectsSortMode.None))
+            {
                 Replace(chair.gameObject, house ? "chairCushion" : "chairDesk", new Vector3(0.9f, 1.14f, 0.9f), true);
+                // Scale visual and existing compound collision together: ~60 cm seat, ~1 m overall height.
+                chair.transform.localScale = Vector3.Scale(chair.transform.localScale, new Vector3(0.67f, 0.9f, 0.67f));
+            }
+            Replace(GameObject.Find("TaskItem_circuit-module"), "laptop", new Vector3(0.42f, 0.18f, 0.3f));
+            Replace(GameObject.Find("TaskItem_safety-canister"), "books", new Vector3(0.25f, 0.35f, 0.25f));
             Replace(GameObject.Find("ProtectivePillow"), "pillowBlue", new Vector3(0.9f, 0.24f, 0.64f));
             foreach (Renderer r in FindObjectsByType<Renderer>(FindObjectsSortMode.None))
             {
@@ -85,6 +91,8 @@ namespace ChulaEarthquakeVR
                     if (model != null) model.position = new Vector3(r.transform.position.x, 0, r.transform.position.z);
                 }
                 if (r.name == "LabBenchLeg" || r.name == "SturdyTableLeg" || r.name == "HouseSturdyTableLeg") r.enabled = false;
+                if (r.name.StartsWith("StagedFallingHazard_") || r.name.StartsWith("HouseFallingObject_"))
+                    Replace(r.gameObject, "books", r.bounds.size);
                 if (r.name.StartsWith("HangingLamp_")) Replace(r.gameObject, "lampSquareCeiling", new Vector3(0.8f, 0.3f, 0.45f));
             }
             string table = house ? "HouseSturdyTableTop" : "SturdyCoverTableTop";
@@ -99,6 +107,20 @@ namespace ChulaEarthquakeVR
             Replace(GameObject.Find("HouseTallCabinet_Left"), "kitchenFridge", new Vector3(1.05f, 2.3f, 0.72f));
             Replace(GameObject.Find("HouseBookcase_Right"), "bookcaseOpen", new Vector3(1.05f, 2.3f, 0.72f));
             if (house) DressHouse(); else DressTutorial();
+            gameObject.AddComponent<QuakeLightFailures>();
+            if (house)
+            {
+                var outline = new GameObject("HouseSafeCoverOutline");
+                outline.transform.SetParent(transform, false);
+                var line = outline.AddComponent<LineRenderer>();
+                line.useWorldSpace = true; line.loop = true; line.widthMultiplier = 0.04f;
+                line.positionCount = 4;
+                line.SetPositions(new[] { new Vector3(-1.35f, 0.025f, -3.4f), new Vector3(1.35f, 0.025f, -3.4f),
+                    new Vector3(1.35f, 0.025f, -2f), new Vector3(-1.35f, 0.025f, -2f) });
+                Material marker = new Material(Shader.Find("Sprites/Default"));
+                owned.Add(marker); line.sharedMaterial = marker;
+                line.startColor = line.endColor = new Color(0.05f, 0.85f, 0.25f);
+            }
             foreach (Renderer original in FindObjectsByType<Renderer>(FindObjectsSortMode.None))
             {
                 if (!original.enabled || (original.name != "Ceiling")) continue;

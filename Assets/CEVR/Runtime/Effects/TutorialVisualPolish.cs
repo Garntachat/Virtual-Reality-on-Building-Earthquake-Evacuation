@@ -154,15 +154,15 @@ namespace ChulaEarthquakeVR
         {
             Vector3 center = new Vector3(2.5f, 0.018f, 0.8f);
             DecorCube("CoverOutline_Front", center + new Vector3(0f, 0f, -0.73f),
-                new Vector3(3f, 0.025f, 0.055f), pink);
+                new Vector3(3f, 0.025f, 0.055f), green);
             DecorCube("CoverOutline_Back", center + new Vector3(0f, 0f, 0.73f),
-                new Vector3(3f, 0.025f, 0.055f), pink);
+                new Vector3(3f, 0.025f, 0.055f), green);
             DecorCube("CoverOutline_Left", center + new Vector3(-1.47f, 0f, 0f),
-                new Vector3(0.055f, 0.025f, 1.5f), pink);
+                new Vector3(0.055f, 0.025f, 1.5f), green);
             DecorCube("CoverOutline_Right", center + new Vector3(1.47f, 0f, 0f),
-                new Vector3(0.055f, 0.025f, 1.5f), pink);
+                new Vector3(0.055f, 0.025f, 1.5f), green);
             DecorCube("CoverTableAccent", new Vector3(2.5f, 0.94f, 0.01f),
-                new Vector3(3.23f, 0.035f, 0.04f), pink);
+                new Vector3(3.23f, 0.035f, 0.04f), green);
         }
 
         private void BuildExitPath()
