@@ -49,6 +49,8 @@ REQUIRED = (
 )
 
 EXPECTED_PACKAGES = {
+    "com.unity.modules.animation": "1.0.0",
+    "com.unity.modules.particlesystem": "1.0.0",
     "com.unity.inputsystem": "1.14.2",
     "com.unity.xr.interaction.toolkit": "3.1.3",
     "com.unity.xr.openxr": "1.18.0",
