@@ -167,7 +167,9 @@ namespace ChulaEarthquakeVR
                     objective = "Wear the shoes, move furniture, and locate the pillow and safe cover.";
                     break;
                 case HousePhase.Earthquake:
-                    heading = $"EARTHQUAKE  •  {remaining:0.0}s  •  HEALTH {health.CurrentHealth:0}";
+                    heading = health.CurrentHealth < health.MaximumHealth - 0.01f
+                        ? $"EARTHQUAKE  •  {remaining:0.0}s  •  HEALTH {health.CurrentHealth:0}"
+                        : $"EARTHQUAKE  •  {remaining:0.0}s";
                     objective = "Hold the pillow over your head or crawl under the table. Stay away from windows and falling furniture.";
                     break;
                 case HousePhase.Evacuation:

@@ -153,6 +153,8 @@ namespace ChulaEarthquakeVR
         private void BuildCoverOutline()
         {
             Vector3 center = new Vector3(2.5f, 0.018f, 0.8f);
+            DecorCube("CoverCrawlArea", center - Vector3.up * 0.006f,
+                new Vector3(2.75f, 0.012f, 1.30f), green);
             DecorCube("CoverOutline_Front", center + new Vector3(0f, 0f, -0.73f),
                 new Vector3(3f, 0.025f, 0.055f), green);
             DecorCube("CoverOutline_Back", center + new Vector3(0f, 0f, 0.73f),
@@ -342,7 +344,7 @@ namespace ChulaEarthquakeVR
             }
             if (controls != null)
             {
-                controls.text = "HEALTH";
+                controls.text = string.Empty;
                 controls.fontSize = 16;
                 controls.fontStyle = FontStyle.Bold;
                 controls.color = new Color(0.62f, 0.7f, 0.8f);
@@ -353,7 +355,7 @@ namespace ChulaEarthquakeVR
             Slider health = FindNamed<Slider>(canvas.transform, "Health");
             if (health != null)
             {
-                SetRect(health.GetComponent<RectTransform>(), new Vector2(130f, -187f), new Vector2(470f, 20f));
+                SetRect(health.GetComponent<RectTransform>(), new Vector2(24f, -187f), new Vector2(210f, 10f));
                 Image fill = FindNamed<Image>(health.transform, "Fill");
                 Image background = FindNamed<Image>(health.transform, "Background");
                 if (fill != null) fill.color = new Color(0.08f, 0.82f, 0.42f, 1f);

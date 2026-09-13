@@ -88,7 +88,9 @@ namespace ChulaEarthquakeVR
             player.transform.position = playerSpawn;
             BuildInvisibleSafetyFloor();
             BuildHouseTable(new Vector3(0f, 0f, -2.7f), wood, charcoal);
-            CreateChair("HouseChair_CoverObstacle", "house-chair-cover-01", new Vector3(0f, 0f, -3.7f), 0f,
+            Primitive("HouseCrawlHereMarker", PrimitiveType.Cube, new Vector3(0f, 0.012f, -2.7f),
+                new Vector3(2.85f, 0.018f, 1.45f), green, false);
+            CreateChair("HouseChair_CoverObstacle", "house-chair-cover-01", new Vector3(0f, 0f, -4.15f), 0f,
                 pink, charcoal, motion, logger);
             CreateChair("HouseChair_DiningLeft", "house-chair-left-01", new Vector3(-1.65f, 0f, -2.7f), 90f,
                 teal, charcoal, motion, logger);
@@ -201,10 +203,10 @@ namespace ChulaEarthquakeVR
 
         private void BuildHouseTable(Vector3 center, Material top, Material frame)
         {
-            Primitive("HouseSturdyTableTop", PrimitiveType.Cube, center + Vector3.up * 0.86f,
-                new Vector3(2.8f, 0.18f, 1.5f), top, true);
-            foreach (float x in new[] { -1.15f, 1.15f })
-            foreach (float z in new[] { -0.58f, 0.58f })
+            Primitive("HouseSturdyTableTop", PrimitiveType.Cube, center + Vector3.up * 0.90f,
+                new Vector3(3.4f, 0.18f, 1.8f), top, true);
+            foreach (float x in new[] { -1.45f, 1.45f })
+            foreach (float z in new[] { -0.72f, 0.72f })
                 Primitive("HouseSturdyTableLeg", PrimitiveType.Cube, center + new Vector3(x, 0.42f, z),
                     new Vector3(0.18f, 0.84f, 0.18f), frame, true);
         }
@@ -353,7 +355,7 @@ namespace ChulaEarthquakeVR
             zone.transform.SetParent(transform);
             zone.transform.position = position;
             BoxCollider trigger = zone.AddComponent<BoxCollider>();
-            trigger.size = new Vector3(2.25f, 0.76f, 1.15f);
+            trigger.size = new Vector3(2.85f, 0.80f, 1.45f);
             trigger.isTrigger = true;
             zone.AddComponent<CoverZone>().Configure("house-sturdy-table-cover");
         }

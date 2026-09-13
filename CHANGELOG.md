@@ -1,5 +1,14 @@
 # Changelog
 
+## Cover-access and footwear repair
+
+- Replaced the block footwear pickup with a shaped low-poly shoe pair including soles, uppers, tongues, and laces.
+- Increased both desktop players' crawl speed from 42% to 68% of walking speed.
+- Enlarged the house table opening and cover trigger, moved approach chairs outward, and added green crawl-area markers.
+- Reduced the tutorial health bar and hide it at full health; house health text appears only after damage.
+- Repository structural and furniture checks pass; Unity Editor and headset acceptance remain required.
+
+
 ## Skinned student avatar
 
 - Replaced primitive body assembly with a licensed skinned FBX and idle/run clips.

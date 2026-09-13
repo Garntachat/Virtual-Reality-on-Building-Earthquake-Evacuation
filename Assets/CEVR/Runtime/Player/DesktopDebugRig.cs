@@ -13,7 +13,7 @@ namespace ChulaEarthquakeVR
         [SerializeField] private float crouchingHeight = 1.05f;
         [SerializeField] private float crawlingHeight = 0.58f;
         [SerializeField, Range(0.1f, 1f)] private float crouchMoveMultiplier = 0.72f;
-        [SerializeField, Range(0.1f, 1f)] private float crawlMoveMultiplier = 0.42f;
+        [SerializeField, Range(0.1f, 1f)] private float crawlMoveMultiplier = 0.68f;
 
         private CharacterController controller;
         private float pitch;

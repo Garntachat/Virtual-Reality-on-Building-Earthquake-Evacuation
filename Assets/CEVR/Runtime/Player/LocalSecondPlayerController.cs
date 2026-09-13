@@ -37,7 +37,7 @@ namespace ChulaEarthquakeVR
                          (Keyboard.current.uKey.isPressed ? 1f : 0f);
             transform.Rotate(Vector3.up, turn * turnSpeed * Time.deltaTime, Space.World);
             Vector3 direction = (transform.forward * forward + transform.right * side).normalized;
-            controller.Move((direction * moveSpeed * (controller.height < 1f ? 0.42f : 1f) + Physics.gravity) * Time.deltaTime);
+            controller.Move((direction * moveSpeed * (controller.height < 1f ? 0.68f : 1f) + Physics.gravity) * Time.deltaTime);
         }
 
         private void LateUpdate()

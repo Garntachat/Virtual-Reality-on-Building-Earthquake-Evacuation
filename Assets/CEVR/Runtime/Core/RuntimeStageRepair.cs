@@ -101,7 +101,7 @@ namespace ChulaEarthquakeVR
             GameObject dynamicParent = GameObject.Find("DynamicProps");
             int created = 0;
             created += EnsureMovableChair("MovableChair_StrongTableApproach", "chair-strong-table-01",
-                new Vector3(2.5f, 0f, 1.8f), 0f, dynamicParent, motion, logger);
+                new Vector3(2.5f, 0f, 2.25f), 0f, dynamicParent, motion, logger);
             created += EnsureMovableChair("MovableChair_LabBenchNorth", "chair-lab-north-01",
                 new Vector3(-3.8f, 0f, 2.6f), 180f, dynamicParent, motion, logger);
             created += EnsureMovableChair("MovableChair_LabBenchSouth", "chair-lab-south-01",

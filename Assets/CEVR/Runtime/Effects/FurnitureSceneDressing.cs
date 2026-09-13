@@ -99,7 +99,7 @@ namespace ChulaEarthquakeVR
             GameObject top = GameObject.Find(table);
             if (top != null)
             {
-                Replace(top, "table", new Vector3(house ? 2.8f : 3.2f, 0.95f, house ? 1.5f : 1.6f));
+                Replace(top, "table", new Vector3(house ? 3.4f : 3.2f, house ? 0.99f : 0.95f, house ? 1.8f : 1.6f));
                 Transform model = top.transform.Find("Kenney_table");
                 if (model != null) model.position = new Vector3(top.transform.position.x, 0, top.transform.position.z);
             }
@@ -115,8 +115,8 @@ namespace ChulaEarthquakeVR
                 var line = outline.AddComponent<LineRenderer>();
                 line.useWorldSpace = true; line.loop = true; line.widthMultiplier = 0.04f;
                 line.positionCount = 4;
-                line.SetPositions(new[] { new Vector3(-1.35f, 0.025f, -3.4f), new Vector3(1.35f, 0.025f, -3.4f),
-                    new Vector3(1.35f, 0.025f, -2f), new Vector3(-1.35f, 0.025f, -2f) });
+                line.SetPositions(new[] { new Vector3(-1.55f, 0.025f, -3.5f), new Vector3(1.55f, 0.025f, -3.5f),
+                    new Vector3(1.55f, 0.025f, -1.9f), new Vector3(-1.55f, 0.025f, -1.9f) });
                 Material marker = new Material(Shader.Find("Sprites/Default"));
                 owned.Add(marker); line.sharedMaterial = marker;
                 line.startColor = line.endColor = new Color(0.05f, 0.85f, 0.25f);

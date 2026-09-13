@@ -204,7 +204,7 @@ def check_crawl_contract(errors: list[str]) -> None:
     required = (
         "Keyboard.current.zKey.wasPressedThisFrame",
         "crawlingHeight = 0.58f",
-        "crawlMoveMultiplier = 0.42f",
+        "crawlMoveMultiplier = 0.68f",
         "HasClearance(requestedHeight)",
         "ApplyHeight(requestedHeight)",
     )
@@ -294,7 +294,7 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
     feature_contracts = {
         "Assets/CEVR/Runtime/Effects/BreakableWindow.cs": ("NormalizedIntensity", "window_cracked"),
         "Assets/CEVR/Runtime/Hazards/ToppleableFurniture.cs": ("AddForceAtPosition", "IsPlaying"),
-        "Assets/CEVR/Runtime/Player/WearableShoes.cs": ("Equip(", "footwear_equipped"),
+        "Assets/CEVR/Runtime/Player/WearableShoes.cs": ("EnsureAuthoredVisual()", "CEVR_LowPolySafetyShoe", "Equip(", "footwear_equipped"),
         "Assets/CEVR/Runtime/Player/ProtectivePillow.cs": ("SetProtection", "pillow_cover_started"),
         "Assets/CEVR/Runtime/Player/ThirdPersonViewController.cs": ("tKey.wasPressedThisFrame", "SphereCast"),
         "Assets/CEVR/Runtime/Player/LocalMultiplayerManager.cs": ("f2Key.wasPressedThisFrame", "LocalPlayer2", "Configure(secondCamera, true)"),

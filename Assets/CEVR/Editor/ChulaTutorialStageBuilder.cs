@@ -212,7 +212,7 @@ namespace ChulaEarthquakeVR.Editor
             trigger.isTrigger = true;
             CoverZone cover = zoneObject.AddComponent<CoverZone>();
             cover.Configure("cover-sturdy-table-01");
-            BuildMovableChair(dynamicParent, origin + new Vector3(0f, 0f, 1.0f), chairAccent, legs,
+            BuildMovableChair(dynamicParent, origin + new Vector3(0f, 0f, 1.45f), chairAccent, legs,
                 motion, logger, "MovableChair_StrongTableApproach", "chair-strong-table-01", 0f);
             CreateTextSign("CoverInteractionSign", "MOVE CHAIR  •  Z CRAWL UNDER TABLE",
                 origin + new Vector3(0f, 1.52f, 0.76f), Quaternion.Euler(0f, 180f, 0f),
