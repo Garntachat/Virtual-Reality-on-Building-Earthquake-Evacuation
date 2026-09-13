@@ -10,7 +10,9 @@ namespace ChulaEarthquakeVR
         [SerializeField, Min(1f)] private float followDistance = 3.1f;
         [SerializeField, Min(0.2f)] private float shoulderHeight = 1.15f;
         [SerializeField, Min(0.05f)] private float collisionRadius = 0.16f;
+        [SerializeField] private bool showViewButton = true;
         private Transform avatar;
+        private GUIStyle buttonStyle;
 
         public bool IsThirdPerson { get; private set; }
 
@@ -22,15 +24,58 @@ namespace ChulaEarthquakeVR
 
         private void Update()
         {
-            if (viewCamera == null || Keyboard.current == null) return;
+            if (viewCamera == null) return;
             if (viewCamera.stereoEnabled)
             {
                 IsThirdPerson = false;
                 if (avatar != null) avatar.gameObject.SetActive(false);
                 return;
             }
-            if (Keyboard.current.tKey.wasPressedThisFrame) IsThirdPerson = !IsThirdPerson;
+            if (Keyboard.current != null && Keyboard.current.tKey.wasPressedThisFrame) ToggleView();
             if (avatar != null) avatar.gameObject.SetActive(IsThirdPerson);
+        }
+
+        private void OnGUI()
+        {
+            if (!showViewButton || viewCamera == null || viewCamera.stereoEnabled) return;
+            if (buttonStyle == null)
+            {
+                buttonStyle = new GUIStyle(GUI.skin.button)
+                {
+                    fontSize = 17,
+                    fontStyle = FontStyle.Bold,
+                    alignment = TextAnchor.MiddleCenter
+                };
+                buttonStyle.normal.textColor = Color.white;
+                buttonStyle.hover.textColor = new Color(0.45f, 1f, 0.68f);
+            }
+            string label = IsThirdPerson ? "FIRST-PERSON VIEW  (T)" : "THIRD-PERSON VIEW  (T)";
+            if (GUI.Button(ViewButtonRect(), label, buttonStyle)) ToggleView();
+            GUI.Label(new Rect(ViewButtonRect().x, ViewButtonRect().yMax + 2f, ViewButtonRect().width, 24f),
+                "Press ESC to release the mouse", new GUIStyle(GUI.skin.label)
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    fontSize = 12,
+                    normal = { textColor = new Color(0.85f, 0.9f, 0.96f) }
+                });
+        }
+
+        public void ToggleView()
+        {
+            if (viewCamera == null || viewCamera.stereoEnabled) return;
+            IsThirdPerson = !IsThirdPerson;
+            if (avatar != null) avatar.gameObject.SetActive(IsThirdPerson);
+        }
+
+        public static bool IsPointerOverViewButton(Vector2 screenPosition)
+        {
+            Vector2 guiPosition = new Vector2(screenPosition.x, Screen.height - screenPosition.y);
+            return ViewButtonRect().Contains(guiPosition);
+        }
+
+        private static Rect ViewButtonRect()
+        {
+            return new Rect(Mathf.Max(12f, Screen.width - 260f), 68f, 242f, 44f);
         }
 
         private void LateUpdate()

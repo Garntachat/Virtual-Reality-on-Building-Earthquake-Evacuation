@@ -344,18 +344,19 @@ namespace ChulaEarthquakeVR
             }
             if (controls != null)
             {
-                controls.text = string.Empty;
+                controls.text = "HEALTH";
                 controls.fontSize = 16;
                 controls.fontStyle = FontStyle.Bold;
                 controls.color = new Color(0.62f, 0.7f, 0.8f);
                 controls.alignment = TextAnchor.MiddleLeft;
-                SetRect(controls.rectTransform, new Vector2(24f, -185f), new Vector2(100f, 24f));
+                SetRect(controls.rectTransform, new Vector2(24f, -183f), new Vector2(100f, 24f));
             }
 
             Slider health = FindNamed<Slider>(canvas.transform, "Health");
             if (health != null)
             {
-                SetRect(health.GetComponent<RectTransform>(), new Vector2(24f, -187f), new Vector2(210f, 10f));
+                health.gameObject.SetActive(true);
+                SetRect(health.GetComponent<RectTransform>(), new Vector2(112f, -185f), new Vector2(250f, 14f));
                 Image fill = FindNamed<Image>(health.transform, "Fill");
                 Image background = FindNamed<Image>(health.transform, "Background");
                 if (fill != null) fill.color = new Color(0.08f, 0.82f, 0.42f, 1f);

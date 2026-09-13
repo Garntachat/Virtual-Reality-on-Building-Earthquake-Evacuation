@@ -34,6 +34,7 @@ To write the newest generated structure into the scene file instead of relying o
 - `C` or left `Ctrl`: crouch
 - `Z`: toggle crawl mode for moving under the table
 - `T`: toggle first-person and third-person desktop view
+- On-screen **THIRD-PERSON VIEW** button: press `Esc` to release the mouse, then click it
 - `F2`: join/leave local split-screen Player 2 (`IJKL`, `U`/`O`, right `Shift` interact)
 - `Esc`: release the cursor
 - Left click: capture the cursor again

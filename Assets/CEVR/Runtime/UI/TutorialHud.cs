@@ -55,7 +55,7 @@ namespace ChulaEarthquakeVR
             healthSlider.minValue = 0f;
             healthSlider.maxValue = Mathf.Max(1f, maximum);
             healthSlider.value = current;
-            healthSlider.gameObject.SetActive(current < maximum - 0.01f);
+            healthSlider.gameObject.SetActive(true);
         }
 
         public void SetQuakeIndicator(bool active, float intensity)

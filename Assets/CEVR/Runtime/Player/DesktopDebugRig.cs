@@ -58,6 +58,7 @@ namespace ChulaEarthquakeVR
             {
                 if (Mouse.current.leftButton.wasPressedThisFrame)
                 {
+                    if (ThirdPersonViewController.IsPointerOverViewButton(Mouse.current.position.ReadValue())) return;
                     Cursor.lockState = CursorLockMode.Locked;
                     Cursor.visible = false;
                     PointerCaptureFrame = Time.frameCount;

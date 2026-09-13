@@ -1,5 +1,12 @@
 # Changelog
 
+## Avatar and desktop HUD recovery
+
+- Added an automatic student-resource reimport check and a visible uniformed fallback avatar, so a missing FBX or texture can no longer leave either player invisible.
+- Restored the labelled health bar at full health and kept it visible throughout the run.
+- Added an on-screen first-/third-person button while retaining the `T` shortcut and VR-safe first-person behavior.
+- Prevented the desktop cursor-capture logic from swallowing clicks on the view button.
+
 ## Complete procedural gameplay audio
 
 - Added escalating earthquake rumble and structural creaks driven by the same smooth motion envelope as the visuals.
