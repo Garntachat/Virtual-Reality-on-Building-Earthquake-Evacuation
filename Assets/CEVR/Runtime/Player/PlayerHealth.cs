@@ -55,6 +55,7 @@ namespace ChulaEarthquakeVR
             lastHitTime = Time.unscaledTime;
             float applied = rawDamage * (IsProtected ? protectedDamageMultiplier : 1f);
             CurrentHealth = Mathf.Max(0f, CurrentHealth - applied);
+            GameplayAudioDirector.PlayCue(GameplayAudioCue.PlayerHit, 0.32f);
             Damaged?.Invoke(applied, CurrentHealth, sourceId ?? "unknown");
             if (IsDead) Died?.Invoke();
             return true;

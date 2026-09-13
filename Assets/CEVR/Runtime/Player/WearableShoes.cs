@@ -138,6 +138,7 @@ namespace ChulaEarthquakeVR
             if (IsEquipped || wearer == null || wearerRoot == null) return;
             IsEquipped = true;
             wearer.EquipProtectiveFootwear();
+            GameplayAudioDirector.PlayCue(GameplayAudioCue.FootwearEquipped, 0.30f);
             transform.SetParent(wearerRoot, false);
             transform.localPosition = new Vector3(0f, 0.07f, 0.08f);
             transform.localRotation = Quaternion.identity;

@@ -64,6 +64,7 @@ namespace ChulaEarthquakeVR
         }
         private void Burst(Vector3 position)
         {
+            GameplayAudioDirector.PlayCue(GameplayAudioCue.LightBreak, 0.34f, 1.12f);
             var effect = new GameObject("BulbBreakParticles");
             effect.transform.position = position;
             var particles = effect.AddComponent<ParticleSystem>();

@@ -28,9 +28,17 @@ namespace ChulaEarthquakeVR
             float intensity = smoothedIntensity;
             if (rumble != null)
             {
-                rumble.volume = intensity * maximumRumbleVolume;
-                if (intensity > 0.01f && !rumble.isPlaying) rumble.Play();
-                else if (intensity <= 0.01f && rumble.isPlaying) rumble.Stop();
+                if (GameplayAudioDirector.Active != null)
+                {
+                    if (rumble.isPlaying) rumble.Stop();
+                    rumble.volume = 0f;
+                }
+                else
+                {
+                    rumble.volume = intensity * maximumRumbleVolume;
+                    if (intensity > 0.01f && !rumble.isPlaying) rumble.Play();
+                    else if (intensity <= 0.01f && rumble.isPlaying) rumble.Stop();
+                }
             }
             for (int i = 0; i < baseIntensity.Length; i++)
             {

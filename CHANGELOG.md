@@ -1,5 +1,13 @@
 # Changelog
 
+## Complete procedural gameplay audio
+
+- Added escalating earthquake rumble and structural creaks driven by the same smooth motion envelope as the visuals.
+- Added procedural footsteps, chair grab/release/scrape/impact, window crack, footwear, pillow, bulb-break, damage, and quake transition cues.
+- Installed the audio director in both supported scenes and suppressed the older duplicate tutorial rumble.
+- All clips are synthesized at runtime, so collaborators do not need missing audio files or additional downloads.
+
+
 ## Cover-access and footwear repair
 
 - Replaced the block footwear pickup with a shaped low-poly shoe pair including soles, uppers, tongues, and laces.

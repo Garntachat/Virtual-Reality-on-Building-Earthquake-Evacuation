@@ -226,6 +226,7 @@ namespace ChulaEarthquakeVR
             }
 
             Transition(GameplayPhase.Success);
+            GameplayAudioDirector.PlayCue(GameplayAudioCue.Success, 0.32f);
             logger.LogEvent("tutorial_success", $"{{\"healthRemaining\":{Number(health.CurrentHealth)}}}");
             yield return new WaitForSecondsRealtime(3f);
             Transition(GameplayPhase.Debrief);
@@ -248,6 +249,7 @@ namespace ChulaEarthquakeVR
         private IEnumerator FinishFailure(string reason)
         {
             Transition(GameplayPhase.Failure);
+            GameplayAudioDirector.PlayCue(GameplayAudioCue.Failure, 0.30f);
             logger.LogEvent("tutorial_failure", $"{{\"reason\":\"{reason}\"}}");
             yield return new WaitForSecondsRealtime(3f);
             Transition(GameplayPhase.Debrief);

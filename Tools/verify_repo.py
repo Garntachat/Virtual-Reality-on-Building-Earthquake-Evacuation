@@ -24,6 +24,8 @@ REQUIRED = (
     "Assets/CEVR/Runtime/Core/RuntimeStageRepair.cs",
     "Assets/CEVR/Runtime/Core/UniversalSceneGameplayBootstrap.cs",
     "Assets/CEVR/Runtime/Core/HouseScenarioController.cs",
+    "Assets/CEVR/Runtime/Audio/GameplayAudioDirector.cs",
+    "Assets/CEVR/Runtime/Audio/FurnitureImpactAudio.cs",
     "Assets/CEVR/Runtime/Effects/TutorialVisualPolish.cs",
     "Assets/CEVR/Runtime/Effects/BreakableWindow.cs",
     "Assets/CEVR/Runtime/Hazards/ToppleableFurniture.cs",
@@ -282,6 +284,7 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
         "ThirdPersonViewController",
         "LocalMultiplayerManager",
         "WearableSafetyShoes_P2",
+        "GameplayAudioDirector",
     )
     for fragment in required:
         if fragment not in bootstrap:
@@ -294,6 +297,8 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
     feature_contracts = {
         "Assets/CEVR/Runtime/Effects/BreakableWindow.cs": ("NormalizedIntensity", "window_cracked"),
         "Assets/CEVR/Runtime/Hazards/ToppleableFurniture.cs": ("AddForceAtPosition", "IsPlaying"),
+        "Assets/CEVR/Runtime/Audio/GameplayAudioDirector.cs": ("PresentationIntensity", "CEVR_Rumble", "CEVR_Footstep", "CEVR_WindowCrack", "GameplayAudioCue.Success"),
+        "Assets/CEVR/Runtime/Audio/FurnitureImpactAudio.cs": ("FurnitureScrape", "FurnitureImpact", "OnCollisionEnter"),
         "Assets/CEVR/Runtime/Player/WearableShoes.cs": ("EnsureAuthoredVisual()", "CEVR_LowPolySafetyShoe", "Equip(", "footwear_equipped"),
         "Assets/CEVR/Runtime/Player/ProtectivePillow.cs": ("SetProtection", "pillow_cover_started"),
         "Assets/CEVR/Runtime/Player/ThirdPersonViewController.cs": ("tKey.wasPressedThisFrame", "SphereCast"),

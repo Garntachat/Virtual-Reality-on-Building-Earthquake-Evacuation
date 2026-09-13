@@ -101,6 +101,7 @@ namespace ChulaEarthquakeVR
                 if (offset.magnitude <= 1.45f)
                 {
                     phase = HousePhase.Success;
+                    GameplayAudioDirector.PlayCue(GameplayAudioCue.Success, 0.32f);
                     logger?.LogEvent("house_tutorial_success",
                         $"{{\"healthRemaining\":{health.CurrentHealth.ToString("0.##", CultureInfo.InvariantCulture)}}}");
                     logger?.EndSession();
@@ -138,6 +139,7 @@ namespace ChulaEarthquakeVR
             motion?.StopQuake();
             hazards?.StopHazards();
             phase = HousePhase.Failure;
+            GameplayAudioDirector.PlayCue(GameplayAudioCue.Failure, 0.30f);
             logger?.LogEvent("house_tutorial_failure", $"{{\"reason\":\"{reason}\"}}");
             logger?.EndSession();
         }

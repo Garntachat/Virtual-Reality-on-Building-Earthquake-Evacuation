@@ -37,6 +37,7 @@ namespace ChulaEarthquakeVR
         {
             if (IsCracked) return;
             IsCracked = true;
+            GameplayAudioDirector.PlayCue(GameplayAudioCue.WindowCrack, 0.48f);
             Vector3[][] paths =
             {
                 new[] { new Vector3(0f, 0f, -0.56f), new Vector3(0.16f, 0.22f, -0.56f), new Vector3(0.3f, 0.48f, -0.56f) },

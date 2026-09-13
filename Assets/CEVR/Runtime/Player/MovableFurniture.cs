@@ -17,12 +17,14 @@ namespace ChulaEarthquakeVR
         private bool interactionActive;
 
         public string FurnitureId => furnitureId;
+        public bool IsInteracting => interactionActive;
 
         private void Start()
         {
             initialPosition = transform.position;
             if (logger == null) logger = FindFirstObjectByType<SessionLogger>();
             if (groundMotion == null) groundMotion = FindFirstObjectByType<GroundMotionPlayer>();
+            if (GetComponent<FurnitureImpactAudio>() == null) gameObject.AddComponent<FurnitureImpactAudio>();
         }
 
         private void Update()

@@ -36,6 +36,7 @@ namespace ChulaEarthquakeVR
             else InstallTutorialFeatures();
             gameObject.AddComponent<FurnitureSceneDressing>();
             gameObject.AddComponent<SimpleSceneGuide>();
+            if (GetComponent<GameplayAudioDirector>() == null) gameObject.AddComponent<GameplayAudioDirector>();
         }
 
         private void InstallTutorialFeatures()

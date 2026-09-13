@@ -218,12 +218,20 @@ namespace ChulaEarthquakeVR
             heldPillow = pillow;
             heldPillow?.SetHeldBy(GetComponent<PlayerHealth>(), true);
             heldFurniture?.BeginInteraction("desktop");
+            GameplayAudioDirector.PlayCue(heldFurniture != null
+                ? GameplayAudioCue.FurnitureGrab
+                : heldPillow != null ? GameplayAudioCue.PillowGrab : GameplayAudioCue.FurnitureGrab,
+                heldFurniture != null ? 0.28f : 0.18f);
         }
 
         private void ReleaseHeldItem(bool restorePhysics)
         {
             if (heldBody == null) return;
             Rigidbody releasedBody = heldBody;
+            GameplayAudioDirector.PlayCue(heldFurniture != null
+                ? GameplayAudioCue.FurnitureRelease
+                : heldPillow != null ? GameplayAudioCue.PillowGrab : GameplayAudioCue.FurnitureRelease,
+                heldFurniture != null ? 0.24f : 0.14f, 0.92f);
             EndFurnitureInteraction();
             heldPillow?.SetHeldBy(GetComponent<PlayerHealth>(), false);
             heldPillow = null;
