@@ -19,11 +19,15 @@ REQUIRED = (
     "Assets/CEVR/Editor/CEVR.Editor.asmdef",
     "Assets/CEVR/Tests/EditMode/CEVR.Tests.asmdef",
     "Assets/CEVR/Editor/ChulaTutorialStageBuilder.cs",
+    "Assets/CEVR/Editor/HouseProBuilderLayoutAnalyzer.cs",
+    "Assets/CEVR/Editor/HouseProBuilderLayoutAnalyzer.cs.meta",
     "Assets/CEVR/Runtime/Core/GeneratedStageInfo.cs",
     "Assets/CEVR/Runtime/Core/GameFlowController.cs",
     "Assets/CEVR/Runtime/Core/RuntimeStageRepair.cs",
     "Assets/CEVR/Runtime/Core/UniversalSceneGameplayBootstrap.cs",
     "Assets/CEVR/Runtime/Core/HouseScenarioController.cs",
+    "Assets/CEVR/Runtime/Core/RenderPipelineMaterialRepair.cs",
+    "Assets/CEVR/Runtime/Core/RenderPipelineMaterialRepair.cs.meta",
     "Assets/CEVR/Runtime/Audio/GameplayAudioDirector.cs",
     "Assets/CEVR/Runtime/Audio/FurnitureImpactAudio.cs",
     "Assets/CEVR/Runtime/Effects/TutorialVisualPolish.cs",
@@ -226,7 +230,8 @@ def check_crawl_contract(errors: list[str]) -> None:
         "PronePitchDegrees = 84f",
         "PronePositionOffset = new Vector3(0f, 0.18f, -0.72f)",
         "crawlBlend = Mathf.MoveTowards",
-        "Quaternion.Slerp(modelRotation, proneRotation, poseBlend)",
+        "Quaternion.Slerp(stanceRotation, proneRotation, crawlPose)",
+        "model.localRotation = Quaternion.Slerp(baseRotation, jumpRotation, jumpPose)",
         "transform.localScale = Vector3.one",
     )
     for fragment in pose_required:
@@ -394,6 +399,39 @@ def check_team_furniture(errors: list[str]) -> None:
             fail(errors, f"team furniture integration is missing: {fragment}")
 
 
+def check_house_layout_analyzer(errors: list[str]) -> None:
+    analyzer_path = ROOT / "Assets/CEVR/Editor/HouseProBuilderLayoutAnalyzer.cs"
+    legacy_path = ROOT / "Assets/CEVR/Runtime/Effects/HouseResourceFurnitureLayout.cs"
+    try:
+        analyzer = analyzer_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        fail(errors, f"could not read House layout analyzer: {exc}")
+        return
+
+    required = (
+        "OpenSceneMode.Additive",
+        "EditorSceneManager.CloseScene(house, true)",
+        "BelongsToScene(",
+        "DetectHorizontalLevels(",
+        "AnalyzeWalkableLevels(",
+        "Physics.OverlapCapsule(",
+        "AnalyzeExteriorOpenings(",
+        "AnalyzePlengFurniture(",
+        "ModelImporter importer",
+        "Mode: READ-ONLY",
+    )
+    for fragment in required:
+        if fragment not in analyzer:
+            fail(errors, f"House layout analyzer safety contract is missing: {fragment}")
+
+    for forbidden in ("SaveScene(", "SaveOpenScenes(", "SaveCurrentModifiedScenesIfUserWantsTo("):
+        if forbidden in analyzer:
+            fail(errors, f"House layout analyzer must remain read-only; found: {forbidden}")
+
+    if legacy_path.exists():
+        fail(errors, "unverified hard-coded HouseResourceFurnitureLayout.cs must not return")
+
+
 def check_main_menu(errors: list[str]) -> None:
     scene_dir = "Assets/CEVR/Generated/Scenes/"
     expected = ["CEVR_MainMenu", "CEVR_ChulaEngineering_Tutorial", "House"]
@@ -456,6 +494,7 @@ def main() -> int:
     check_visual_polish_contract(errors)
     check_cross_scene_feature_contract(errors)
     check_team_furniture(errors)
+    check_house_layout_analyzer(errors)
     check_main_menu(errors)
     check_git_hygiene(errors)
     check_english_only(errors)
