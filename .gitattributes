@@ -33,3 +33,7 @@
 # Small CC0 student pack is stored directly so clones need no extra LFS download.
 Assets/CEVR/Resources/Student/*.fbx -filter -diff -merge -text
 Assets/CEVR/Resources/Student/*.png -filter -diff -merge -text
+
+# These team-authored furniture FBX files are small and must work after a normal clone
+# without requiring Git LFS to be installed on every Unity workstation.
+Assets/CEVR/Resources/PlengFurniture/*.fbx -filter -diff -merge -text

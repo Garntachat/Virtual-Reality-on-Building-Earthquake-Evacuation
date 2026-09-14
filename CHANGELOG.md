@@ -1,5 +1,13 @@
 # Changelog
 
+## Team-authored furniture integration
+
+- Integrated all nine FBX models contributed through `assets/furniture-models` without editing the committed scene YAML.
+- Replaced chairs, sturdy tables, protective pillows, sofas and relevant tall furniture while preserving tested gameplay objects and collision.
+- Added a condo bed area, sofa cushions, and a physics-enabled vase that responds to earthquake acceleration and produces impact audio.
+- Added render-pipeline-safe materials, hidden imported collision proxies, visual fallbacks, deterministic import settings, asset tests and static verification.
+- Embedded the small FBX files directly so a normal clone works without Git LFS.
+
 ## Full-size prone crawl pose
 
 - Removed the collider-height scale shortcut that visibly squashed the student when crawling.

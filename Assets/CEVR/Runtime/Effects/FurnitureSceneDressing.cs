@@ -12,6 +12,8 @@ namespace ChulaEarthquakeVR
         [Serializable] private class PartData { public float[] color; public int[] triangles; }
         private readonly List<UnityEngine.Object> owned = new List<UnityEngine.Object>();
         private readonly Dictionary<string, GameObject> templates = new Dictionary<string, GameObject>();
+        private readonly HashSet<string> missingTeamModels = new HashSet<string>();
+        private const string TeamFurniturePath = "PlengFurniture/";
 
         private GameObject Model(string name, Transform parent, Vector3 position, Vector3 size, Quaternion rotation)
         {
@@ -70,18 +72,191 @@ namespace ChulaEarthquakeVR
             foreach (Renderer renderer in old) renderer.enabled = false;
         }
 
+        private GameObject TeamModel(
+            string name, Transform parent, Vector3 bottomCenter, Vector3 dimensions, Quaternion rotation)
+        {
+            GameObject source = Resources.Load<GameObject>(TeamFurniturePath + name);
+            if (source == null)
+            {
+                if (missingTeamModels.Add(name))
+                    Debug.LogWarning("CEVR team furniture unavailable: " + name + ". Keeping the tested fallback visual.");
+                return null;
+            }
+
+            GameObject model = Instantiate(source);
+            model.name = "TeamFurniture_" + name;
+            model.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+            model.transform.localScale = Vector3.one;
+
+            foreach (Collider importedCollider in model.GetComponentsInChildren<Collider>(true))
+                importedCollider.enabled = false;
+            foreach (Renderer renderer in model.GetComponentsInChildren<Renderer>(true))
+                if (IsCollisionVisual(renderer.transform, model.transform)) renderer.enabled = false;
+
+            ConvertMaterialsForActivePipeline(model);
+            if (!TryGetVisibleBounds(model, out Bounds sourceBounds) ||
+                sourceBounds.size.x < 0.001f || sourceBounds.size.y < 0.001f || sourceBounds.size.z < 0.001f)
+            {
+                Debug.LogWarning("CEVR team furniture has no usable visible bounds: " + name + ". Keeping fallback visual.");
+                Destroy(model);
+                return null;
+            }
+
+            model.transform.localScale = new Vector3(
+                dimensions.x / sourceBounds.size.x,
+                dimensions.y / sourceBounds.size.y,
+                dimensions.z / sourceBounds.size.z);
+            model.transform.rotation = rotation;
+            if (!TryGetVisibleBounds(model, out Bounds placedBounds))
+            {
+                Destroy(model);
+                return null;
+            }
+            model.transform.position += bottomCenter -
+                new Vector3(placedBounds.center.x, placedBounds.min.y, placedBounds.center.z);
+            model.transform.SetParent(parent, true);
+            return model;
+        }
+
+        private bool ReplaceWithTeamModel(
+            GameObject target, string model, Vector3 dimensions, bool bottomAtPivot = false)
+        {
+            Vector3 bottom = target == null ? Vector3.zero : target.transform.position;
+            if (!bottomAtPivot) bottom -= Vector3.up * dimensions.y * 0.5f;
+            return ReplaceWithTeamModelAt(target, model, dimensions, bottom);
+        }
+
+        private bool ReplaceWithTeamModelAt(
+            GameObject target, string model, Vector3 dimensions, Vector3 bottomCenter)
+        {
+            if (target == null) return false;
+            if (target.transform.Find("TeamFurniture_" + model) != null) return true;
+            Renderer[] old = target.GetComponentsInChildren<Renderer>(true);
+            GameObject result = TeamModel(model, target.transform, bottomCenter, dimensions, target.transform.rotation);
+            if (result == null) return false;
+            // Gameplay colliders and scripts stay on the original object. Only its placeholder surfaces are hidden.
+            foreach (Renderer renderer in old)
+                if (renderer.name.IndexOf("WarningStripe", StringComparison.Ordinal) < 0) renderer.enabled = false;
+            return true;
+        }
+
+        private GameObject TeamDecor(
+            string model, Vector3 bottomCenter, Vector3 dimensions, float yaw = 0f, bool addCollider = false)
+        {
+            GameObject result = TeamModel(model, transform, bottomCenter, dimensions, Quaternion.Euler(0f, yaw, 0f));
+            if (result != null && addCollider) AddBoundsCollider(result);
+            return result;
+        }
+
+        private void CreateShakingVase(Vector3 bottomCenter)
+        {
+            GameObject vase = TeamDecor("Vase", bottomCenter, new Vector3(0.28f, 0.62f, 0.28f));
+            if (vase == null) return;
+            AddBoundsCollider(vase);
+            Rigidbody body = vase.AddComponent<Rigidbody>();
+            body.mass = 1.1f;
+            body.collisionDetectionMode = CollisionDetectionMode.Continuous;
+            GroundMotionPlayer motion = FindFirstObjectByType<GroundMotionPlayer>();
+            vase.AddComponent<InertialRigidbody>().Configure(motion, 1.05f, true);
+            vase.AddComponent<FurnitureImpactAudio>();
+        }
+
+        private void ConvertMaterialsForActivePipeline(GameObject model)
+        {
+            Shader shader = Shader.Find(GraphicsSettings.currentRenderPipeline == null
+                ? "Standard" : "Universal Render Pipeline/Lit") ?? Shader.Find("Sprites/Default");
+            if (shader == null) return;
+            var converted = new Dictionary<Material, Material>();
+            foreach (Renderer renderer in model.GetComponentsInChildren<Renderer>(true))
+            {
+                Material[] slots = renderer.sharedMaterials;
+                for (int i = 0; i < slots.Length; i++)
+                {
+                    Material original = slots[i];
+                    if (original != null && converted.TryGetValue(original, out Material cached))
+                    {
+                        slots[i] = cached;
+                        continue;
+                    }
+                    Color color = original != null && original.HasProperty("_BaseColor")
+                        ? original.GetColor("_BaseColor")
+                        : original != null && original.HasProperty("_Color") ? original.color : new Color(0.72f, 0.72f, 0.72f);
+                    Material material = new Material(shader)
+                    {
+                        name = "CEVR " + (original == null ? "Team Furniture" : original.name),
+                        color = color,
+                        mainTexture = original == null ? null : original.mainTexture
+                    };
+                    if (material.HasProperty("_Smoothness")) material.SetFloat("_Smoothness", 0.22f);
+                    if (material.HasProperty("_Glossiness")) material.SetFloat("_Glossiness", 0.22f);
+                    owned.Add(material);
+                    if (original != null) converted[original] = material;
+                    slots[i] = material;
+                }
+                renderer.sharedMaterials = slots;
+            }
+        }
+
+        private static bool IsCollisionVisual(Transform candidate, Transform root)
+        {
+            Transform current = candidate;
+            while (current != null)
+            {
+                if (current.name.IndexOf("Collision", StringComparison.OrdinalIgnoreCase) >= 0) return true;
+                if (current == root) break;
+                current = current.parent;
+            }
+            return false;
+        }
+
+        private static bool TryGetVisibleBounds(GameObject root, out Bounds bounds)
+        {
+            bounds = default;
+            bool found = false;
+            foreach (Renderer renderer in root.GetComponentsInChildren<Renderer>(true))
+            {
+                if (!renderer.enabled || IsCollisionVisual(renderer.transform, root.transform)) continue;
+                if (!found) { bounds = renderer.bounds; found = true; }
+                else bounds.Encapsulate(renderer.bounds);
+            }
+            return found;
+        }
+
+        private static void AddBoundsCollider(GameObject root)
+        {
+            foreach (Collider existing in root.GetComponents<Collider>())
+                if (existing.enabled) return;
+            if (!TryGetVisibleBounds(root, out Bounds worldBounds)) return;
+            Vector3 min = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+            Vector3 max = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+            foreach (float x in new[] { worldBounds.min.x, worldBounds.max.x })
+            foreach (float y in new[] { worldBounds.min.y, worldBounds.max.y })
+            foreach (float z in new[] { worldBounds.min.z, worldBounds.max.z })
+            {
+                Vector3 local = root.transform.InverseTransformPoint(new Vector3(x, y, z));
+                min = Vector3.Min(min, local);
+                max = Vector3.Max(max, local);
+            }
+            BoxCollider collider = root.AddComponent<BoxCollider>();
+            collider.center = (min + max) * 0.5f;
+            collider.size = max - min;
+        }
+
         private void Start()
         {
             bool house = SceneManager.GetActiveScene().name.ToLowerInvariant().Contains("house");
             foreach (MovableFurniture chair in FindObjectsByType<MovableFurniture>(FindObjectsSortMode.None))
             {
-                Replace(chair.gameObject, house ? "chairCushion" : "chairDesk", new Vector3(0.9f, 1.14f, 0.9f), true);
                 // Scale visual and existing compound collision together: ~60 cm seat, ~1 m overall height.
                 chair.transform.localScale = Vector3.Scale(chair.transform.localScale, new Vector3(0.67f, 0.9f, 0.67f));
+                if (!ReplaceWithTeamModel(chair.gameObject, "DiningChair", new Vector3(0.64f, 0.96f, 0.64f), true))
+                    Replace(chair.gameObject, house ? "chairCushion" : "chairDesk", new Vector3(0.9f, 1.14f, 0.9f), true);
             }
             Replace(GameObject.Find("TaskItem_circuit-module"), "laptop", new Vector3(0.42f, 0.18f, 0.3f));
             Replace(GameObject.Find("TaskItem_safety-canister"), "books", new Vector3(0.25f, 0.35f, 0.25f));
-            Replace(GameObject.Find("ProtectivePillow"), "pillowBlue", new Vector3(0.9f, 0.24f, 0.64f));
+            GameObject protectivePillow = GameObject.Find("ProtectivePillow");
+            if (!ReplaceWithTeamModel(protectivePillow, "Bed_Pillow", new Vector3(0.78f, 0.20f, 0.50f)))
+                Replace(protectivePillow, "pillowBlue", new Vector3(0.9f, 0.24f, 0.64f));
             foreach (Renderer r in FindObjectsByType<Renderer>(FindObjectsSortMode.None))
             {
                 if (r.name == "LabBenchTop")
@@ -99,13 +274,24 @@ namespace ChulaEarthquakeVR
             GameObject top = GameObject.Find(table);
             if (top != null)
             {
-                Replace(top, "table", new Vector3(house ? 3.4f : 3.2f, house ? 0.99f : 0.95f, house ? 1.8f : 1.6f));
-                Transform model = top.transform.Find("Kenney_table");
-                if (model != null) model.position = new Vector3(top.transform.position.x, 0, top.transform.position.z);
+                Vector3 dimensions = new Vector3(house ? 3.4f : 3.2f, house ? 0.99f : 0.95f, house ? 1.8f : 1.6f);
+                Vector3 bottom = new Vector3(top.transform.position.x, 0f, top.transform.position.z);
+                if (!ReplaceWithTeamModelAt(top, "DiningTable", dimensions, bottom))
+                {
+                    Replace(top, "table", dimensions);
+                    Transform model = top.transform.Find("Kenney_table");
+                    if (model != null) model.position = bottom;
+                }
             }
-            Replace(GameObject.Find("UnsecuredTallCabinet"), "bookcaseOpen", new Vector3(1.1f, 2.5f, 0.7f));
-            Replace(GameObject.Find("HouseTallCabinet_Left"), "kitchenFridge", new Vector3(1.05f, 2.3f, 0.72f));
-            Replace(GameObject.Find("HouseBookcase_Right"), "bookcaseOpen", new Vector3(1.05f, 2.3f, 0.72f));
+            GameObject tutorialCabinet = GameObject.Find("UnsecuredTallCabinet");
+            if (!ReplaceWithTeamModel(tutorialCabinet, "Wandrobe", new Vector3(1.1f, 2.5f, 0.7f)))
+                Replace(tutorialCabinet, "bookcaseOpen", new Vector3(1.1f, 2.5f, 0.7f));
+            GameObject houseFridge = GameObject.Find("HouseTallCabinet_Left");
+            if (!ReplaceWithTeamModel(houseFridge, "Fridge", new Vector3(1.05f, 2.3f, 0.72f)))
+                Replace(houseFridge, "kitchenFridge", new Vector3(1.05f, 2.3f, 0.72f));
+            GameObject houseWardrobe = GameObject.Find("HouseBookcase_Right");
+            if (!ReplaceWithTeamModel(houseWardrobe, "Wandrobe", new Vector3(1.05f, 2.3f, 0.72f)))
+                Replace(houseWardrobe, "bookcaseOpen", new Vector3(1.05f, 2.3f, 0.72f));
             if (house) DressHouse(); else DressTutorial();
             gameObject.AddComponent<QuakeLightFailures>();
             if (house)
@@ -155,7 +341,9 @@ namespace ChulaEarthquakeVR
         private void DressHouse()
         {
             Hide("HouseSofa", "HouseCoffeeTable", "HousePlant", "HouseShelfBook", "HousePhoto", "HouseRug");
-            Decor("loungeSofaLong", new Vector3(-3.5f, 0, -4.6f), new Vector3(2.2f, 1.1f, 0.85f));
+            if (TeamDecor("Sofa", new Vector3(-3.5f, 0f, -4.6f), new Vector3(2.2f, 0.95f, 1.0f)) == null)
+                Decor("loungeSofaLong", new Vector3(-3.5f, 0, -4.6f), new Vector3(2.2f, 1.1f, 0.85f));
+            TeamDecor("Sofa_Pillows", new Vector3(-3.5f, 0.50f, -4.83f), new Vector3(1.45f, 0.42f, 0.28f));
             Decor("tableCoffee", new Vector3(-3.45f, 0, -3.25f), new Vector3(1.7f, 0.48f, 0.9f));
             Decor("rugRectangle", new Vector3(-3.45f, 0.01f, -3.7f), new Vector3(3, 0.02f, 2.5f));
             Decor("pottedPlant", new Vector3(4.6f, 0, -4.8f), new Vector3(0.7f, 1.35f, 0.7f));
@@ -165,6 +353,9 @@ namespace ChulaEarthquakeVR
             Decor("kitchenSink", new Vector3(3.35f, 0, 1.15f), new Vector3(1.1f, 0.9f, 0.65f));
             Decor("kitchenStove", new Vector3(4.45f, 0, 1.15f), new Vector3(0.9f, 0.9f, 0.65f));
             Decor("lampRoundFloor", new Vector3(-4.9f, 0, -4.9f), new Vector3(0.45f, 1.6f, 0.45f));
+            TeamDecor("Bed", new Vector3(-3.8f, 0f, 4.55f), new Vector3(1.65f, 0.68f, 2.10f), 0f, true);
+            TeamDecor("Bed_Pillow", new Vector3(-3.8f, 0.68f, 5.15f), new Vector3(0.72f, 0.18f, 0.42f));
+            CreateShakingVase(new Vector3(-3.45f, 0.49f, -3.25f));
             // Two restrained warm fills; no extra realtime shadow maps for the VR scene.
             foreach (Vector3 position in new[] { new Vector3(-3.3f, 2.5f, -3.8f), new Vector3(2.6f, 2.5f, -0.5f) })
             {
@@ -194,7 +385,9 @@ namespace ChulaEarthquakeVR
             }
             Decor("bookcaseOpen", new Vector3(-8.7f, 0, 4.9f), new Vector3(1.3f, 2.2f, 0.4f));
             Decor("pottedPlant", new Vector3(-9.0f, 0, -4.9f), new Vector3(0.6f, 1.4f, 0.6f));
-            Decor("loungeSofaLong", new Vector3(1.5f, 0, 4.9f), new Vector3(2.6f, 1f, 0.85f));
+            if (TeamDecor("Sofa", new Vector3(1.5f, 0f, 4.9f), new Vector3(2.6f, 1.0f, 1.08f), 0f, true) == null)
+                Decor("loungeSofaLong", new Vector3(1.5f, 0, 4.9f), new Vector3(2.6f, 1f, 0.85f));
+            TeamDecor("Sofa_Pillows", new Vector3(1.5f, 0.53f, 4.65f), new Vector3(1.65f, 0.45f, 0.30f));
             Decor("tableCoffee", new Vector3(1.5f, 0, 3.6f), new Vector3(1.3f, 0.45f, 0.65f));
             Decor("books", new Vector3(1.5f, 0.46f, 3.6f), new Vector3(0.35f, 0.15f, 0.3f));
         }

@@ -351,6 +351,45 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
             fail(errors, f"local multiplayer interaction ownership is missing: {fragment}")
 
 
+def check_team_furniture(errors: list[str]) -> None:
+    folder = ROOT / "Assets/CEVR/Resources/PlengFurniture"
+    models = (
+        "Bed", "Bed_Pillow", "DiningChair", "DiningTable", "Fridge",
+        "Sofa", "Sofa_Pillows", "Vase", "Wandrobe",
+    )
+    for model in models:
+        path = folder / f"{model}.fbx"
+        if not path.is_file():
+            fail(errors, f"missing team furniture model: {model}.fbx")
+            continue
+        if path.stat().st_size < 4_000 or not path.read_bytes().startswith(b"Kaydara FBX Binary"):
+            fail(errors, f"team furniture is not a real embedded FBX (possible LFS pointer): {model}.fbx")
+
+    attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8")
+    if "Assets/CEVR/Resources/PlengFurniture/*.fbx -filter -diff -merge -text" not in attributes:
+        fail(errors, "small team furniture must remain directly cloneable without Git LFS")
+
+    dressing_path = ROOT / "Assets/CEVR/Runtime/Effects/FurnitureSceneDressing.cs"
+    try:
+        dressing = dressing_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        fail(errors, f"could not read team furniture integration: {exc}")
+        return
+    required = (
+        'TeamFurniturePath = "PlengFurniture/"',
+        "ReplaceWithTeamModel(",
+        "ReplaceWithTeamModelAt(",
+        "ConvertMaterialsForActivePipeline(",
+        "IsCollisionVisual(",
+        "CreateShakingVase(",
+        '"DiningChair"', '"DiningTable"', '"Bed_Pillow"', '"Fridge"',
+        '"Wandrobe"', '"Sofa"', '"Sofa_Pillows"', '"Bed"', '"Vase"',
+    )
+    for fragment in required:
+        if fragment not in dressing:
+            fail(errors, f"team furniture integration is missing: {fragment}")
+
+
 def check_main_menu(errors: list[str]) -> None:
     scene_dir = "Assets/CEVR/Generated/Scenes/"
     expected = ["CEVR_MainMenu", "CEVR_ChulaEngineering_Tutorial", "House"]
@@ -412,6 +451,7 @@ def main() -> int:
     check_crawl_contract(errors)
     check_visual_polish_contract(errors)
     check_cross_scene_feature_contract(errors)
+    check_team_furniture(errors)
     check_main_menu(errors)
     check_git_hygiene(errors)
     check_english_only(errors)
