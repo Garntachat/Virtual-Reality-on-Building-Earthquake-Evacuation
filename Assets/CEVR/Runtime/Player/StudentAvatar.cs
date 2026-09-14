@@ -22,11 +22,16 @@ namespace ChulaEarthquakeVR
         private Transform fallbackLeftLeg;
         private Transform fallbackRightLeg;
         private float fallbackStride;
+        private float crouchBlend;
         private float crawlBlend;
 
+        private const float CrouchHeightThreshold = 1.20f;
         private const float CrawlHeightThreshold = 0.72f;
+        private const float CrouchTransitionSeconds = 0.16f;
         private const float CrawlTransitionSeconds = 0.22f;
+        private const float CrouchPitchDegrees = 8f;
         private const float PronePitchDegrees = 84f;
+        private static readonly Vector3 CrouchPositionOffset = new Vector3(0f, -0.18f, 0.02f);
         // The model pivot is at its feet. Pull it back by about half a body length so the
         // prone visual stays centred on the gameplay capsule instead of projecting ahead.
         private static readonly Vector3 PronePositionOffset = new Vector3(0f, 0.18f, -0.72f);
@@ -216,15 +221,21 @@ namespace ChulaEarthquakeVR
         {
             if (transform.parent != null) previousPosition = transform.parent.position;
         }
+
         private void LateUpdate()
         {
             if (model == null || transform.parent == null) return;
+
             Vector3 current = transform.parent.position;
-            Vector3 delta = current - previousPosition; delta.y = 0f;
+            Vector3 delta = current - previousPosition;
+            delta.y = 0f;
             previousPosition = current;
             float speed = delta.magnitude / Mathf.Max(0.001f, Time.deltaTime);
+
             bool crawling = controller != null && controller.height <= CrawlHeightThreshold;
+            bool crouching = controller != null && !crawling && controller.height <= CrouchHeightThreshold;
             bool nextMoving = speed > (moving ? 0.05f : 0.12f);
+
             if (nextMoving != moving)
             {
                 moving = nextMoving;
@@ -234,37 +245,74 @@ namespace ChulaEarthquakeVR
                     if (animationPlayer[state] != null) animationPlayer.CrossFade(state, 0.18f);
                 }
             }
-            if (animationPlayer != null && animationPlayer["move"] != null)
-                animationPlayer["move"].speed = Mathf.Clamp(speed / (crawling ? 1.35f : 2.4f), 0.35f, 1.5f);
 
-            fallbackStride += speed * Time.deltaTime * (crawling ? 4.2f : 5.5f);
+            if (animationPlayer != null && animationPlayer["move"] != null)
+            {
+                float stanceReferenceSpeed = crawling ? 1.35f : crouching ? 1.65f : 2.4f;
+                animationPlayer["move"].speed = Mathf.Clamp(speed / stanceReferenceSpeed, 0.35f, 1.5f);
+            }
+
+            crouchBlend = Mathf.MoveTowards(crouchBlend, crouching ? 1f : 0f,
+                Time.deltaTime / CrouchTransitionSeconds);
+            crawlBlend = Mathf.MoveTowards(crawlBlend, crawling ? 1f : 0f,
+                Time.deltaTime / CrawlTransitionSeconds);
+
+            float crouchPose = Mathf.SmoothStep(0f, 1f, crouchBlend);
+            float crawlPose = Mathf.SmoothStep(0f, 1f, crawlBlend);
+
+            fallbackStride += speed * Time.deltaTime * (crawling ? 4.2f : crouching ? 4.7f : 5.5f);
             if (animationPlayer == null && fallbackLeftLeg != null)
             {
                 float swing = moving ? Mathf.Sin(fallbackStride) * 24f : 0f;
+                float crouchStep = moving ? Mathf.Sin(fallbackStride) * 8f : 0f;
                 float crawlStroke = moving ? Mathf.Sin(fallbackStride) * 13f : 0f;
-                float limbBlend = Mathf.SmoothStep(0f, 1f, crawlBlend);
+
+                Quaternion standingLeftLeg = Quaternion.Euler(swing, 0f, 0f);
+                Quaternion standingRightLeg = Quaternion.Euler(-swing, 0f, 0f);
+                Quaternion standingLeftArm = Quaternion.Euler(-swing * 0.65f, 0f, 0f);
+                Quaternion standingRightArm = Quaternion.Euler(swing * 0.65f, 0f, 0f);
+
+                Quaternion crouchLeftLeg = Quaternion.Euler(24f - crouchStep, 0f, -5f);
+                Quaternion crouchRightLeg = Quaternion.Euler(24f + crouchStep, 0f, 5f);
+                Quaternion crouchLeftArm = Quaternion.Euler(-24f + crouchStep * 0.6f, 0f, -6f);
+                Quaternion crouchRightArm = Quaternion.Euler(-24f - crouchStep * 0.6f, 0f, 6f);
+
+                Quaternion crawlLeftLeg = Quaternion.Euler(10f - crawlStroke, 0f, -4f);
+                Quaternion crawlRightLeg = Quaternion.Euler(10f + crawlStroke, 0f, 4f);
+                Quaternion crawlLeftArm = Quaternion.Euler(-8f + crawlStroke, 0f, -7f);
+                Quaternion crawlRightArm = Quaternion.Euler(-8f - crawlStroke, 0f, 7f);
+
                 fallbackLeftLeg.localRotation = Quaternion.Slerp(
-                    Quaternion.Euler(swing, 0f, 0f), Quaternion.Euler(10f - crawlStroke, 0f, -4f), limbBlend);
+                    Quaternion.Slerp(standingLeftLeg, crouchLeftLeg, crouchPose), crawlLeftLeg, crawlPose);
                 fallbackRightLeg.localRotation = Quaternion.Slerp(
-                    Quaternion.Euler(-swing, 0f, 0f), Quaternion.Euler(10f + crawlStroke, 0f, 4f), limbBlend);
+                    Quaternion.Slerp(standingRightLeg, crouchRightLeg, crouchPose), crawlRightLeg, crawlPose);
                 fallbackLeftArm.localRotation = Quaternion.Slerp(
-                    Quaternion.Euler(-swing * 0.65f, 0f, 0f), Quaternion.Euler(-8f + crawlStroke, 0f, -7f), limbBlend);
+                    Quaternion.Slerp(standingLeftArm, crouchLeftArm, crouchPose), crawlLeftArm, crawlPose);
                 fallbackRightArm.localRotation = Quaternion.Slerp(
-                    Quaternion.Euler(swing * 0.65f, 0f, 0f), Quaternion.Euler(-8f - crawlStroke, 0f, 7f), limbBlend);
+                    Quaternion.Slerp(standingRightArm, crouchRightArm, crouchPose), crawlRightArm, crawlPose);
             }
 
-            crawlBlend = Mathf.MoveTowards(crawlBlend, crawling ? 1f : 0f,
-                Time.deltaTime / CrawlTransitionSeconds);
-            float poseBlend = Mathf.SmoothStep(0f, 1f, crawlBlend);
             float crawlRoll = crawling && moving ? Mathf.Sin(fallbackStride) * 2.2f : 0f;
+            Quaternion crouchRotation = modelRotation * Quaternion.Euler(CrouchPitchDegrees, 0f, 0f);
             Quaternion proneRotation = modelRotation * Quaternion.Euler(PronePitchDegrees, 0f, crawlRoll);
 
-            // Keep the character at full size. Crawling changes its pose and collider, never its proportions.
-            model.localPosition = Vector3.Lerp(standingPosition, standingPosition + PronePositionOffset, poseBlend);
-            model.localScale = modelScale;
-            model.localRotation = Quaternion.Slerp(modelRotation, proneRotation, poseBlend);
+            Vector3 crouchedPosition = standingPosition + CrouchPositionOffset;
+            Vector3 stancePosition = Vector3.Lerp(standingPosition, crouchedPosition, crouchPose);
+            model.localPosition = Vector3.Lerp(stancePosition, standingPosition + PronePositionOffset, crawlPose);
+
+            // The imported student has no dedicated crouch FBX clip. Compressing the vertical
+            // silhouette while lowering and pitching the root gives a clear squat transition,
+            // while the fallback avatar additionally bends its limbs above. Crawling returns
+            // to full proportions and uses the existing prone pose.
+            Vector3 crouchedScale = new Vector3(modelScale.x, modelScale.y * 0.76f, modelScale.z);
+            Vector3 stanceScale = Vector3.Lerp(modelScale, crouchedScale, crouchPose);
+            model.localScale = Vector3.Lerp(stanceScale, modelScale, crawlPose);
+
+            Quaternion stanceRotation = Quaternion.Slerp(modelRotation, crouchRotation, crouchPose);
+            model.localRotation = Quaternion.Slerp(stanceRotation, proneRotation, crawlPose);
             transform.localScale = Vector3.one;
         }
+
         private void OnDestroy()
         {
             if (uniform != null) Destroy(uniform);
