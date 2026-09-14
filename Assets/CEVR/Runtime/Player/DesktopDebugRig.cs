@@ -3,6 +3,8 @@ using UnityEngine.InputSystem;
 
 namespace ChulaEarthquakeVR
 {
+    // Capture clicks before DesktopGrabInteractor reads this frame's input.
+    [DefaultExecutionOrder(-50)]
     [RequireComponent(typeof(CharacterController))]
     public sealed class DesktopDebugRig : MonoBehaviour
     {

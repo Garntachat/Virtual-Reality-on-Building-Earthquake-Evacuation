@@ -219,7 +219,7 @@ namespace ChulaEarthquakeVR
                 yield return null;
             }
             if (aborted) yield break;
-            if (!assemblyReached)
+            if (health.IsDead || !assemblyReached)
             {
                 yield return FinishFailure(health.IsDead ? "health_depleted" : "evacuation_timeout");
                 yield break;

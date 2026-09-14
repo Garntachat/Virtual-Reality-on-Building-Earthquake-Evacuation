@@ -65,7 +65,7 @@ namespace ChulaEarthquakeVR
             if (Keyboard.current != null &&
                 (Keyboard.current.f12Key.wasPressedThisFrame || Keyboard.current.backspaceKey.wasPressedThisFrame))
                 Abort("participant_or_facilitator_stop");
-            if (phase == HousePhase.Earthquake && health.IsDead) Fail("health_depleted");
+            if (!HasEnded && health != null && health.IsDead) Fail("health_depleted");
         }
 
         private IEnumerator RunScenario()
@@ -95,6 +95,12 @@ namespace ChulaEarthquakeVR
             float elapsed = 0f;
             while (elapsed < evacuationSeconds)
             {
+                // Check before the arrival test, including death on the same frame as arrival.
+                if (health.IsDead)
+                {
+                    Fail("health_depleted");
+                    yield break;
+                }
                 remaining = evacuationSeconds - elapsed;
                 Vector3 offset = player.position - assemblyPoint.position;
                 offset.y = 0f;

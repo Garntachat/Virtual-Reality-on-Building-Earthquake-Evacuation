@@ -114,12 +114,14 @@ namespace ChulaEarthquakeVR
                          Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             {
                 if (hit.transform == transform || hit.transform.IsChildOf(transform)) continue;
-                if (Vector3.Distance(hit.point, transform.position) > maximumGrabDistance) continue;
                 if (hit.distance >= nearest) continue;
                 nearest = hit.distance;
                 target = hit;
             }
-            return !float.IsPositiveInfinity(nearest);
+            // Pick the nearest obstruction first. A wall outside player reach must still
+            // block a camera ray instead of exposing a grabbable object behind it.
+            return !float.IsPositiveInfinity(nearest) &&
+                   Vector3.Distance(target.point, transform.position) <= maximumGrabDistance;
         }
 
         private bool HasGrabbableTarget()
