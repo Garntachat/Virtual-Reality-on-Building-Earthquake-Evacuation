@@ -76,7 +76,7 @@ namespace ChulaEarthquakeVR.Editor
                 report.AppendLine("CEVR HOUSE / PROBUILDER / PLENG FURNITURE ANALYSIS");
                 report.AppendLine("Generated: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                 report.AppendLine("Scene: " + HouseScenePath);
-                report.AppendLine("Mode: READ-ONLY. No scene objects are moved, created, deleted, or saved.");
+                report.AppendLine("Mode: READ-ONLY. House.unity and the user's active scene are not saved or modified.");
                 report.AppendLine(new string('=', 88));
 
                 AnalyzeAuthoredGeometry(house, report, out Bounds houseBounds);
@@ -461,90 +461,104 @@ namespace ChulaEarthquakeVR.Editor
             report.AppendLine("5. PLENG FURNITURE IMPORT / BOUNDS AUDIT");
             report.AppendLine("--------------------------------------");
 
-            foreach (string name in PlengNames)
+            Scene previewScene = EditorSceneManager.NewPreviewScene();
+            try
             {
-                string path = PlengFolder + "/" + name + ".fbx";
-                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                ModelImporter importer = AssetImporter.GetAtPath(path) as ModelImporter;
-
-                report.AppendLine();
-                report.AppendLine(name + ":");
-                report.AppendLine("  asset = " + path);
-
-                if (importer == null)
+                foreach (string name in PlengNames)
                 {
-                    report.AppendLine("  ERROR: no ModelImporter found");
-                }
-                else
-                {
-                    report.AppendLine($"  importer globalScale={importer.globalScale:F4}; useFileScale={importer.useFileScale}; readable={importer.isReadable}; addCollider={importer.addCollider}");
-                    report.AppendLine($"  importer animations={importer.importAnimation}; cameras={importer.importCameras}; lights={importer.importLights}");
-                }
+                    string path = PlengFolder + "/" + name + ".fbx";
+                    GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                    ModelImporter importer = AssetImporter.GetAtPath(path) as ModelImporter;
 
-                if (prefab == null)
-                {
-                    report.AppendLine("  ERROR: FBX failed to import as a GameObject");
-                    continue;
-                }
+                    report.AppendLine();
+                    report.AppendLine(name + ":");
+                    report.AppendLine("  asset = " + path);
 
-                GameObject instance = UnityEngine.Object.Instantiate(prefab);
-                try
-                {
-                    instance.name = "CEVR_Analysis_" + name;
-                    instance.hideFlags = HideFlags.HideAndDontSave;
-                    instance.transform.position = Vector3.zero;
-                    Physics.SyncTransforms();
-
-                    Vector3 rootScale = instance.transform.localScale;
-                    Vector3 rootRotation = instance.transform.localEulerAngles;
-                    Renderer[] renderers = instance.GetComponentsInChildren<Renderer>(true);
-                    Collider[] colliders = instance.GetComponentsInChildren<Collider>(true);
-                    Bounds bounds = default;
-                    bool found = false;
-
-                    foreach (Renderer renderer in renderers)
+                    if (importer == null)
                     {
-                        if (!renderer.enabled || IsCollisionNamed(renderer.transform, instance.transform)) continue;
-                        if (!found)
-                        {
-                            bounds = renderer.bounds;
-                            found = true;
-                        }
-                        else
-                        {
-                            bounds.Encapsulate(renderer.bounds);
-                        }
-                    }
-
-                    report.AppendLine("  root local scale=" + Vec(rootScale) + " rotation=" + Vec(rootRotation));
-                    report.AppendLine($"  renderers={renderers.Length}; imported colliders={colliders.Length}");
-                    if (!found)
-                    {
-                        report.AppendLine("  ERROR: no enabled non-collision renderer bounds");
+                        report.AppendLine("  ERROR: no ModelImporter found");
                     }
                     else
                     {
-                        report.AppendLine("  visible bounds center=" + Vec(bounds.center) +
-                                          " size=" + Vec(bounds.size) +
-                                          " min=" + Vec(bounds.min) +
-                                          " max=" + Vec(bounds.max));
-                        report.AppendLine("  bottom-center offset from root=" +
-                                          Vec(new Vector3(bounds.center.x, bounds.min.y, bounds.center.z) - instance.transform.position));
-                        report.AppendLine($"  aspect X:Y:Z = {SafeRatio(bounds.size.x, bounds.size.y):F3}:{1f:F3}:{SafeRatio(bounds.size.z, bounds.size.y):F3}");
+                        report.AppendLine($"  importer globalScale={importer.globalScale:F4}; useFileScale={importer.useFileScale}; readable={importer.isReadable}; addCollider={importer.addCollider}");
+                        report.AppendLine($"  importer animations={importer.importAnimation}; cameras={importer.importCameras}; lights={importer.importLights}");
                     }
 
-                    foreach (Renderer renderer in renderers.OrderBy(renderer => HierarchyPath(renderer.transform)))
+                    if (prefab == null)
                     {
-                        report.AppendLine("    renderer " + HierarchyPath(renderer.transform, instance.transform) +
-                                          " enabled=" + renderer.enabled +
-                                          " bounds center=" + Vec(renderer.bounds.center) +
-                                          " size=" + Vec(renderer.bounds.size));
+                        report.AppendLine("  ERROR: FBX failed to import as a GameObject");
+                        continue;
+                    }
+
+                    GameObject instance = PrefabUtility.InstantiatePrefab(prefab, previewScene) as GameObject;
+                    if (instance == null)
+                    {
+                        report.AppendLine("  ERROR: FBX could not be instantiated in the isolated preview scene");
+                        continue;
+                    }
+
+                    try
+                    {
+                        instance.name = "CEVR_Analysis_" + name;
+                        instance.hideFlags = HideFlags.HideAndDontSave;
+                        instance.transform.position = Vector3.zero;
+
+                        Vector3 rootScale = instance.transform.localScale;
+                        Vector3 rootRotation = instance.transform.localEulerAngles;
+                        Renderer[] renderers = instance.GetComponentsInChildren<Renderer>(true);
+                        Collider[] colliders = instance.GetComponentsInChildren<Collider>(true);
+                        Bounds bounds = default;
+                        bool found = false;
+
+                        foreach (Renderer renderer in renderers)
+                        {
+                            if (!renderer.enabled || IsCollisionNamed(renderer.transform, instance.transform)) continue;
+                            if (!found)
+                            {
+                                bounds = renderer.bounds;
+                                found = true;
+                            }
+                            else
+                            {
+                                bounds.Encapsulate(renderer.bounds);
+                            }
+                        }
+
+                        report.AppendLine("  root local scale=" + Vec(rootScale) + " rotation=" + Vec(rootRotation));
+                        report.AppendLine($"  renderers={renderers.Length}; imported colliders={colliders.Length}");
+                        if (!found)
+                        {
+                            report.AppendLine("  ERROR: no enabled non-collision renderer bounds");
+                        }
+                        else
+                        {
+                            report.AppendLine("  visible bounds center=" + Vec(bounds.center) +
+                                              " size=" + Vec(bounds.size) +
+                                              " min=" + Vec(bounds.min) +
+                                              " max=" + Vec(bounds.max));
+                            report.AppendLine("  bottom-center offset from root=" +
+                                              Vec(new Vector3(bounds.center.x, bounds.min.y, bounds.center.z) - instance.transform.position));
+                            report.AppendLine($"  aspect X:Y:Z = {SafeRatio(bounds.size.x, bounds.size.y):F3}:{1f:F3}:{SafeRatio(bounds.size.z, bounds.size.y):F3}");
+                        }
+
+                        foreach (Renderer renderer in renderers.OrderBy(renderer => HierarchyPath(renderer.transform)))
+                        {
+                            report.AppendLine("    renderer " + HierarchyPath(renderer.transform, instance.transform) +
+                                              " enabled=" + renderer.enabled +
+                                              " bounds center=" + Vec(renderer.bounds.center) +
+                                              " size=" + Vec(renderer.bounds.size));
+                        }
+                    }
+                    finally
+                    {
+                        UnityEngine.Object.DestroyImmediate(instance);
                     }
                 }
-                finally
-                {
-                    UnityEngine.Object.DestroyImmediate(instance);
-                }
+            }
+            finally
+            {
+                if (previewScene.IsValid())
+                    EditorSceneManager.ClosePreviewScene(previewScene);
             }
         }
 
