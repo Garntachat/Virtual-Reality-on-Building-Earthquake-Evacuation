@@ -16,13 +16,18 @@ namespace ChulaEarthquakeVR
         [SerializeField] private float crawlingHeight = 0.58f;
         [SerializeField, Range(0.1f, 1f)] private float crouchMoveMultiplier = 0.72f;
         [SerializeField, Range(0.1f, 1f)] private float crawlMoveMultiplier = 0.68f;
+        [SerializeField, Min(0.5f)] private float jumpHeight = 1.05f;
+        [SerializeField, Min(1f)] private float gravity = 22f;
 
         private CharacterController controller;
         private float pitch;
+        private float verticalVelocity;
         private bool crawlToggled;
         public static int PointerCaptureFrame { get; private set; } = -1;
         public bool IsCrawling => controller != null &&
                                   controller.height <= crawlingHeight + 0.02f;
+        public bool IsGrounded => controller != null && controller.isGrounded;
+        public float VerticalVelocity => verticalVelocity;
         public bool CrawlRequested => crawlToggled;
 
         private void Awake()
@@ -91,7 +96,19 @@ namespace ChulaEarthquakeVR
             float stanceSpeed = IsCrawling
                 ? crawlMoveMultiplier
                 : controller.height < standingHeight - 0.02f ? crouchMoveMultiplier : 1f;
-            controller.Move((direction * (moveSpeed * stanceSpeed) + Physics.gravity) * Time.deltaTime);
+
+            // Keep a small downward force while grounded so CharacterController remains snapped
+            // to slopes/floors. Space launches the player only while grounded and not crawling.
+            if (controller.isGrounded && verticalVelocity < 0f) verticalVelocity = -2f;
+            if (Keyboard.current.spaceKey.wasPressedThisFrame && controller.isGrounded && !IsCrawling)
+            {
+                verticalVelocity = Mathf.Sqrt(2f * gravity * jumpHeight);
+            }
+            verticalVelocity -= gravity * Time.deltaTime;
+
+            Vector3 velocity = direction * (moveSpeed * stanceSpeed);
+            velocity.y = verticalVelocity;
+            controller.Move(velocity * Time.deltaTime);
         }
 
         private void ApplyHeight(float height)
