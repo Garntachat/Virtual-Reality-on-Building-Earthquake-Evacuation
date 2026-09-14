@@ -1,5 +1,11 @@
 # Changelog
 
+## Visible exterior windows and reliable falling impacts
+
+- Made tutorial and house windows transparent and added a lightweight exterior skyline view so players can clearly look outside.
+- Added swept physics contact detection to falling hazards so fast objects striking a stationary player still deduct health.
+- Preserved collision-based damage, one-hit protection, invulnerability timing, and pillow cover damage reduction.
+
 ## Team-authored furniture integration
 
 - Integrated all nine FBX models contributed through `assets/furniture-models` without editing the committed scene YAML.

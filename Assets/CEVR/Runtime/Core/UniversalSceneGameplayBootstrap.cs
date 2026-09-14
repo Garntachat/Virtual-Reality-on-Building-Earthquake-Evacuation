@@ -293,6 +293,7 @@ namespace ChulaEarthquakeVR
                 GameObject window = Primitive($"HouseWindow_{i + 1}", PrimitiveType.Cube,
                     new Vector3(x, 1.65f, 2.2f), new Vector3(2.0f, 1.45f, 0.08f), glass, false);
                 window.AddComponent<BreakableWindow>().Configure($"house-window-{i + 1}", motion, logger);
+                window.AddComponent<WindowView>().Configure();
                 CreateChildVisual("WindowTopFrame", window.transform, new Vector3(0f, 0.53f, 0f),
                     new Vector3(1.08f, 0.07f, 1.4f), frame, false);
                 CreateChildVisual("WindowBottomFrame", window.transform, new Vector3(0f, -0.53f, 0f),
@@ -310,6 +311,9 @@ namespace ChulaEarthquakeVR
                 BreakableWindow window = renderer.GetComponent<BreakableWindow>();
                 if (window == null) window = renderer.gameObject.AddComponent<BreakableWindow>();
                 window.Configure($"tutorial-window-{++index}", motion, logger);
+                WindowView view = renderer.GetComponent<WindowView>();
+                if (view == null) view = renderer.gameObject.AddComponent<WindowView>();
+                view.Configure();
             }
         }
 

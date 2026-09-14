@@ -28,6 +28,7 @@ REQUIRED = (
     "Assets/CEVR/Runtime/Audio/FurnitureImpactAudio.cs",
     "Assets/CEVR/Runtime/Effects/TutorialVisualPolish.cs",
     "Assets/CEVR/Runtime/Effects/BreakableWindow.cs",
+    "Assets/CEVR/Runtime/Effects/WindowView.cs",
     "Assets/CEVR/Runtime/Hazards/ToppleableFurniture.cs",
     "Assets/CEVR/Runtime/Hazards/BrokenGlassHazard.cs",
     "Assets/CEVR/Runtime/Player/DesktopGrabInteractor.cs",
@@ -304,6 +305,7 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
         "ThirdPersonViewController",
         "LocalMultiplayerManager",
         "WearableSafetyShoes_P2",
+        "AddComponent<WindowView>()",
         "GameplayAudioDirector",
     )
     for fragment in required:
@@ -316,6 +318,8 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
 
     feature_contracts = {
         "Assets/CEVR/Runtime/Effects/BreakableWindow.cs": ("NormalizedIntensity", "window_cracked"),
+        "Assets/CEVR/Runtime/Effects/WindowView.cs": ("ApplyTransparentGlass", "BuildExteriorView", "ExteriorView"),
+        "Assets/CEVR/Runtime/Hazards/FallingHazard.cs": ("CheckSweptPlayerContact", "Physics.OverlapBox", "ApplyDamage"),
         "Assets/CEVR/Runtime/Hazards/ToppleableFurniture.cs": ("AddForceAtPosition", "IsPlaying"),
         "Assets/CEVR/Runtime/Audio/GameplayAudioDirector.cs": ("PresentationIntensity", "CEVR_Rumble", "CEVR_Footstep", "CEVR_WindowCrack", "GameplayAudioCue.Success"),
         "Assets/CEVR/Runtime/Audio/FurnitureImpactAudio.cs": ("FurnitureScrape", "FurnitureImpact", "OnCollisionEnter"),

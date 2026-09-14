@@ -11,13 +11,78 @@ namespace ChulaEarthquakeVR
         [SerializeField] private bool oneHitOnly = true;
         private bool armed;
         private bool spent;
+        private Rigidbody body;
+        private Collider[] hazardColliders;
+        private Vector3 previousPosition;
+
+        private void Awake()
+        {
+            body = GetComponent<Rigidbody>();
+            hazardColliders = GetComponentsInChildren<Collider>(true);
+            previousPosition = body.position;
+        }
+
+        private void FixedUpdate()
+        {
+            Vector3 currentPosition = body.position;
+            Vector3 movement = currentPosition - previousPosition;
+            float sweptSpeed = movement.magnitude / Mathf.Max(0.0001f, Time.fixedDeltaTime);
+            float impactSpeed = Mathf.Max(body.linearVelocity.magnitude, sweptSpeed);
+            if (armed && !spent && impactSpeed >= minimumImpactSpeed)
+                CheckSweptPlayerContact(previousPosition, currentPosition, impactSpeed);
+            previousPosition = currentPosition;
+        }
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (!armed || spent || collision.relativeVelocity.magnitude < minimumImpactSpeed) return;
-            PlayerHealth health = collision.collider.GetComponentInParent<PlayerHealth>();
-            if (health == null) return;
-            if (health.ApplyDamage(damage, hazardId) && oneHitOnly) spent = true;
+            TryDamage(collision.collider, collision.relativeVelocity.magnitude);
+        }
+
+        private void CheckSweptPlayerContact(Vector3 from, Vector3 to, float impactSpeed)
+        {
+            bool foundBounds = false;
+            Bounds sweptBounds = default;
+            Vector3 previousOffset = from - to;
+            foreach (Collider ownCollider in hazardColliders)
+            {
+                if (ownCollider == null || !ownCollider.enabled || ownCollider.isTrigger) continue;
+                Bounds current = ownCollider.bounds;
+                Bounds previous = new Bounds(current.center + previousOffset, current.size);
+                if (!foundBounds)
+                {
+                    sweptBounds = current;
+                    foundBounds = true;
+                }
+                else sweptBounds.Encapsulate(current);
+                sweptBounds.Encapsulate(previous);
+            }
+            if (!foundBounds) return;
+
+            sweptBounds.Expand(0.10f);
+            Collider[] contacts = Physics.OverlapBox(
+                sweptBounds.center, sweptBounds.extents, Quaternion.identity,
+                Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+            foreach (Collider contact in contacts)
+            {
+                if (IsOwnCollider(contact)) continue;
+                if (TryDamage(contact, impactSpeed)) return;
+            }
+        }
+
+        private bool IsOwnCollider(Collider candidate)
+        {
+            foreach (Collider ownCollider in hazardColliders)
+                if (candidate == ownCollider) return true;
+            return false;
+        }
+
+        private bool TryDamage(Collider target, float impactSpeed)
+        {
+            if (!armed || spent || target == null || impactSpeed < minimumImpactSpeed) return false;
+            PlayerHealth health = target.GetComponentInParent<PlayerHealth>();
+            if (health == null || !health.ApplyDamage(damage, hazardId)) return false;
+            if (oneHitOnly) spent = true;
+            return true;
         }
 
         public void Configure(string id, float hitDamage)
@@ -29,7 +94,12 @@ namespace ChulaEarthquakeVR
         public void Arm(bool value)
         {
             armed = value;
-            if (value) spent = false;
+            if (body == null) body = GetComponent<Rigidbody>();
+            if (value)
+            {
+                spent = false;
+                previousPosition = body.position;
+            }
         }
     }
 }
