@@ -10,6 +10,7 @@ namespace ChulaEarthquakeVR
     {
         [SerializeField] private Camera viewCamera;
         [SerializeField, Min(0.1f)] private float moveSpeed = 2.4f;
+        [SerializeField, Range(1.1f, 3f)] private float runMultiplier = 1.75f;
         [SerializeField, Min(1f)] private float mouseSensitivity = 8f;
         [SerializeField] private float standingHeight = 1.75f;
         [SerializeField] private float crouchingHeight = 1.05f;
@@ -23,10 +24,12 @@ namespace ChulaEarthquakeVR
         private float pitch;
         private float verticalVelocity;
         private bool crawlToggled;
+        private bool running;
         public static int PointerCaptureFrame { get; private set; } = -1;
         public bool IsCrawling => controller != null &&
                                   controller.height <= crawlingHeight + 0.02f;
         public bool IsGrounded => controller != null && controller.isGrounded;
+        public bool IsRunning => running;
         public float VerticalVelocity => verticalVelocity;
         public bool CrawlRequested => crawlToggled;
 
@@ -49,6 +52,7 @@ namespace ChulaEarthquakeVR
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+            running = false;
         }
 
         private void Update()
@@ -59,10 +63,12 @@ namespace ChulaEarthquakeVR
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
+                running = false;
                 return;
             }
             if (Cursor.lockState != CursorLockMode.Locked)
             {
+                running = false;
                 if (Mouse.current.leftButton.wasPressedThisFrame)
                 {
                     if (ThirdPersonViewController.IsPointerOverViewButton(Mouse.current.position.ReadValue())) return;
@@ -93,9 +99,15 @@ namespace ChulaEarthquakeVR
             if (Keyboard.current.dKey.isPressed) move.x += 1f;
             if (Keyboard.current.aKey.isPressed) move.x -= 1f;
             Vector3 direction = (transform.forward * move.y + transform.right * move.x).normalized;
+
+            bool standing = !IsCrawling && controller.height >= standingHeight - 0.02f;
+            bool shiftHeld = Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed;
+            running = shiftHeld && standing && move.sqrMagnitude > 0.01f && controller.isGrounded;
+
             float stanceSpeed = IsCrawling
                 ? crawlMoveMultiplier
                 : controller.height < standingHeight - 0.02f ? crouchMoveMultiplier : 1f;
+            float movementMultiplier = stanceSpeed * (running ? runMultiplier : 1f);
 
             // Keep a small downward force while grounded so CharacterController remains snapped
             // to slopes/floors. Space launches the player only while grounded and not crawling.
@@ -106,7 +118,7 @@ namespace ChulaEarthquakeVR
             }
             verticalVelocity -= gravity * Time.deltaTime;
 
-            Vector3 velocity = direction * (moveSpeed * stanceSpeed);
+            Vector3 velocity = direction * (moveSpeed * movementMultiplier);
             velocity.y = verticalVelocity;
             controller.Move(velocity * Time.deltaTime);
         }
