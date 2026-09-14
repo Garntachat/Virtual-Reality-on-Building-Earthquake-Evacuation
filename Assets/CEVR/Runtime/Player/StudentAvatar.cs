@@ -17,6 +17,7 @@ namespace ChulaEarthquakeVR
         private CharacterController controller;
         private bool moving;
         private bool wasCrawling;
+        private bool wasAirborne;
         private readonly List<Material> fallbackMaterials = new List<Material>();
         private Transform fallbackLeftArm;
         private Transform fallbackRightArm;
@@ -25,17 +26,17 @@ namespace ChulaEarthquakeVR
         private float fallbackStride;
         private float crouchBlend;
         private float crawlBlend;
+        private float jumpBlend;
         private float crawlCycle;
 
         private const float CrouchHeightThreshold = 1.20f;
         private const float CrawlHeightThreshold = 0.72f;
         private const float CrouchTransitionSeconds = 0.16f;
         private const float CrawlTransitionSeconds = 0.22f;
+        private const float JumpTransitionSeconds = 0.10f;
         private const float CrouchPitchDegrees = 8f;
         private const float PronePitchDegrees = 84f;
         private static readonly Vector3 CrouchPositionOffset = new Vector3(0f, -0.18f, 0.02f);
-        // The model pivot is at its feet. Pull it back by about half a body length so the
-        // prone visual stays centred on the gameplay capsule instead of projecting ahead.
         private static readonly Vector3 PronePositionOffset = new Vector3(0f, 0.18f, -0.72f);
 
         public static Transform Build(Transform player, string objectName)
@@ -54,17 +55,15 @@ namespace ChulaEarthquakeVR
             Texture2D texture = Resources.Load<Texture2D>("Student/StudentUniform");
             if (source == null || texture == null)
             {
-                string missing = source == null && texture == null
-                    ? "model and uniform texture"
-                    : source == null ? "model" : "uniform texture";
+                string missing = source == null && texture == null ? "model and uniform texture" : source == null ? "model" : "uniform texture";
                 Debug.LogWarning($"CEVR student {missing} unavailable. Using the built-in student fallback so the player remains visible.");
                 CreateFallbackUniform();
                 return;
             }
+
             model = Instantiate(source, transform, false).transform;
             model.name = "StudentMesh";
-            Shader shader = Shader.Find(UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline == null
-                ? "Standard" : "Universal Render Pipeline/Lit");
+            Shader shader = Shader.Find(UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline == null ? "Standard" : "Universal Render Pipeline/Lit");
             if (shader == null)
             {
                 Debug.LogWarning("Student shader unavailable for the active render pipeline. Using the built-in student fallback.");
@@ -73,6 +72,7 @@ namespace ChulaEarthquakeVR
                 CreateFallbackUniform();
                 return;
             }
+
             uniform = new Material(shader) { mainTexture = texture, color = Color.white };
             try
             {
@@ -83,8 +83,10 @@ namespace ChulaEarthquakeVR
             {
                 Debug.LogWarning("Student outfit conversion unavailable; retaining original texture. " + exception.Message);
             }
+
             if (uniform.HasProperty("_Smoothness")) uniform.SetFloat("_Smoothness", 0.15f);
             if (uniform.HasProperty("_Glossiness")) uniform.SetFloat("_Glossiness", 0.15f);
+
             Renderer[] renderers = model.GetComponentsInChildren<Renderer>();
             if (renderers.Length == 0)
             {
@@ -94,6 +96,7 @@ namespace ChulaEarthquakeVR
                 CreateFallbackUniform();
                 return;
             }
+
             Bounds bounds = renderers[0].bounds;
             foreach (Renderer renderer in renderers)
             {
@@ -103,14 +106,17 @@ namespace ChulaEarthquakeVR
                 renderer.sharedMaterials = slots;
                 if (renderer is SkinnedMeshRenderer skin) skin.updateWhenOffscreen = true;
             }
+
             float scale = 1.72f / Mathf.Max(0.01f, bounds.size.y);
             model.localScale *= scale;
             model.localPosition = Vector3.up * (transform.position.y - bounds.min.y) * scale;
             standingPosition = model.localPosition;
             modelScale = model.localScale;
             modelRotation = model.localRotation;
+
             foreach (Collider collider in model.GetComponentsInChildren<Collider>()) collider.enabled = false;
             foreach (Animator animator in model.GetComponentsInChildren<Animator>()) animator.enabled = false;
+
             animationPlayer = model.GetComponent<Animation>();
             if (animationPlayer == null) animationPlayer = model.gameObject.AddComponent<Animation>();
             animationPlayer.playAutomatically = false;
@@ -118,14 +124,14 @@ namespace ChulaEarthquakeVR
             AddClip("Student/Idle", "idle");
             AddClip("Student/Run", "move");
             if (animationPlayer["idle"] != null) animationPlayer.Play("idle");
+
             controller = transform.parent.GetComponent<CharacterController>();
             previousPosition = transform.parent.position;
         }
 
         private void CreateFallbackUniform()
         {
-            Shader shader = Shader.Find(UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline == null
-                ? "Standard" : "Universal Render Pipeline/Lit");
+            Shader shader = Shader.Find(UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline == null ? "Standard" : "Universal Render Pipeline/Lit");
             if (shader == null) shader = Shader.Find("Sprites/Default");
             if (shader == null)
             {
@@ -142,36 +148,22 @@ namespace ChulaEarthquakeVR
             Material hair = CreateFallbackMaterial(shader, "Student Hair", new Color(0.035f, 0.025f, 0.02f));
             Material accent = CreateFallbackMaterial(shader, "Chula Pink Accent", new Color(0.86f, 0.08f, 0.38f));
 
-            CreateFallbackPart("Torso", PrimitiveType.Cube, new Vector3(0f, 1.12f, 0f),
-                new Vector3(0.48f, 0.58f, 0.25f), shirt);
-            CreateFallbackPart("Collar", PrimitiveType.Cube, new Vector3(0f, 1.43f, -0.13f),
-                new Vector3(0.26f, 0.08f, 0.035f), shirt);
-            CreateFallbackPart("UniformBadge", PrimitiveType.Cube, new Vector3(-0.13f, 1.25f, -0.132f),
-                new Vector3(0.07f, 0.09f, 0.025f), accent);
-            CreateFallbackPart("Neck", PrimitiveType.Cylinder, new Vector3(0f, 1.49f, 0f),
-                new Vector3(0.10f, 0.08f, 0.10f), skin);
-            CreateFallbackPart("Head", PrimitiveType.Sphere, new Vector3(0f, 1.67f, 0f),
-                new Vector3(0.27f, 0.31f, 0.25f), skin);
-            CreateFallbackPart("Hair", PrimitiveType.Sphere, new Vector3(0f, 1.80f, 0.015f),
-                new Vector3(0.275f, 0.13f, 0.255f), hair);
+            CreateFallbackPart("Torso", PrimitiveType.Cube, new Vector3(0f, 1.12f, 0f), new Vector3(0.48f, 0.58f, 0.25f), shirt);
+            CreateFallbackPart("Collar", PrimitiveType.Cube, new Vector3(0f, 1.43f, -0.13f), new Vector3(0.26f, 0.08f, 0.035f), shirt);
+            CreateFallbackPart("UniformBadge", PrimitiveType.Cube, new Vector3(-0.13f, 1.25f, -0.132f), new Vector3(0.07f, 0.09f, 0.025f), accent);
+            CreateFallbackPart("Neck", PrimitiveType.Cylinder, new Vector3(0f, 1.49f, 0f), new Vector3(0.10f, 0.08f, 0.10f), skin);
+            CreateFallbackPart("Head", PrimitiveType.Sphere, new Vector3(0f, 1.67f, 0f), new Vector3(0.27f, 0.31f, 0.25f), skin);
+            CreateFallbackPart("Hair", PrimitiveType.Sphere, new Vector3(0f, 1.80f, 0.015f), new Vector3(0.275f, 0.13f, 0.255f), hair);
 
-            fallbackLeftArm = CreateFallbackPart("LeftArm", PrimitiveType.Capsule, new Vector3(-0.31f, 1.09f, 0f),
-                new Vector3(0.105f, 0.33f, 0.105f), skin);
-            fallbackRightArm = CreateFallbackPart("RightArm", PrimitiveType.Capsule, new Vector3(0.31f, 1.09f, 0f),
-                new Vector3(0.105f, 0.33f, 0.105f), skin);
-            CreateFallbackPart("LeftSleeve", PrimitiveType.Sphere, new Vector3(-0.30f, 1.31f, 0f),
-                new Vector3(0.16f, 0.17f, 0.15f), shirt);
-            CreateFallbackPart("RightSleeve", PrimitiveType.Sphere, new Vector3(0.30f, 1.31f, 0f),
-                new Vector3(0.16f, 0.17f, 0.15f), shirt);
+            fallbackLeftArm = CreateFallbackPart("LeftArm", PrimitiveType.Capsule, new Vector3(-0.31f, 1.09f, 0f), new Vector3(0.105f, 0.33f, 0.105f), skin);
+            fallbackRightArm = CreateFallbackPart("RightArm", PrimitiveType.Capsule, new Vector3(0.31f, 1.09f, 0f), new Vector3(0.105f, 0.33f, 0.105f), skin);
+            CreateFallbackPart("LeftSleeve", PrimitiveType.Sphere, new Vector3(-0.30f, 1.31f, 0f), new Vector3(0.16f, 0.17f, 0.15f), shirt);
+            CreateFallbackPart("RightSleeve", PrimitiveType.Sphere, new Vector3(0.30f, 1.31f, 0f), new Vector3(0.16f, 0.17f, 0.15f), shirt);
 
-            fallbackLeftLeg = CreateFallbackPart("LeftLeg", PrimitiveType.Capsule, new Vector3(-0.14f, 0.47f, 0f),
-                new Vector3(0.135f, 0.43f, 0.145f), trousers);
-            fallbackRightLeg = CreateFallbackPart("RightLeg", PrimitiveType.Capsule, new Vector3(0.14f, 0.47f, 0f),
-                new Vector3(0.135f, 0.43f, 0.145f), trousers);
-            CreateFallbackPart("LeftShoe", PrimitiveType.Sphere, new Vector3(-0.14f, 0.08f, -0.07f),
-                new Vector3(0.17f, 0.09f, 0.28f), hair);
-            CreateFallbackPart("RightShoe", PrimitiveType.Sphere, new Vector3(0.14f, 0.08f, -0.07f),
-                new Vector3(0.17f, 0.09f, 0.28f), hair);
+            fallbackLeftLeg = CreateFallbackPart("LeftLeg", PrimitiveType.Capsule, new Vector3(-0.14f, 0.47f, 0f), new Vector3(0.135f, 0.43f, 0.145f), trousers);
+            fallbackRightLeg = CreateFallbackPart("RightLeg", PrimitiveType.Capsule, new Vector3(0.14f, 0.47f, 0f), new Vector3(0.135f, 0.43f, 0.145f), trousers);
+            CreateFallbackPart("LeftShoe", PrimitiveType.Sphere, new Vector3(-0.14f, 0.08f, -0.07f), new Vector3(0.17f, 0.09f, 0.28f), hair);
+            CreateFallbackPart("RightShoe", PrimitiveType.Sphere, new Vector3(0.14f, 0.08f, -0.07f), new Vector3(0.17f, 0.09f, 0.28f), hair);
 
             standingPosition = Vector3.zero;
             modelScale = Vector3.one;
@@ -229,26 +221,29 @@ namespace ChulaEarthquakeVR
             if (model == null || transform.parent == null) return;
 
             Vector3 current = transform.parent.position;
-            Vector3 delta = current - previousPosition;
-            delta.y = 0f;
+            Vector3 frameDelta = current - previousPosition;
+            float verticalSpeed = frameDelta.y / Mathf.Max(0.001f, Time.deltaTime);
+            Vector3 planarDelta = frameDelta;
+            planarDelta.y = 0f;
             previousPosition = current;
-            float speed = delta.magnitude / Mathf.Max(0.001f, Time.deltaTime);
+            float speed = planarDelta.magnitude / Mathf.Max(0.001f, Time.deltaTime);
 
             bool crawling = controller != null && controller.height <= CrawlHeightThreshold;
             bool crouching = controller != null && !crawling && controller.height <= CrouchHeightThreshold;
+            bool airborne = controller != null && !controller.isGrounded && !crawling && Mathf.Abs(verticalSpeed) > 0.12f;
             bool nextMoving = speed > (moving ? 0.05f : 0.12f);
 
-            // Crawl must never reuse the run clip. There is no crawl FBX in Resources yet,
-            // so while prone we hold the neutral body animation and drive a dedicated crawl
-            // body cycle below instead of making the student's arms/legs run sideways.
             if (animationPlayer != null)
             {
                 if (crawling)
                 {
-                    if (!wasCrawling && animationPlayer["idle"] != null)
-                        animationPlayer.CrossFade("idle", 0.12f);
+                    if (!wasCrawling && animationPlayer["idle"] != null) animationPlayer.CrossFade("idle", 0.12f);
                 }
-                else if (nextMoving != moving || wasCrawling)
+                else if (airborne)
+                {
+                    if (!wasAirborne && animationPlayer["idle"] != null) animationPlayer.CrossFade("idle", 0.08f);
+                }
+                else if (nextMoving != moving || wasCrawling || wasAirborne)
                 {
                     string state = nextMoving ? "move" : "idle";
                     if (animationPlayer[state] != null) animationPlayer.CrossFade(state, 0.16f);
@@ -257,24 +252,24 @@ namespace ChulaEarthquakeVR
 
             moving = nextMoving;
             wasCrawling = crawling;
+            wasAirborne = airborne;
 
-            if (animationPlayer != null && animationPlayer["move"] != null && !crawling)
+            if (animationPlayer != null && animationPlayer["move"] != null && !crawling && !airborne)
             {
                 float stanceReferenceSpeed = crouching ? 1.65f : 2.4f;
                 animationPlayer["move"].speed = Mathf.Clamp(speed / stanceReferenceSpeed, 0.35f, 1.5f);
             }
 
-            crouchBlend = Mathf.MoveTowards(crouchBlend, crouching ? 1f : 0f,
-                Time.deltaTime / CrouchTransitionSeconds);
-            crawlBlend = Mathf.MoveTowards(crawlBlend, crawling ? 1f : 0f,
-                Time.deltaTime / CrawlTransitionSeconds);
+            crouchBlend = Mathf.MoveTowards(crouchBlend, crouching ? 1f : 0f, Time.deltaTime / CrouchTransitionSeconds);
+            crawlBlend = Mathf.MoveTowards(crawlBlend, crawling ? 1f : 0f, Time.deltaTime / CrawlTransitionSeconds);
+            jumpBlend = Mathf.MoveTowards(jumpBlend, airborne ? 1f : 0f, Time.deltaTime / JumpTransitionSeconds);
 
             float crouchPose = Mathf.SmoothStep(0f, 1f, crouchBlend);
             float crawlPose = Mathf.SmoothStep(0f, 1f, crawlBlend);
+            float jumpPose = Mathf.SmoothStep(0f, 1f, jumpBlend);
 
             fallbackStride += speed * Time.deltaTime * (crawling ? 3.1f : crouching ? 4.7f : 5.5f);
-            if (crawling && moving)
-                crawlCycle += speed * Time.deltaTime * 2.65f;
+            if (crawling && moving) crawlCycle += speed * Time.deltaTime * 2.65f;
 
             if (animationPlayer == null && fallbackLeftLeg != null)
             {
@@ -292,20 +287,23 @@ namespace ChulaEarthquakeVR
                 Quaternion crouchLeftArm = Quaternion.Euler(-24f + crouchStep * 0.6f, 0f, -6f);
                 Quaternion crouchRightArm = Quaternion.Euler(-24f - crouchStep * 0.6f, 0f, 6f);
 
-                // Slow opposing elbow/knee strokes: this reads as crawling rather than running.
                 Quaternion crawlLeftLeg = Quaternion.Euler(28f - crawlStroke, 0f, -10f);
                 Quaternion crawlRightLeg = Quaternion.Euler(28f + crawlStroke, 0f, 10f);
                 Quaternion crawlLeftArm = Quaternion.Euler(-38f + crawlStroke, 0f, -18f);
                 Quaternion crawlRightArm = Quaternion.Euler(-38f - crawlStroke, 0f, 18f);
 
-                fallbackLeftLeg.localRotation = Quaternion.Slerp(
-                    Quaternion.Slerp(standingLeftLeg, crouchLeftLeg, crouchPose), crawlLeftLeg, crawlPose);
-                fallbackRightLeg.localRotation = Quaternion.Slerp(
-                    Quaternion.Slerp(standingRightLeg, crouchRightLeg, crouchPose), crawlRightLeg, crawlPose);
-                fallbackLeftArm.localRotation = Quaternion.Slerp(
-                    Quaternion.Slerp(standingLeftArm, crouchLeftArm, crouchPose), crawlLeftArm, crawlPose);
-                fallbackRightArm.localRotation = Quaternion.Slerp(
-                    Quaternion.Slerp(standingRightArm, crouchRightArm, crouchPose), crawlRightArm, crawlPose);
+                // Tuck the knees and raise the arms while airborne. On descent the same pose
+                // relaxes smoothly into the landing/locomotion state.
+                float ascent = Mathf.Clamp01((verticalSpeed + 1f) / 6f);
+                Quaternion jumpLeftLeg = Quaternion.Euler(35f + ascent * 16f, 0f, -5f);
+                Quaternion jumpRightLeg = Quaternion.Euler(35f + ascent * 16f, 0f, 5f);
+                Quaternion jumpLeftArm = Quaternion.Euler(-55f - ascent * 22f, 0f, -8f);
+                Quaternion jumpRightArm = Quaternion.Euler(-55f - ascent * 22f, 0f, 8f);
+
+                fallbackLeftLeg.localRotation = Quaternion.Slerp(Quaternion.Slerp(Quaternion.Slerp(standingLeftLeg, crouchLeftLeg, crouchPose), crawlLeftLeg, crawlPose), jumpLeftLeg, jumpPose);
+                fallbackRightLeg.localRotation = Quaternion.Slerp(Quaternion.Slerp(Quaternion.Slerp(standingRightLeg, crouchRightLeg, crouchPose), crawlRightLeg, crawlPose), jumpRightLeg, jumpPose);
+                fallbackLeftArm.localRotation = Quaternion.Slerp(Quaternion.Slerp(Quaternion.Slerp(standingLeftArm, crouchLeftArm, crouchPose), crawlLeftArm, crawlPose), jumpLeftArm, jumpPose);
+                fallbackRightArm.localRotation = Quaternion.Slerp(Quaternion.Slerp(Quaternion.Slerp(standingRightArm, crouchRightArm, crouchPose), crawlRightArm, crawlPose), jumpRightArm, jumpPose);
             }
 
             float crawlWave = crawling && moving ? Mathf.Sin(crawlCycle) : 0f;
@@ -315,21 +313,30 @@ namespace ChulaEarthquakeVR
             float crawlPush = crawling && moving ? Mathf.Sin(crawlCycle) * 0.035f : 0f;
 
             Quaternion crouchRotation = modelRotation * Quaternion.Euler(CrouchPitchDegrees, 0f, 0f);
-            Quaternion proneRotation = modelRotation * Quaternion.Euler(
-                PronePitchDegrees + crawlPitch, 0f, crawlRoll);
+            Quaternion proneRotation = modelRotation * Quaternion.Euler(PronePitchDegrees + crawlPitch, 0f, crawlRoll);
 
             Vector3 crouchedPosition = standingPosition + CrouchPositionOffset;
             Vector3 stancePosition = Vector3.Lerp(standingPosition, crouchedPosition, crouchPose);
-            Vector3 crawlPosition = standingPosition + PronePositionOffset +
-                                    new Vector3(0f, crawlBob, crawlPush);
-            model.localPosition = Vector3.Lerp(stancePosition, crawlPosition, crawlPose);
+            Vector3 crawlPosition = standingPosition + PronePositionOffset + new Vector3(0f, crawlBob, crawlPush);
+            Vector3 basePosition = Vector3.Lerp(stancePosition, crawlPosition, crawlPose);
+
+            // No Jump.fbx exists in the project yet, so the imported student gets a clear
+            // procedural takeoff/apex/landing silhouette instead of reusing the run animation.
+            float rising = Mathf.Clamp(verticalSpeed / 6f, -1f, 1f);
+            float jumpLift = jumpPose * (0.05f + Mathf.Max(0f, rising) * 0.05f);
+            float landingCompression = jumpPose * Mathf.Max(0f, -rising) * 0.07f;
+            model.localPosition = basePosition + Vector3.up * (jumpLift - landingCompression);
 
             Vector3 crouchedScale = new Vector3(modelScale.x, modelScale.y * 0.76f, modelScale.z);
             Vector3 stanceScale = Vector3.Lerp(modelScale, crouchedScale, crouchPose);
-            model.localScale = Vector3.Lerp(stanceScale, modelScale, crawlPose);
+            Vector3 baseScale = Vector3.Lerp(stanceScale, modelScale, crawlPose);
+            Vector3 airborneScale = new Vector3(baseScale.x * 0.98f, baseScale.y * (1.03f - Mathf.Max(0f, -rising) * 0.05f), baseScale.z * 0.98f);
+            model.localScale = Vector3.Lerp(baseScale, airborneScale, jumpPose);
 
             Quaternion stanceRotation = Quaternion.Slerp(modelRotation, crouchRotation, crouchPose);
-            model.localRotation = Quaternion.Slerp(stanceRotation, proneRotation, crawlPose);
+            Quaternion baseRotation = Quaternion.Slerp(stanceRotation, proneRotation, crawlPose);
+            Quaternion jumpRotation = modelRotation * Quaternion.Euler(rising >= 0f ? -8f : 7f, 0f, 0f);
+            model.localRotation = Quaternion.Slerp(baseRotation, jumpRotation, jumpPose);
             transform.localScale = Vector3.one;
         }
 
