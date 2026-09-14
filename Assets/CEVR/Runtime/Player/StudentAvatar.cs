@@ -16,6 +16,7 @@ namespace ChulaEarthquakeVR
         private Quaternion modelRotation;
         private CharacterController controller;
         private bool moving;
+        private bool wasCrawling;
         private readonly List<Material> fallbackMaterials = new List<Material>();
         private Transform fallbackLeftArm;
         private Transform fallbackRightArm;
@@ -24,6 +25,7 @@ namespace ChulaEarthquakeVR
         private float fallbackStride;
         private float crouchBlend;
         private float crawlBlend;
+        private float crawlCycle;
 
         private const float CrouchHeightThreshold = 1.20f;
         private const float CrawlHeightThreshold = 0.72f;
@@ -236,19 +238,29 @@ namespace ChulaEarthquakeVR
             bool crouching = controller != null && !crawling && controller.height <= CrouchHeightThreshold;
             bool nextMoving = speed > (moving ? 0.05f : 0.12f);
 
-            if (nextMoving != moving)
+            // Crawl must never reuse the run clip. There is no crawl FBX in Resources yet,
+            // so while prone we hold the neutral body animation and drive a dedicated crawl
+            // body cycle below instead of making the student's arms/legs run sideways.
+            if (animationPlayer != null)
             {
-                moving = nextMoving;
-                if (animationPlayer != null)
+                if (crawling)
                 {
-                    string state = moving ? "move" : "idle";
-                    if (animationPlayer[state] != null) animationPlayer.CrossFade(state, 0.18f);
+                    if (!wasCrawling && animationPlayer["idle"] != null)
+                        animationPlayer.CrossFade("idle", 0.12f);
+                }
+                else if (nextMoving != moving || wasCrawling)
+                {
+                    string state = nextMoving ? "move" : "idle";
+                    if (animationPlayer[state] != null) animationPlayer.CrossFade(state, 0.16f);
                 }
             }
 
-            if (animationPlayer != null && animationPlayer["move"] != null)
+            moving = nextMoving;
+            wasCrawling = crawling;
+
+            if (animationPlayer != null && animationPlayer["move"] != null && !crawling)
             {
-                float stanceReferenceSpeed = crawling ? 1.35f : crouching ? 1.65f : 2.4f;
+                float stanceReferenceSpeed = crouching ? 1.65f : 2.4f;
                 animationPlayer["move"].speed = Mathf.Clamp(speed / stanceReferenceSpeed, 0.35f, 1.5f);
             }
 
@@ -260,12 +272,15 @@ namespace ChulaEarthquakeVR
             float crouchPose = Mathf.SmoothStep(0f, 1f, crouchBlend);
             float crawlPose = Mathf.SmoothStep(0f, 1f, crawlBlend);
 
-            fallbackStride += speed * Time.deltaTime * (crawling ? 4.2f : crouching ? 4.7f : 5.5f);
+            fallbackStride += speed * Time.deltaTime * (crawling ? 3.1f : crouching ? 4.7f : 5.5f);
+            if (crawling && moving)
+                crawlCycle += speed * Time.deltaTime * 2.65f;
+
             if (animationPlayer == null && fallbackLeftLeg != null)
             {
                 float swing = moving ? Mathf.Sin(fallbackStride) * 24f : 0f;
                 float crouchStep = moving ? Mathf.Sin(fallbackStride) * 8f : 0f;
-                float crawlStroke = moving ? Mathf.Sin(fallbackStride) * 13f : 0f;
+                float crawlStroke = crawling && moving ? Mathf.Sin(crawlCycle) * 7f : 0f;
 
                 Quaternion standingLeftLeg = Quaternion.Euler(swing, 0f, 0f);
                 Quaternion standingRightLeg = Quaternion.Euler(-swing, 0f, 0f);
@@ -277,10 +292,11 @@ namespace ChulaEarthquakeVR
                 Quaternion crouchLeftArm = Quaternion.Euler(-24f + crouchStep * 0.6f, 0f, -6f);
                 Quaternion crouchRightArm = Quaternion.Euler(-24f - crouchStep * 0.6f, 0f, 6f);
 
-                Quaternion crawlLeftLeg = Quaternion.Euler(10f - crawlStroke, 0f, -4f);
-                Quaternion crawlRightLeg = Quaternion.Euler(10f + crawlStroke, 0f, 4f);
-                Quaternion crawlLeftArm = Quaternion.Euler(-8f + crawlStroke, 0f, -7f);
-                Quaternion crawlRightArm = Quaternion.Euler(-8f - crawlStroke, 0f, 7f);
+                // Slow opposing elbow/knee strokes: this reads as crawling rather than running.
+                Quaternion crawlLeftLeg = Quaternion.Euler(28f - crawlStroke, 0f, -10f);
+                Quaternion crawlRightLeg = Quaternion.Euler(28f + crawlStroke, 0f, 10f);
+                Quaternion crawlLeftArm = Quaternion.Euler(-38f + crawlStroke, 0f, -18f);
+                Quaternion crawlRightArm = Quaternion.Euler(-38f - crawlStroke, 0f, 18f);
 
                 fallbackLeftLeg.localRotation = Quaternion.Slerp(
                     Quaternion.Slerp(standingLeftLeg, crouchLeftLeg, crouchPose), crawlLeftLeg, crawlPose);
@@ -292,18 +308,22 @@ namespace ChulaEarthquakeVR
                     Quaternion.Slerp(standingRightArm, crouchRightArm, crouchPose), crawlRightArm, crawlPose);
             }
 
-            float crawlRoll = crawling && moving ? Mathf.Sin(fallbackStride) * 2.2f : 0f;
+            float crawlWave = crawling && moving ? Mathf.Sin(crawlCycle) : 0f;
+            float crawlRoll = crawlWave * 3.2f;
+            float crawlPitch = crawling && moving ? Mathf.Sin(crawlCycle * 2f) * 1.4f : 0f;
+            float crawlBob = crawling && moving ? (Mathf.Sin(crawlCycle * 2f) + 1f) * 0.015f : 0f;
+            float crawlPush = crawling && moving ? Mathf.Sin(crawlCycle) * 0.035f : 0f;
+
             Quaternion crouchRotation = modelRotation * Quaternion.Euler(CrouchPitchDegrees, 0f, 0f);
-            Quaternion proneRotation = modelRotation * Quaternion.Euler(PronePitchDegrees, 0f, crawlRoll);
+            Quaternion proneRotation = modelRotation * Quaternion.Euler(
+                PronePitchDegrees + crawlPitch, 0f, crawlRoll);
 
             Vector3 crouchedPosition = standingPosition + CrouchPositionOffset;
             Vector3 stancePosition = Vector3.Lerp(standingPosition, crouchedPosition, crouchPose);
-            model.localPosition = Vector3.Lerp(stancePosition, standingPosition + PronePositionOffset, crawlPose);
+            Vector3 crawlPosition = standingPosition + PronePositionOffset +
+                                    new Vector3(0f, crawlBob, crawlPush);
+            model.localPosition = Vector3.Lerp(stancePosition, crawlPosition, crawlPose);
 
-            // The imported student has no dedicated crouch FBX clip. Compressing the vertical
-            // silhouette while lowering and pitching the root gives a clear squat transition,
-            // while the fallback avatar additionally bends its limbs above. Crawling returns
-            // to full proportions and uses the existing prone pose.
             Vector3 crouchedScale = new Vector3(modelScale.x, modelScale.y * 0.76f, modelScale.z);
             Vector3 stanceScale = Vector3.Lerp(modelScale, crouchedScale, crouchPose);
             model.localScale = Vector3.Lerp(stanceScale, modelScale, crawlPose);
