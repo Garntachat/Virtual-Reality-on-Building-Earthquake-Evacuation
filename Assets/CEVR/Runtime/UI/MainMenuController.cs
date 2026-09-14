@@ -14,6 +14,8 @@ namespace ChulaEarthquakeVR
         private string message = "Choose a scene to begin.";
         private Transform previewRoot;
         private GUIStyle heading, body, button;
+        private AudioSource menuMusic;
+        private AudioClip generatedSoundtrack;
 
         private void Awake()
         {
@@ -44,7 +46,75 @@ namespace ChulaEarthquakeVR
             light.type = LightType.Directional;
             light.intensity = 1.5f;
             lightObject.transform.rotation = Quaternion.Euler(35f, -30f, 0f);
+            CreateMenuSoundtrack();
             RefreshPreview();
+        }
+
+        private void CreateMenuSoundtrack()
+        {
+            // Keep the repository self-contained: the menu music is generated at runtime instead
+            // of relying on a missing binary audio asset. It is intentionally calm so gameplay
+            // warning/earthquake sounds remain distinct after a scene is selected.
+            const int sampleRate = 44100;
+            const float duration = 16f;
+            int sampleCount = Mathf.RoundToInt(sampleRate * duration);
+            float[] samples = new float[sampleCount];
+
+            // Four-bar ambient progression. Each chord crossfades into the next so the final loop
+            // does not click. Frequencies are deliberately low/mid and mixed quietly.
+            float[][] chords =
+            {
+                new[] { 146.83f, 220.00f, 293.66f }, // Dm
+                new[] { 130.81f, 196.00f, 261.63f }, // C
+                new[] { 116.54f, 174.61f, 233.08f }, // Bb
+                new[] { 130.81f, 196.00f, 293.66f }  // C(add9)
+            };
+
+            for (int i = 0; i < sampleCount; i++)
+            {
+                float t = i / (float)sampleRate;
+                float barPosition = t / 4f;
+                int chordIndex = Mathf.FloorToInt(barPosition) % chords.Length;
+                int nextIndex = (chordIndex + 1) % chords.Length;
+                float withinBar = barPosition - Mathf.Floor(barPosition);
+                float blend = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.72f, 1f, withinBar));
+
+                float current = ChordSample(chords[chordIndex], t);
+                float next = ChordSample(chords[nextIndex], t);
+                float pad = Mathf.Lerp(current, next, blend);
+
+                float pulse = 0.5f + 0.5f * Mathf.Sin(2f * Mathf.PI * 0.25f * t - Mathf.PI * 0.5f);
+                float air = Mathf.Sin(2f * Mathf.PI * 587.33f * t) * (0.01f + 0.012f * pulse);
+                float bass = Mathf.Sin(2f * Mathf.PI * 73.42f * t) * 0.035f;
+                float loopEnvelope = Mathf.SmoothStep(0f, 1f, Mathf.Min(t / 0.15f, (duration - t) / 0.15f));
+                samples[i] = Mathf.Clamp((pad * 0.10f + bass + air) * loopEnvelope, -0.22f, 0.22f);
+            }
+
+            generatedSoundtrack = AudioClip.Create("CEVR Main Menu Ambient", sampleCount, 1, sampleRate, false);
+            generatedSoundtrack.SetData(samples, 0);
+
+            var musicObject = new GameObject("Main Menu Soundtrack", typeof(AudioSource));
+            musicObject.transform.SetParent(transform, false);
+            menuMusic = musicObject.GetComponent<AudioSource>();
+            menuMusic.clip = generatedSoundtrack;
+            menuMusic.loop = true;
+            menuMusic.playOnAwake = false;
+            menuMusic.spatialBlend = 0f;
+            menuMusic.volume = 0.42f;
+            menuMusic.priority = 180;
+            menuMusic.Play();
+        }
+
+        private static float ChordSample(float[] chord, float t)
+        {
+            float sample = 0f;
+            for (int i = 0; i < chord.Length; i++)
+            {
+                float frequency = chord[i];
+                sample += Mathf.Sin(2f * Mathf.PI * frequency * t) * 0.52f;
+                sample += Mathf.Sin(2f * Mathf.PI * frequency * 0.5f * t) * 0.18f;
+            }
+            return sample / chord.Length;
         }
 
         private void RefreshPreview()
@@ -103,7 +173,22 @@ namespace ChulaEarthquakeVR
             }
             loading = true;
             message = "Loading " + (scene == HouseScene ? "House" : "Tutorial") + "...";
-            StartCoroutine(LoadSelectedScene(scene));
+            StartCoroutine(FadeMusicAndLoad(scene));
+        }
+
+        private IEnumerator FadeMusicAndLoad(string scene)
+        {
+            const float fadeSeconds = 0.45f;
+            float startVolume = menuMusic == null ? 0f : menuMusic.volume;
+            float elapsed = 0f;
+            while (elapsed < fadeSeconds)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                if (menuMusic != null)
+                    menuMusic.volume = Mathf.Lerp(startVolume, 0f, Mathf.Clamp01(elapsed / fadeSeconds));
+                yield return null;
+            }
+            yield return LoadSelectedScene(scene);
         }
 
         private IEnumerator LoadSelectedScene(string scene)
@@ -118,6 +203,11 @@ namespace ChulaEarthquakeVR
             if (operation == null)
             {
                 loading = false;
+                if (menuMusic != null)
+                {
+                    menuMusic.volume = 0.42f;
+                    if (!menuMusic.isPlaying) menuMusic.Play();
+                }
                 if (message.StartsWith("Loading")) message = "Scene loading failed. Check the Unity Console.";
                 yield break;
             }
@@ -132,6 +222,11 @@ namespace ChulaEarthquakeVR
 #else
             Application.Quit();
 #endif
+        }
+
+        private void OnDestroy()
+        {
+            if (generatedSoundtrack != null) Destroy(generatedSoundtrack);
         }
     }
 }
