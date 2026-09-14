@@ -214,6 +214,26 @@ def check_crawl_contract(errors: list[str]) -> None:
         if fragment not in text:
             fail(errors, f"desktop crawl contract is missing: {fragment}")
 
+    avatar_path = ROOT / "Assets/CEVR/Runtime/Player/StudentAvatar.cs"
+    try:
+        avatar = avatar_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        fail(errors, f"could not read student crawl pose: {exc}")
+        return
+    pose_required = (
+        "CrawlHeightThreshold = 0.72f",
+        "PronePitchDegrees = 84f",
+        "PronePositionOffset = new Vector3(0f, 0.18f, -0.72f)",
+        "crawlBlend = Mathf.MoveTowards",
+        "Quaternion.Slerp(modelRotation, proneRotation, poseBlend)",
+        "transform.localScale = Vector3.one",
+    )
+    for fragment in pose_required:
+        if fragment not in avatar:
+            fail(errors, f"student prone-pose contract is missing: {fragment}")
+    if "controller.height / 1.75f" in avatar:
+        fail(errors, "student crawl must not squash the avatar to match collider height")
+
 
 def check_visual_polish_contract(errors: list[str]) -> None:
     path = ROOT / "Assets/CEVR/Runtime/Effects/TutorialVisualPolish.cs"

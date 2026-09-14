@@ -1,5 +1,12 @@
 # Changelog
 
+## Full-size prone crawl pose
+
+- Removed the collider-height scale shortcut that visibly squashed the student when crawling.
+- Added a smooth full-body transition between standing and a floor-level prone pose for both desktop players.
+- Reused locomotion limb motion at a crawl cadence and added subtle body roll while moving prone.
+- Added static regression checks and a third-person crawl acceptance test.
+
 ## Main menu and selectable student outfits
 
 - Added a committed main-menu scene, first in Build Settings, with Tutorial, House and Exit actions.

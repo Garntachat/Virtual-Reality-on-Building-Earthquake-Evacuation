@@ -32,25 +32,26 @@
 | F14 | Open the committed legacy generated scene | Runtime preparation repairs it before validation; no stale-scene failure blocks Play |
 | F15 | Aim at both task items and all four pink chairs | Context prompt changes and every object can be grabbed/released independently |
 | F16 | Press `Z`, crawl under the table, then press `Z` again beneath it | Player fits below the tabletop and remains low until there is standing clearance |
-| F17 | Reset released hazards in the same scene | Every staged hazard returns to its captured pose and safe kinematic state |
-| F18 | Start the committed scene and inspect the first frame | Oversized mirrored text is hidden; HUD is compact, readable, and not mirrored |
-| F19 | Inspect cover, chair, exit, and cabinet areas | Pink cover outline/beacon, green exit chevrons, and amber hazard boundary are visible |
-| F20 | Aim away from and then at the chair or task item | Crosshair/prompt feedback changes from white/navy to green; held feedback becomes pink |
-| F21 | Observe Orientation, Earthquake, Evacuation, Success, and Failure | Phase heading uses distinct accessible status colors and quake indicator activates only during shaking |
-| F22 | Compare camera during normal and earthquake phases | Environment, lights, and objects react; camera transform receives no scripted shake |
-| F23 | Move each of the four chairs and inspect the session log | Each unique chair ID produces independent grab, release, and first-displacement events |
-| F24 | Walk from spawn to both benches, cover table, exit, and assembly point | Workstation and safety decorations are visible but have no colliders and never block the route |
-| F25 | Complete both routine tasks before 30 seconds | Earthquake waits until the 30-second minimum, then begins exactly once |
-| F26 | Open `House.unity` and press Play | Player spawns inside the playable area; prompt, chairs, shoes, pillow, windows, cover table, hazards, and exit marker appear |
-| F27 | Aim at each shoe pair and press the player's interact key | Shoes attach to that player, stop colliding, and log `footwear_equipped` once per pair |
-| F28 | Grab the pillow during shaking | Pillow is held above the head, protection activates, and damage is reduced without cancelling table-cover protection |
-| F29 | Observe both house windows, then walk across the visible debris with and without shoes | Each displays a deterministic crack pattern; visual shards have no collision, and the trigger inflicts substantially less damage when footwear is equipped |
-| F30 | Observe the house cabinet and bookcase | Both release in order and receive deterministic overturning force from ground acceleration |
-| F31 | Press `T` twice in desktop mode | Camera switches to collision-aware third person and returns to first person; movement remains responsive |
-| F32 | Press `F2`, move and interact as Player 2, then press `F2` again | Split screen opens, Player 2 responds to `IJKL`, `U`/`O`, and right `Shift`; leaving restores Player 1 full screen |
-| F33 | Repeat F31 and F32 with stereo XR active | Third-person/split-screen inputs do not replace the tracked stereo view |
-| F34 | Complete the house quake, then reach the marker | Success is accepted only after shaking stops |
-| F35 | Deplete health, then repeat and wait 60 seconds after shaking | Health depletion and evacuation timeout each produce failure and stop active hazards |
+| F17 | Enable third-person view, press `Z`, move while low, then press `Z` after leaving the table | The full-size student smoothly rotates into a floor-level prone crawl with limb motion, never squashes vertically, and smoothly returns upright |
+| F18 | Reset released hazards in the same scene | Every staged hazard returns to its captured pose and safe kinematic state |
+| F19 | Start the committed scene and inspect the first frame | Oversized mirrored text is hidden; HUD is compact, readable, and not mirrored |
+| F20 | Inspect cover, chair, exit, and cabinet areas | Pink cover outline/beacon, green exit chevrons, and amber hazard boundary are visible |
+| F21 | Aim away from and then at the chair or task item | Crosshair/prompt feedback changes from white/navy to green; held feedback becomes pink |
+| F22 | Observe Orientation, Earthquake, Evacuation, Success, and Failure | Phase heading uses distinct accessible status colors and quake indicator activates only during shaking |
+| F23 | Compare camera during normal and earthquake phases | Environment, lights, and objects react; camera transform receives no scripted shake |
+| F24 | Move each of the four chairs and inspect the session log | Each unique chair ID produces independent grab, release, and first-displacement events |
+| F25 | Walk from spawn to both benches, cover table, exit, and assembly point | Workstation and safety decorations are visible but have no colliders and never block the route |
+| F26 | Complete both routine tasks before 30 seconds | Earthquake waits until the 30-second minimum, then begins exactly once |
+| F27 | Open `House.unity` and press Play | Player spawns inside the playable area; prompt, chairs, shoes, pillow, windows, cover table, hazards, and exit marker appear |
+| F28 | Aim at each shoe pair and press the player's interact key | Shoes attach to that player, stop colliding, and log `footwear_equipped` once per pair |
+| F29 | Grab the pillow during shaking | Pillow is held above the head, protection activates, and damage is reduced without cancelling table-cover protection |
+| F30 | Observe both house windows, then walk across the visible debris with and without shoes | Each displays a deterministic crack pattern; visual shards have no collision, and the trigger inflicts substantially less damage when footwear is equipped |
+| F31 | Observe the house cabinet and bookcase | Both release in order and receive deterministic overturning force from ground acceleration |
+| F32 | Press `T` twice in desktop mode | Camera switches to collision-aware third person and returns to first person; movement remains responsive |
+| F33 | Press `F2`, move and interact as Player 2, then press `F2` again | Split screen opens, Player 2 responds to `IJKL`, `U`/`O`, and right `Shift`; leaving restores Player 1 full screen |
+| F34 | Repeat F32 and F33 with stereo XR active | Third-person/split-screen inputs do not replace the tracked stereo view |
+| F35 | Complete the house quake, then reach the marker | Success is accepted only after shaking stops |
+| F36 | Deplete health, then repeat and wait 60 seconds after shaking | Health depletion and evacuation timeout each produce failure and stop active hazards |
 
 ## 3. VR comfort and physical safety
 

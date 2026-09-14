@@ -22,6 +22,14 @@ namespace ChulaEarthquakeVR
         private Transform fallbackLeftLeg;
         private Transform fallbackRightLeg;
         private float fallbackStride;
+        private float crawlBlend;
+
+        private const float CrawlHeightThreshold = 0.72f;
+        private const float CrawlTransitionSeconds = 0.22f;
+        private const float PronePitchDegrees = 84f;
+        // The model pivot is at its feet. Pull it back by about half a body length so the
+        // prone visual stays centred on the gameplay capsule instead of projecting ahead.
+        private static readonly Vector3 PronePositionOffset = new Vector3(0f, 0.18f, -0.72f);
 
         public static Transform Build(Transform player, string objectName)
         {
@@ -215,6 +223,7 @@ namespace ChulaEarthquakeVR
             Vector3 delta = current - previousPosition; delta.y = 0f;
             previousPosition = current;
             float speed = delta.magnitude / Mathf.Max(0.001f, Time.deltaTime);
+            bool crawling = controller != null && controller.height <= CrawlHeightThreshold;
             bool nextMoving = speed > (moving ? 0.05f : 0.12f);
             if (nextMoving != moving)
             {
@@ -226,21 +235,35 @@ namespace ChulaEarthquakeVR
                 }
             }
             if (animationPlayer != null && animationPlayer["move"] != null)
-                animationPlayer["move"].speed = Mathf.Clamp(speed / 2.4f, 0.35f, 1.5f);
+                animationPlayer["move"].speed = Mathf.Clamp(speed / (crawling ? 1.35f : 2.4f), 0.35f, 1.5f);
+
+            fallbackStride += speed * Time.deltaTime * (crawling ? 4.2f : 5.5f);
             if (animationPlayer == null && fallbackLeftLeg != null)
             {
-                fallbackStride += speed * Time.deltaTime * 5.5f;
                 float swing = moving ? Mathf.Sin(fallbackStride) * 24f : 0f;
-                fallbackLeftLeg.localRotation = Quaternion.Euler(swing, 0f, 0f);
-                fallbackRightLeg.localRotation = Quaternion.Euler(-swing, 0f, 0f);
-                fallbackLeftArm.localRotation = Quaternion.Euler(-swing * 0.65f, 0f, 0f);
-                fallbackRightArm.localRotation = Quaternion.Euler(swing * 0.65f, 0f, 0f);
+                float crawlStroke = moving ? Mathf.Sin(fallbackStride) * 13f : 0f;
+                float limbBlend = Mathf.SmoothStep(0f, 1f, crawlBlend);
+                fallbackLeftLeg.localRotation = Quaternion.Slerp(
+                    Quaternion.Euler(swing, 0f, 0f), Quaternion.Euler(10f - crawlStroke, 0f, -4f), limbBlend);
+                fallbackRightLeg.localRotation = Quaternion.Slerp(
+                    Quaternion.Euler(-swing, 0f, 0f), Quaternion.Euler(10f + crawlStroke, 0f, 4f), limbBlend);
+                fallbackLeftArm.localRotation = Quaternion.Slerp(
+                    Quaternion.Euler(-swing * 0.65f, 0f, 0f), Quaternion.Euler(-8f + crawlStroke, 0f, -7f), limbBlend);
+                fallbackRightArm.localRotation = Quaternion.Slerp(
+                    Quaternion.Euler(swing * 0.65f, 0f, 0f), Quaternion.Euler(-8f - crawlStroke, 0f, 7f), limbBlend);
             }
-            // Root motion never drives gameplay collision. A dedicated crawl clip is still needed.
-            model.localPosition = standingPosition;
+
+            crawlBlend = Mathf.MoveTowards(crawlBlend, crawling ? 1f : 0f,
+                Time.deltaTime / CrawlTransitionSeconds);
+            float poseBlend = Mathf.SmoothStep(0f, 1f, crawlBlend);
+            float crawlRoll = crawling && moving ? Mathf.Sin(fallbackStride) * 2.2f : 0f;
+            Quaternion proneRotation = modelRotation * Quaternion.Euler(PronePitchDegrees, 0f, crawlRoll);
+
+            // Keep the character at full size. Crawling changes its pose and collider, never its proportions.
+            model.localPosition = Vector3.Lerp(standingPosition, standingPosition + PronePositionOffset, poseBlend);
             model.localScale = modelScale;
-            model.localRotation = modelRotation;
-            transform.localScale = new Vector3(1f, controller == null ? 1f : Mathf.Clamp(controller.height / 1.75f, 0.3f, 1f), 1f);
+            model.localRotation = Quaternion.Slerp(modelRotation, proneRotation, poseBlend);
+            transform.localScale = Vector3.one;
         }
         private void OnDestroy()
         {
