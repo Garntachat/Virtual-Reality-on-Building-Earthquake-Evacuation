@@ -331,6 +331,32 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
             fail(errors, f"local multiplayer interaction ownership is missing: {fragment}")
 
 
+def check_main_menu(errors: list[str]) -> None:
+    scene_dir = "Assets/CEVR/Generated/Scenes/"
+    expected = ["CEVR_MainMenu", "CEVR_ChulaEngineering_Tutorial", "House"]
+    settings = (ROOT / "ProjectSettings/EditorBuildSettings.asset").read_text()
+    paths = re.findall(r"- enabled: 1\s+path: (.+)", settings)
+    if paths[:3] != [scene_dir + name + ".unity" for name in expected]:
+        fail(errors, "main menu must be first, followed by enabled Tutorial and House scenes")
+    for name in expected:
+        scene = ROOT / (scene_dir + name + ".unity")
+        if not scene.is_file():
+            fail(errors, "missing menu destination: " + name)
+    menu_path = ROOT / "Assets/CEVR/Runtime/UI/MainMenuController.cs"
+    appearance_path = ROOT / "Assets/CEVR/Runtime/Player/StudentAppearance.cs"
+    for path in (menu_path, appearance_path):
+        if not path.is_file():
+            fail(errors, "missing menu implementation: " + str(path))
+            return
+    menu = menu_path.read_text()
+    for token in ("LoadSceneAsync", "CanStreamedLevelBeLoaded", "if (loading) return", "Application.Quit", "isPlaying = false", "StudentAppearance.Select"):
+        if token not in menu:
+            fail(errors, "menu contract missing: " + token)
+    bootstrap = (ROOT / "Assets/CEVR/Runtime/Core/UniversalSceneGameplayBootstrap.cs").read_text()
+    if "if (scene.name == MainMenuController.MenuScene) return;" not in bootstrap:
+        fail(errors, "menu must not install earthquake gameplay")
+
+
 def check_git_hygiene(errors: list[str]) -> None:
     for name in FORBIDDEN_TRACKED_DIRS:
         if (ROOT / name).exists():
@@ -366,6 +392,7 @@ def main() -> int:
     check_crawl_contract(errors)
     check_visual_polish_contract(errors)
     check_cross_scene_feature_contract(errors)
+    check_main_menu(errors)
     check_git_hygiene(errors)
     check_english_only(errors)
     if errors:

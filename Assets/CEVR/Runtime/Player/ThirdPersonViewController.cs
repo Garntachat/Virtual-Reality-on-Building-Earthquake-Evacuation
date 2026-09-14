@@ -13,6 +13,7 @@ namespace ChulaEarthquakeVR
         [SerializeField] private bool showViewButton = true;
         private Transform avatar;
         private GUIStyle buttonStyle;
+        private bool returningToMenu;
 
         public bool IsThirdPerson { get; private set; }
 
@@ -51,6 +52,17 @@ namespace ChulaEarthquakeVR
             }
             string label = IsThirdPerson ? "FIRST-PERSON VIEW  (T)" : "THIRD-PERSON VIEW  (T)";
             if (GUI.Button(ViewButtonRect(), label, buttonStyle)) ToggleView();
+            GUI.enabled = !returningToMenu;
+            if (GUI.Button(MenuButtonRect(), "MAIN MENU", buttonStyle))
+            {
+                if (Application.CanStreamedLevelBeLoaded(MainMenuController.MenuScene))
+                {
+                    returningToMenu = true;
+                    UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(MainMenuController.MenuScene);
+                }
+                else Debug.LogWarning("Main menu scene is not enabled in Build Settings.");
+            }
+            GUI.enabled = true;
             GUI.Label(new Rect(ViewButtonRect().x, ViewButtonRect().yMax + 2f, ViewButtonRect().width, 24f),
                 "Press ESC to release the mouse", new GUIStyle(GUI.skin.label)
                 {
@@ -65,13 +77,20 @@ namespace ChulaEarthquakeVR
             if (viewCamera == null || viewCamera.stereoEnabled) return;
             IsThirdPerson = !IsThirdPerson;
             if (avatar != null) avatar.gameObject.SetActive(IsThirdPerson);
+            if (!IsThirdPerson)
+            {
+                CharacterController body = GetComponent<CharacterController>();
+                viewCamera.transform.localPosition = Vector3.up * (body == null ? 1.63f : Mathf.Max(0.2f, body.height - 0.12f));
+            }
         }
 
         public static bool IsPointerOverViewButton(Vector2 screenPosition)
         {
             Vector2 guiPosition = new Vector2(screenPosition.x, Screen.height - screenPosition.y);
-            return ViewButtonRect().Contains(guiPosition);
+            return ViewButtonRect().Contains(guiPosition) || MenuButtonRect().Contains(guiPosition);
         }
+
+        private static Rect MenuButtonRect() => new Rect(Mathf.Max(12f, Screen.width - 260f), 145f, 242f, 38f);
 
         private static Rect ViewButtonRect()
         {

@@ -7,6 +7,7 @@ namespace ChulaEarthquakeVR
     public sealed class StudentAvatar : MonoBehaviour
     {
         private Material uniform;
+        private Texture2D outfitTexture;
         private Animation animationPlayer;
         private Transform model;
         private Vector3 previousPosition;
@@ -58,6 +59,15 @@ namespace ChulaEarthquakeVR
                 return;
             }
             uniform = new Material(shader) { mainTexture = texture, color = Color.white };
+            try
+            {
+                outfitTexture = StudentAppearance.CreateOutfitTexture(texture);
+                if (outfitTexture != null) uniform.mainTexture = outfitTexture;
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogWarning("Student outfit conversion unavailable; retaining original texture. " + exception.Message);
+            }
             if (uniform.HasProperty("_Smoothness")) uniform.SetFloat("_Smoothness", 0.15f);
             if (uniform.HasProperty("_Glossiness")) uniform.SetFloat("_Glossiness", 0.15f);
             Renderer[] renderers = model.GetComponentsInChildren<Renderer>();
@@ -111,7 +121,7 @@ namespace ChulaEarthquakeVR
             model = new GameObject("StudentMeshFallback").transform;
             model.SetParent(transform, false);
 
-            Material shirt = CreateFallbackMaterial(shader, "Student White Shirt", new Color(0.94f, 0.96f, 1f));
+            Material shirt = CreateFallbackMaterial(shader, "Student Shirt", StudentAppearance.ShirtColor(StudentAppearance.Selected));
             Material trousers = CreateFallbackMaterial(shader, "Student Navy Trousers", new Color(0.035f, 0.07f, 0.13f));
             Material skin = CreateFallbackMaterial(shader, "Student Skin", new Color(0.62f, 0.39f, 0.25f));
             Material hair = CreateFallbackMaterial(shader, "Student Hair", new Color(0.035f, 0.025f, 0.02f));
@@ -235,6 +245,7 @@ namespace ChulaEarthquakeVR
         private void OnDestroy()
         {
             if (uniform != null) Destroy(uniform);
+            if (outfitTexture != null) Destroy(outfitTexture);
             foreach (Material material in fallbackMaterials)
                 if (material != null) Destroy(material);
         }

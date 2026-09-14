@@ -23,6 +23,7 @@ namespace ChulaEarthquakeVR
 
         private static void InstallAfterSceneLoad(Scene scene, LoadSceneMode mode)
         {
+            if (scene.name == MainMenuController.MenuScene) return;
             string sceneName = scene.name.ToLowerInvariant();
             if (!sceneName.Contains("cevr") && !sceneName.Contains("tutorial") && !sceneName.Contains("house")) return;
             if (GameObject.Find(RootName) != null) return;

@@ -1,5 +1,13 @@
 # Changelog
 
+## Main menu and selectable student outfits
+
+- Added a committed main-menu scene, first in Build Settings, with Tutorial, House and Exit actions.
+- Added guarded asynchronous loading, loading feedback, and return-to-menu controls.
+- Added saved white, burgundy and blue shirt choices using the existing animated student model and UV atlas.
+- Excluded the menu from the earthquake gameplay installer; kept direct gameplay-scene Play available.
+- Added EditMode tests and static menu contracts. Unity runtime/visual validation remains required.
+
 ## Avatar and desktop HUD recovery
 
 - Added an automatic student-resource reimport check and a visible uniformed fallback avatar, so a missing FBX or texture can no longer leave either player invisible.

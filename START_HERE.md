@@ -9,8 +9,8 @@ This repository is the complete Unity project. Version 0.5.0 supports both the e
 1. Open the repository root with Unity `6000.3.20f1`.
 2. Wait for package import and script compilation to finish.
 3. Stop if the Console contains a red error.
-4. Open either `Assets/CEVR/Generated/Scenes/CEVR_ChulaEngineering_Tutorial.unity` or `Assets/CEVR/Generated/Scenes/House.unity`.
-5. Press Play.
+4. Open `Assets/CEVR/Generated/Scenes/CEVR_MainMenu.unity`.
+5. Press Play, choose a student outfit, then click **PLAY TUTORIAL** or **PLAY HOUSE**. **EXIT** stops Play Mode in the Editor and quits a standalone build.
 6. Click inside the Game view, then turn 180 degrees toward the sturdy brown table.
 7. Confirm that the HUD is readable, four pink chairs exist, and the marked primary chair is beside the table.
 
@@ -26,6 +26,11 @@ To write the newest generated structure into the scene file instead of relying o
 4. Save the project after validation passes.
 
 ## Desktop controls
+
+The menu is a desktop/lab-operator screen; headset controller navigation is not implemented.
+Builds start at the menu. In the Editor, Play starts the currently open scene, so open `CEVR_MainMenu` first.
+During gameplay, press `Esc` and click **MAIN MENU** to end the current run and select another scene.
+Changing the outfit affects the same animated student model (and Player 2), not gameplay or avatar proportions.
 
 - `WASD`: move
 - Mouse: look
