@@ -24,6 +24,18 @@ Select `Tools > CEVR > Import Ground Motion CSV...`, save the generated asset, a
 
 `FloorResponseProfile` is a reduced single-degree-of-freedom response model for prototyping. Natural period, damping, gain, and output limit require an appropriate source and calibration. Do not convert a floor number into force with a generic formula and report it as physical truth.
 
+### Scene-wide object response
+
+At runtime, `EarthquakeSceneResponseInstaller` connects the active floor acceleration to all safe physics props and relevant non-physics décor. Responses are deliberately differentiated:
+
+- light loose props receive stronger inertial response and may slide;
+- tall unsecured bodies receive force above their center of mass and may rock or topple;
+- hanging fixtures swing at a lower natural frequency;
+- mounted objects and windows vibrate with small displacement;
+- heavy furniture responds with lower amplitude.
+
+The player, tracked camera, XR Origin, HUD, floor, walls, safety zones, and assembly geometry are excluded. Training floor numbers only alter the synthetic preview presentation. Recorded motion must use a calibrated `FloorResponseProfile`; the installer does not add a generic floor multiplier to recorded research data.
+
 ## 3. Research validation checklist
 
 - Record source, event, station, component, license, and retrieval date.

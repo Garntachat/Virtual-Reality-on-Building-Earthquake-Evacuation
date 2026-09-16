@@ -43,9 +43,12 @@ The committed legacy scene is repaired in memory before tutorial validation. Thi
 3. Press Play and click the Game view.
 4. Confirm the 30-second preparation prompt appears with four chairs, two shoe pairs, pillow, table, two windows, cabinet, bookcase, and a green outdoor marker.
 5. Aim at the shoes and press `E`; then grab/release the pillow and each chair.
-6. Wait for the earthquake, verify falling/toppling objects and window cracks, use pillow/table cover, then reach the green marker after shaking.
+6. When the earthquake begins, confirm loose objects slide, tall furniture rocks, hanging lights swing, and mounted décor/windows visibly vibrate as intensity rises.
+7. Confirm the player camera itself remains stable, then verify falling/toppling objects and window cracks, use pillow/table cover, and reach the green marker after shaking.
 
 **Gate C-House:** the original house architecture remains present; the player does not fall through the floor; all feature objects appear once; the preparation–earthquake–evacuation flow reaches Success or a defined Failure.
+
+The Console should report how many physics and decorative objects were connected by the scene-wide earthquake response installer. Zero decorative objects indicates a setup failure.
 
 ## D. Optional persistent stage rebuild
 

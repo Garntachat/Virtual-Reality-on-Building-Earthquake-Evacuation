@@ -30,6 +30,12 @@ REQUIRED = (
     "Assets/CEVR/Runtime/Core/HouseScenarioController.cs",
     "Assets/CEVR/Runtime/Core/RenderPipelineMaterialRepair.cs",
     "Assets/CEVR/Runtime/Core/RenderPipelineMaterialRepair.cs.meta",
+    "Assets/CEVR/Runtime/Earthquake/GroundMotionPlayer.cs",
+    "Assets/CEVR/Runtime/Earthquake/InertialRigidbody.cs",
+    "Assets/CEVR/Runtime/Earthquake/EarthquakeSceneResponseInstaller.cs",
+    "Assets/CEVR/Runtime/Earthquake/EarthquakeSceneResponseInstaller.cs.meta",
+    "Assets/CEVR/Runtime/Effects/DecorativeQuakeResponse.cs",
+    "Assets/CEVR/Runtime/Effects/DecorativeQuakeResponse.cs.meta",
     "Assets/CEVR/Runtime/Audio/GameplayAudioDirector.cs",
     "Assets/CEVR/Runtime/Audio/FurnitureImpactAudio.cs",
     "Assets/CEVR/Runtime/Effects/TutorialVisualPolish.cs",
@@ -313,6 +319,7 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
         "LocalMultiplayerManager",
         "WearableSafetyShoes_P2",
         "AddComponent<WindowView>()",
+        "EarthquakeSceneResponseInstaller",
         "GameplayAudioDirector",
     )
     for fragment in required:
@@ -325,6 +332,8 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
 
     feature_contracts = {
         "Assets/CEVR/Editor/EditableSceneMaterialRepair.cs": ("EditorSceneManager.sceneOpened", "EditorApplication.hierarchyChanged", "Repair Pink Materials In Open Scenes", "NeedsRepair", "MarkSceneDirty"),
+        "Assets/CEVR/Runtime/Earthquake/EarthquakeSceneResponseInstaller.cs": ("BindPhysicsObjects", "BindDecorativeObjects", "InertialRigidbody", "TryAddToppleResponse", "GetComponentInParent<PlayerHealth>()", "IsUsingPreview"),
+        "Assets/CEVR/Runtime/Effects/DecorativeQuakeResponse.cs": ("CurrentFloorAccelerationMs2", "PresentationIntensity", "DecorativeQuakeMode.Hanging", "StablePhase", "OnDisable"),
         "Assets/CEVR/Runtime/Effects/BreakableWindow.cs": ("NormalizedIntensity", "window_cracked"),
         "Assets/CEVR/Runtime/Effects/WindowView.cs": ("ApplyTransparentGlass", "BuildExteriorView", "ExteriorView"),
         "Assets/CEVR/Runtime/Hazards/FallingHazard.cs": ("CheckSweptPlayerContact", "Physics.OverlapBox", "ApplyDamage"),

@@ -1,5 +1,14 @@
 # Changelog
 
+## Scene-wide realistic earthquake response
+
+- Connected every safe active Rigidbody in House and Tutorial to the same deterministic floor-acceleration signal; light objects respond more readily while heavy objects retain restrained motion.
+- Added automatic tall-object rocking/toppling, continuous collision handling, wake-up tuning, and impact audio without random torque.
+- Added deterministic visual response for non-physics décor including books, screens, lamps, windows, cabinets, plants, cushions, tables, and other relevant dressing.
+- Differentiated loose sliding, tall rocking, hanging swing, mounted vibration, and heavy-furniture response.
+- Preserved a stable player camera, XR rig, floors, walls, HUD, assembly zones, and crawl/safety geometry for comfort and navigation.
+- Limited floor-number amplification to the synthetic training preview; recorded research profiles continue to use their calibrated floor-response data unchanged.
+
 ## Editable Scene-view material repair
 
 - Added an editor-only repair for unsupported or missing shaders in the House and Tutorial scenes, fixing magenta ProBuilder surfaces before Play mode.

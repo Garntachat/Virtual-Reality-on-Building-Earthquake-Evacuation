@@ -38,6 +38,13 @@ namespace ChulaEarthquakeVR
             gameObject.AddComponent<FurnitureSceneDressing>();
             gameObject.AddComponent<SimpleSceneGuide>();
             if (GetComponent<GameplayAudioDirector>() == null) gameObject.AddComponent<GameplayAudioDirector>();
+
+            GroundMotionPlayer motion = FindFirstObjectByType<GroundMotionPlayer>();
+            EarthquakeSceneResponseInstaller responseInstaller =
+                GetComponent<EarthquakeSceneResponseInstaller>();
+            if (responseInstaller == null)
+                responseInstaller = gameObject.AddComponent<EarthquakeSceneResponseInstaller>();
+            responseInstaller.Configure(motion, houseScene ? 12 : 3);
         }
 
         private void InstallTutorialFeatures()
