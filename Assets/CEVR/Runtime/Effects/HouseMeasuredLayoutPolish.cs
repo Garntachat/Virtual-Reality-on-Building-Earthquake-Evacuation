@@ -9,10 +9,7 @@ namespace ChulaEarthquakeVR
 {
     /// <summary>
     /// Final, measured House-only correction pass.
-    /// Uses HouseProBuilderLayoutAnalyzer results and the measured Pleng FBX visible bounds:
-    /// ground floor y=1.0; upper landing y=4.0, x~4.25..6.25, z~0.25..3.0.
-    /// It does not invent a second furniture set. It corrects the furniture already instantiated by
-    /// FurnitureSceneDressing after that component has finished its normal Start pass.
+    /// Uses HouseProBuilderLayoutAnalyzer results and measured Pleng FBX visible bounds.
     /// </summary>
     [DefaultExecutionOrder(25000)]
     public sealed class HouseMeasuredLayoutPolish : MonoBehaviour
@@ -31,8 +28,6 @@ namespace ChulaEarthquakeVR
 
         private IEnumerator Start()
         {
-            // Bootstrap and FurnitureSceneDressing are synchronous, but two frames guarantees all
-            // generated Pleng/Kenney children and WindowView objects exist before correction.
             yield return null;
             yield return null;
 
@@ -42,17 +37,18 @@ namespace ChulaEarthquakeVR
             FaceTelevisionTowardSofa();
             RebuildMeasuredWindow();
 
-            Debug.Log("CEVR HOUSE MEASURED POLISH READY: compact Pleng dining set, upstairs bed, TV facing sofa, and fitted south-wall window applied.");
+            Debug.Log("CEVR HOUSE MEASURED POLISH READY: dining chairs aligned, bed clear of stairs, TV rotated toward sofa, and fitted window applied.");
         }
 
         private static void CorrectDiningSet()
         {
-            SetAnchor("HouseChair_CoverObstacle", HouseSceneLayout.CoverObstacleChair, 0f);
-            SetAnchor("HouseChair_DiningLeft", HouseSceneLayout.DiningLeftChair, 90f);
-            SetAnchor("HouseChair_DiningRight", HouseSceneLayout.DiningRightChair, -90f);
-            SetAnchor("HouseChair_Spare", HouseSceneLayout.SpareChair, -45f);
+            // DiningChair native front is -Z. Put one chair exactly on each side of the table and
+            // rotate every chair inward toward the tabletop.
+            SetAnchor("HouseChair_CoverObstacle", HouseSceneLayout.CoverObstacleChair, 180f); // south -> north
+            SetAnchor("HouseChair_Spare", HouseSceneLayout.SpareChair, 0f);                   // north -> south
+            SetAnchor("HouseChair_DiningLeft", HouseSceneLayout.DiningLeftChair, -90f);      // west -> east
+            SetAnchor("HouseChair_DiningRight", HouseSceneLayout.DiningRightChair, 90f);     // east -> west
 
-            // Measured source chair = 0.421 x 0.900 x 0.401 m. Keep it close to authored size.
             foreach (MovableFurniture chair in FindObjectsByType<MovableFurniture>(FindObjectsSortMode.None))
             {
                 if (chair == null || !chair.name.StartsWith("HouseChair_", StringComparison.Ordinal)) continue;
@@ -64,19 +60,19 @@ namespace ChulaEarthquakeVR
             GameObject tableTop = GameObject.Find("HouseSturdyTableTop");
             if (tableTop != null)
             {
-                // Measured source table = 1.500 x 0.734 x 0.850 m. Previous 3.4 m visual was more
-                // than twice the authored model width and dominated the hallway.
                 tableTop.transform.position = HouseSceneLayout.DiningTable + Vector3.up * 0.82f;
+                tableTop.transform.rotation = Quaternion.identity;
                 Transform visual = FindChildDeep(tableTop.transform, "TeamFurniture_DiningTable");
                 if (visual != null)
+                {
+                    visual.rotation = Quaternion.identity;
                     FitWorldBounds(visual, new Vector3(1.65f, 0.81f, 0.94f), HouseSceneLayout.DiningTable);
+                }
             }
         }
 
         private static void CorrectLargePlengFurniture()
         {
-            // Sofa source bounds = 1.900 x 0.811 x 0.942 m. Preserve that proportion rather than
-            // stretching it. Native sofa front is +Z; yaw +90 points it toward the TV at +X.
             Transform sofa = FindSceneTransform("TeamFurniture_Sofa", null);
             if (sofa != null)
             {
@@ -111,50 +107,46 @@ namespace ChulaEarthquakeVR
 
         private static void MoveBedroomUpstairs()
         {
-            // Analyzer: upper usable strip is x=4.25..6.25, z=0.25..3.00 at y=4.0.
-            // Measured Bed source = 2.109 x 1.506 x 3.805. Uniform 0.65 scale gives
-            // ~1.371 x 0.979 x 2.473 m, fitting the landing while leaving ~0.6 m along x=4.25.
             Transform bed = FindSceneTransform("TeamFurniture_Bed", null);
             if (bed != null)
             {
                 bed.rotation = Quaternion.identity;
-                FitWorldBounds(bed, new Vector3(1.371f, 0.979f, 2.473f), HouseSceneLayout.Bed);
+                // The upper stair occupies roughly x<=5.0, z=1.5..3.0. Keep the bed footprint
+                // wholly east of x=5 while remaining inside the x<=6.25 landing boundary.
+                FitWorldBounds(bed, new Vector3(1.10f, 0.88f, 2.15f), HouseSceneLayout.Bed);
             }
 
-            // Do not touch the gameplay ProtectivePillow; this selects only the decorative bed pillow.
             GameObject protective = GameObject.Find("ProtectivePillow");
             foreach (Transform candidate in FindObjectsByType<Transform>(FindObjectsSortMode.None))
             {
                 if (candidate == null || candidate.name != "TeamFurniture_Bed_Pillow") continue;
                 if (protective != null && candidate.IsChildOf(protective.transform)) continue;
                 candidate.rotation = Quaternion.identity;
-                FitWorldBounds(candidate, new Vector3(0.651f, 0.091f, 0.300f), HouseSceneLayout.BedPillow);
+                FitWorldBounds(candidate, new Vector3(0.58f, 0.085f, 0.27f), HouseSceneLayout.BedPillow);
             }
         }
 
         private static void FaceTelevisionTowardSofa()
         {
-            // Sofa is west of the television. Current Kenney orientation showed the back of the TV
-            // to the sofa in the user's Game view, so flip both TV and cabinet by 180 degrees.
             Transform tv = FindSceneTransform("Kenney_televisionModern", null);
             if (tv != null)
             {
                 tv.position = HouseSceneLayout.Television + Vector3.up * 0.65f;
-                tv.rotation = Quaternion.Euler(0f, 90f, 0f);
+                // Previous pass incorrectly claimed a 180-degree flip but assigned 90 degrees.
+                // Rotate the actual Kenney TV another 180 degrees from that orientation.
+                tv.rotation = Quaternion.Euler(0f, 270f, 0f);
             }
 
             Transform cabinet = FindSceneTransform("Kenney_cabinetTelevision", null);
             if (cabinet != null)
             {
                 cabinet.position = HouseSceneLayout.Television;
-                cabinet.rotation = Quaternion.Euler(0f, 90f, 0f);
+                cabinet.rotation = Quaternion.Euler(0f, 270f, 0f);
             }
         }
 
         private void RebuildMeasuredWindow()
         {
-            // Analyzer found the south-wall aperture around x=-2.0, z=-7.5 with a solid lower sill.
-            // Remove the generated window and replace it with one clean frame sized *inside* the hole.
             foreach (Transform candidate in FindObjectsByType<Transform>(FindObjectsSortMode.None))
             {
                 if (candidate == null) continue;
