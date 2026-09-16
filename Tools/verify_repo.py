@@ -21,6 +21,8 @@ REQUIRED = (
     "Assets/CEVR/Editor/ChulaTutorialStageBuilder.cs",
     "Assets/CEVR/Editor/HouseProBuilderLayoutAnalyzer.cs",
     "Assets/CEVR/Editor/HouseProBuilderLayoutAnalyzer.cs.meta",
+    "Assets/CEVR/Editor/EditableSceneMaterialRepair.cs",
+    "Assets/CEVR/Editor/EditableSceneMaterialRepair.cs.meta",
     "Assets/CEVR/Runtime/Core/GeneratedStageInfo.cs",
     "Assets/CEVR/Runtime/Core/GameFlowController.cs",
     "Assets/CEVR/Runtime/Core/RuntimeStageRepair.cs",
@@ -322,6 +324,7 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
         fail(errors, "House.unity must be enabled in EditorBuildSettings")
 
     feature_contracts = {
+        "Assets/CEVR/Editor/EditableSceneMaterialRepair.cs": ("EditorSceneManager.sceneOpened", "EditorApplication.hierarchyChanged", "Repair Pink Materials In Open Scenes", "NeedsRepair", "MarkSceneDirty"),
         "Assets/CEVR/Runtime/Effects/BreakableWindow.cs": ("NormalizedIntensity", "window_cracked"),
         "Assets/CEVR/Runtime/Effects/WindowView.cs": ("ApplyTransparentGlass", "BuildExteriorView", "ExteriorView"),
         "Assets/CEVR/Runtime/Hazards/FallingHazard.cs": ("CheckSweptPlayerContact", "Physics.OverlapBox", "ApplyDamage"),

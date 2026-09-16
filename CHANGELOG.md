@@ -1,5 +1,12 @@
 # Changelog
 
+## Editable Scene-view material repair
+
+- Added an editor-only repair for unsupported or missing shaders in the House and Tutorial scenes, fixing magenta ProBuilder surfaces before Play mode.
+- Reuses the project-owned Built-in Render Pipeline wall and concrete materials without changing meshes, transforms, XR hierarchy, or gameplay components.
+- Rechecks newly created ProBuilder objects and provides a manual **CEVR > Repair Pink Materials In Open Scenes** command.
+- Marks repaired scenes dirty so the corrected material references can be saved normally with Cmd/Ctrl+S.
+
 ## Visible exterior windows and reliable falling impacts
 
 - Made tutorial and house windows transparent and added a lightweight exterior skyline view so players can clearly look outside.

@@ -96,6 +96,7 @@ The house uses a separate runtime-installed contract because it preserves a hand
 
 | Symptom | Check | Resolution |
 |---|---|---|
+| House or Tutorial is pink in Scene view | An unsupported `ProBuilderDefault` or imported shader | Wait for compilation, then use **CEVR > Repair Pink Materials In Open Scenes** if the automatic repair did not run; save once with Cmd/Ctrl+S |
 | CEVR menu is missing | Compilation errors | Resolve all errors; Editor scripts do not load after a failed compile |
 | Play mode says the generated scene is stale | Runtime repair script is missing or did not compile | Confirm `RuntimeStageRepair.cs` exists and clear all Console errors; a persistent rebuild is optional after Play works |
 | VR object cannot be grabbed | XRI package, actions, interactors | Complete `XR_SETUP.md`, then rebuild the stage |
