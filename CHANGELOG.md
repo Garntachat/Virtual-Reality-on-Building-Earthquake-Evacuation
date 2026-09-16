@@ -1,5 +1,13 @@
 # Changelog
 
+## Measured House furniture layout
+
+- Replaced guessed House furniture coordinates with a single measured ground-floor layout based on the read-only ProBuilder analysis (floor Y=1.0 m).
+- Put the team bed, pillows, dining set, sofa, fridge, wardrobe, vase, and supporting décor into appropriate living, dining, bedroom, and kitchen zones.
+- Moved the breakable transparent window into the measured south-wall opening, kept the stair and evacuation route clear, and placed broken glass on the detected floor.
+- Added edit-mode layout contracts for room bounds, floor elevation, the measured window opening, and the intentional chair obstruction before the cover table.
+- Preserved the authored House scene mesh, XR/player hierarchy, earthquake response, falling hazards, local co-op, protection equipment, health, third-person view, and logging.
+
 ## Scene-wide realistic earthquake response
 
 - Connected every safe active Rigidbody in House and Tutorial to the same deterministic floor-acceleration signal; light objects respond more readily while heavy objects retain restrained motion.

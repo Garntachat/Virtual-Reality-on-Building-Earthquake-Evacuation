@@ -93,20 +93,21 @@ namespace ChulaEarthquakeVR
             Material blueGlass = MaterialFor("House Glass", new Color(0.10f, 0.36f, 0.55f));
             Material cream = MaterialFor("House Cream", new Color(0.88f, 0.84f, 0.76f));
 
-            Vector3 playerSpawn = new Vector3(0f, 0.03f, -5.2f);
+            Vector3 playerSpawn = HouseSceneLayout.PlayerSpawn;
             player.transform.position = playerSpawn;
             BuildInvisibleSafetyFloor();
-            BuildHouseTable(new Vector3(0f, 0f, -2.7f), wood, charcoal);
-            Primitive("HouseCrawlHereMarker", PrimitiveType.Cube, new Vector3(0f, 0.012f, -2.7f),
+            BuildHouseTable(HouseSceneLayout.DiningTable, wood, charcoal);
+            Primitive("HouseCrawlHereMarker", PrimitiveType.Cube,
+                HouseSceneLayout.OnFloor(HouseSceneLayout.DiningTable.x, HouseSceneLayout.DiningTable.z, 0.012f),
                 new Vector3(2.85f, 0.018f, 1.45f), green, false);
-            CreateChair("HouseChair_CoverObstacle", "house-chair-cover-01", new Vector3(0f, 0f, -4.15f), 0f,
-                pink, charcoal, motion, logger);
-            CreateChair("HouseChair_DiningLeft", "house-chair-left-01", new Vector3(-1.65f, 0f, -2.7f), 90f,
-                teal, charcoal, motion, logger);
-            CreateChair("HouseChair_DiningRight", "house-chair-right-01", new Vector3(1.65f, 0f, -2.7f), -90f,
-                teal, charcoal, motion, logger);
-            CreateChair("HouseChair_Spare", "house-chair-spare-01", new Vector3(2.8f, 0f, -4.7f), -45f,
-                cream, charcoal, motion, logger);
+            CreateChair("HouseChair_CoverObstacle", "house-chair-cover-01",
+                HouseSceneLayout.CoverObstacleChair, 0f, pink, charcoal, motion, logger);
+            CreateChair("HouseChair_DiningLeft", "house-chair-left-01",
+                HouseSceneLayout.DiningLeftChair, 90f, teal, charcoal, motion, logger);
+            CreateChair("HouseChair_DiningRight", "house-chair-right-01",
+                HouseSceneLayout.DiningRightChair, -90f, teal, charcoal, motion, logger);
+            CreateChair("HouseChair_Spare", "house-chair-spare-01",
+                HouseSceneLayout.SpareChair, -45f, cream, charcoal, motion, logger);
 
             EnsureShoes("WearableSafetyShoes_P1", "protective-shoes-p1",
                 playerSpawn + new Vector3(-0.85f, 0.06f, 1.0f), logger);
@@ -115,15 +116,11 @@ namespace ChulaEarthquakeVR
             EnsurePillow(playerSpawn + new Vector3(0.95f, 0.55f, 1.4f), motion, logger);
 
             var staged = new List<Rigidbody>();
-            staged.Add(CreateTopplingCabinet("HouseTallCabinet_Left", new Vector3(-4.55f, 1.15f, -1.0f),
-                charcoal, amber, motion, "house-cabinet-left"));
-            staged.Add(CreateTopplingCabinet("HouseBookcase_Right", new Vector3(4.55f, 1.15f, -0.4f),
-                wood, amber, motion, "house-bookcase-right"));
-            Vector3[] overhead =
-            {
-                new Vector3(-1.8f, 3.15f, -2.0f), new Vector3(1.7f, 3.25f, -1.1f),
-                new Vector3(-0.4f, 3.35f, 0.5f), new Vector3(3.1f, 3.05f, 1.2f)
-            };
+            staged.Add(CreateTopplingCabinet("HouseTallCabinet_Left",
+                HouseSceneLayout.FridgeCenter, charcoal, amber, motion, "house-fridge"));
+            staged.Add(CreateTopplingCabinet("HouseBookcase_Right",
+                HouseSceneLayout.WardrobeCenter, wood, amber, motion, "house-wardrobe"));
+            Vector3[] overhead = HouseSceneLayout.OverheadHazards;
             for (int i = 0; i < overhead.Length; i++)
                 staged.Add(CreateFallingProp($"HouseFallingObject_{i + 1}", overhead[i],
                     i % 2 == 0 ? amber : charcoal, motion, $"house-overhead-{i + 1}"));
@@ -131,8 +128,8 @@ namespace ChulaEarthquakeVR
 
             BuildHouseWindows(motion, logger, blueGlass, charcoal);
             BuildHouseDecoration(wood, cream, teal, green, charcoal);
-            Transform assembly = BuildAssemblyMarker(new Vector3(0f, 0.025f, -8.7f), green).transform;
-            BuildCoverZone(new Vector3(0f, 0.42f, -2.7f));
+            Transform assembly = BuildAssemblyMarker(HouseSceneLayout.AssemblyPoint, green).transform;
+            BuildCoverZone(HouseSceneLayout.CoverZone);
             EnsurePlayerFeatures(player, camera);
             EnsureMultiplayer(camera, player.transform);
 
@@ -223,7 +220,8 @@ namespace ChulaEarthquakeVR
         private void BuildInvisibleSafetyFloor()
         {
             GameObject floor = Primitive("HouseGameplaySafetyFloor", PrimitiveType.Cube,
-                new Vector3(0f, -0.12f, 0f), new Vector3(12f, 0.2f, 19f), null, true);
+                new Vector3(1f, HouseSceneLayout.FloorY - 0.10f, 0f),
+                new Vector3(12f, 0.2f, 19f), null, true);
             Renderer renderer = floor.GetComponent<Renderer>();
             if (renderer != null) renderer.enabled = false;
         }
@@ -294,18 +292,30 @@ namespace ChulaEarthquakeVR
         private void BuildHouseWindows(
             GroundMotionPlayer motion, SessionLogger logger, Material glass, Material frame)
         {
-            for (int i = 0; i < 2; i++)
-            {
-                float x = i == 0 ? -3.1f : 3.1f;
-                GameObject window = Primitive($"HouseWindow_{i + 1}", PrimitiveType.Cube,
-                    new Vector3(x, 1.65f, 2.2f), new Vector3(2.0f, 1.45f, 0.08f), glass, false);
-                window.AddComponent<BreakableWindow>().Configure($"house-window-{i + 1}", motion, logger);
-                window.AddComponent<WindowView>().Configure();
-                CreateChildVisual("WindowTopFrame", window.transform, new Vector3(0f, 0.53f, 0f),
-                    new Vector3(1.08f, 0.07f, 1.4f), frame, false);
-                CreateChildVisual("WindowBottomFrame", window.transform, new Vector3(0f, -0.53f, 0f),
-                    new Vector3(1.08f, 0.07f, 1.4f), frame, false);
-            }
+            // The authored south-wall aperture was measured by HouseProBuilderLayoutAnalyzer.
+            // Keep the glass inside that opening so it is visible from indoors and looks outside.
+            var window = new GameObject("HouseWindow_1");
+            window.transform.SetParent(transform);
+            window.transform.SetPositionAndRotation(HouseSceneLayout.WindowCenter, Quaternion.identity);
+
+            GameObject pane = CreateChildVisual("WindowGlass", window.transform, Vector3.zero,
+                HouseSceneLayout.WindowSize, glass, false);
+            CreateChildVisual("WindowTopFrame", window.transform,
+                new Vector3(0f, HouseSceneLayout.WindowSize.y * 0.5f + 0.035f, 0f),
+                new Vector3(HouseSceneLayout.WindowSize.x + 0.12f, 0.07f, 0.10f), frame, false);
+            CreateChildVisual("WindowBottomFrame", window.transform,
+                new Vector3(0f, -HouseSceneLayout.WindowSize.y * 0.5f - 0.035f, 0f),
+                new Vector3(HouseSceneLayout.WindowSize.x + 0.12f, 0.07f, 0.10f), frame, false);
+            CreateChildVisual("WindowLeftFrame", window.transform,
+                new Vector3(-HouseSceneLayout.WindowSize.x * 0.5f - 0.035f, 0f, 0f),
+                new Vector3(0.07f, HouseSceneLayout.WindowSize.y, 0.10f), frame, false);
+            CreateChildVisual("WindowRightFrame", window.transform,
+                new Vector3(HouseSceneLayout.WindowSize.x * 0.5f + 0.035f, 0f, 0f),
+                new Vector3(0.07f, HouseSceneLayout.WindowSize.y, 0.10f), frame, false);
+
+            BreakableWindow breakable = pane.AddComponent<BreakableWindow>();
+            breakable.Configure("house-window-1", motion, logger);
+            pane.AddComponent<WindowView>().Configure();
         }
 
         private void AttachWindowCracking(GroundMotionPlayer motion, SessionLogger logger)
@@ -327,28 +337,35 @@ namespace ChulaEarthquakeVR
         private void BuildHouseDecoration(
             Material wood, Material cream, Material teal, Material green, Material frame)
         {
-            Primitive("HouseSofaBase", PrimitiveType.Cube, new Vector3(-3.5f, 0.36f, -4.6f),
+            Vector3 sofa = HouseSceneLayout.Sofa;
+            Primitive("HouseSofaBase", PrimitiveType.Cube, sofa + Vector3.up * 0.36f,
                 new Vector3(2.2f, 0.55f, 0.85f), cream, true);
-            Primitive("HouseSofaBack", PrimitiveType.Cube, new Vector3(-3.5f, 0.92f, -4.98f),
-                new Vector3(2.2f, 0.85f, 0.16f), teal, true);
-            Primitive("HouseCoffeeTable", PrimitiveType.Cube, new Vector3(-3.45f, 0.42f, -3.25f),
-                new Vector3(1.7f, 0.12f, 0.9f), wood, true);
-            Primitive("HouseRug", PrimitiveType.Cube, new Vector3(-3.45f, 0.018f, -3.7f),
-                new Vector3(3f, 0.025f, 2.5f), teal, false);
-            Primitive("HousePlantPot", PrimitiveType.Cylinder, new Vector3(4.6f, 0.28f, -4.8f),
+            Primitive("HouseSofaBack", PrimitiveType.Cube,
+                sofa + new Vector3(-0.38f, 0.92f, 0f),
+                new Vector3(0.16f, 0.85f, 2.2f), teal, true);
+            Primitive("HouseCoffeeTable", PrimitiveType.Cube,
+                HouseSceneLayout.CoffeeTable + Vector3.up * 0.42f,
+                new Vector3(0.9f, 0.12f, 1.7f), wood, true);
+            Primitive("HouseRug", PrimitiveType.Cube,
+                HouseSceneLayout.Rug + Vector3.up * 0.018f,
+                new Vector3(2.5f, 0.025f, 3f), teal, false);
+            Primitive("HousePlantPot", PrimitiveType.Cylinder,
+                HouseSceneLayout.Plant + Vector3.up * 0.28f,
                 new Vector3(0.38f, 0.28f, 0.38f), wood, false);
             for (int i = 0; i < 3; i++)
                 Primitive($"HousePlantLeaf_{i + 1}", PrimitiveType.Sphere,
-                    new Vector3(4.4f + i * 0.2f, 0.78f + (i % 2) * 0.12f, -4.8f),
+                    HouseSceneLayout.Plant + new Vector3(-0.2f + i * 0.2f, 0.78f + (i % 2) * 0.12f, 0f),
                     new Vector3(0.30f, 0.58f, 0.24f), green, false);
             for (int i = 0; i < 4; i++)
                 Primitive($"HouseShelfBook_{i + 1}", PrimitiveType.Cube,
-                    new Vector3(4.25f + i * 0.18f, 1.1f, -0.7f),
+                    HouseSceneLayout.WardrobeBottom + new Vector3(-0.35f + i * 0.18f, 1.1f, -0.42f),
                     new Vector3(0.12f, 0.42f + i * 0.04f, 0.32f), i % 2 == 0 ? teal : cream, false);
-            Primitive("HousePhotoFrame", PrimitiveType.Cube, new Vector3(0f, 1.75f, 2.28f),
-                new Vector3(1.05f, 0.72f, 0.06f), frame, false);
-            Primitive("HousePhoto", PrimitiveType.Cube, new Vector3(0f, 1.75f, 2.23f),
-                new Vector3(0.88f, 0.56f, 0.025f), cream, false);
+            Primitive("HousePhotoFrame", PrimitiveType.Cube,
+                HouseSceneLayout.OnFloor(-0.45f, 1.95f, 1.75f),
+                new Vector3(0.06f, 0.72f, 1.05f), frame, false);
+            Primitive("HousePhoto", PrimitiveType.Cube,
+                HouseSceneLayout.OnFloor(-0.49f, 1.95f, 1.75f),
+                new Vector3(0.025f, 0.56f, 0.88f), cream, false);
         }
 
         private GameObject BuildAssemblyMarker(Vector3 position, Material material)
@@ -389,7 +406,7 @@ namespace ChulaEarthquakeVR
             return item;
         }
 
-        private static void CreateChildVisual(
+        private static GameObject CreateChildVisual(
             string objectName, Transform parent, Vector3 localPosition, Vector3 localScale,
             Material material, bool colliderEnabled)
         {
@@ -401,6 +418,7 @@ namespace ChulaEarthquakeVR
             item.GetComponent<Renderer>().sharedMaterial = material;
             Collider itemCollider = item.GetComponent<Collider>();
             if (itemCollider != null) itemCollider.enabled = colliderEnabled;
+            return item;
         }
 
         private Material MaterialFor(string materialName, Color color)

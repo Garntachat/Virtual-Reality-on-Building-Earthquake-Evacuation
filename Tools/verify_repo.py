@@ -28,6 +28,8 @@ REQUIRED = (
     "Assets/CEVR/Runtime/Core/RuntimeStageRepair.cs",
     "Assets/CEVR/Runtime/Core/UniversalSceneGameplayBootstrap.cs",
     "Assets/CEVR/Runtime/Core/HouseScenarioController.cs",
+    "Assets/CEVR/Runtime/Core/HouseSceneLayout.cs",
+    "Assets/CEVR/Runtime/Core/HouseSceneLayout.cs.meta",
     "Assets/CEVR/Runtime/Core/RenderPipelineMaterialRepair.cs",
     "Assets/CEVR/Runtime/Core/RenderPipelineMaterialRepair.cs.meta",
     "Assets/CEVR/Runtime/Earthquake/GroundMotionPlayer.cs",
@@ -312,6 +314,9 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
         "EnsureShoes(",
         "EnsurePillow(",
         "BuildHouseWindows(",
+        "HouseSceneLayout.PlayerSpawn",
+        "HouseSceneLayout.WindowCenter",
+        "HouseSceneLayout.DiningTable",
         "CreateTopplingCabinet(",
         "CreateFallingProp(",
         "HouseScenarioController",
@@ -345,6 +350,7 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
         "Assets/CEVR/Runtime/Player/ThirdPersonViewController.cs": ("tKey.wasPressedThisFrame", "SphereCast"),
         "Assets/CEVR/Runtime/Player/LocalMultiplayerManager.cs": ("f2Key.wasPressedThisFrame", "LocalPlayer2", "Configure(secondCamera, true)"),
         "Assets/CEVR/Runtime/Core/HouseScenarioController.cs": ("preparationSeconds = 30f", "house_tutorial_success"),
+        "Assets/CEVR/Runtime/Core/HouseSceneLayout.cs": ("FloorY = 1.0f", "WindowCenter", "DiningTable", "WardrobeCenter", "FridgeCenter", "OverheadHazards"),
     }
     for relative, fragments in feature_contracts.items():
         try:

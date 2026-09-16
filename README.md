@@ -1,4 +1,4 @@
-> Latest update: [authored furniture and simple 30-second training flow](docs/FURNITURE_AND_SIMPLE_PLAY.md). Lab tasks are optional in Training. Runtime/VR testing remains pending.
+> Latest update: the House scene now uses measured floor/window geometry and room-appropriate placement for every team furniture model.
 
 # CEVR - Chula Engineering Earthquake VR Tutorial Stage
 

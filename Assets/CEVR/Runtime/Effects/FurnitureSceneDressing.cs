@@ -275,7 +275,7 @@ namespace ChulaEarthquakeVR
             if (top != null)
             {
                 Vector3 dimensions = new Vector3(house ? 3.4f : 3.2f, house ? 0.99f : 0.95f, house ? 1.8f : 1.6f);
-                Vector3 bottom = new Vector3(top.transform.position.x, 0f, top.transform.position.z);
+                Vector3 bottom = new Vector3(top.transform.position.x, HouseSceneLayout.FloorY, top.transform.position.z);
                 if (!ReplaceWithTeamModelAt(top, "DiningTable", dimensions, bottom))
                 {
                     Replace(top, "table", dimensions);
@@ -301,8 +301,12 @@ namespace ChulaEarthquakeVR
                 var line = outline.AddComponent<LineRenderer>();
                 line.useWorldSpace = true; line.loop = true; line.widthMultiplier = 0.04f;
                 line.positionCount = 4;
-                line.SetPositions(new[] { new Vector3(-1.55f, 0.025f, -3.5f), new Vector3(1.55f, 0.025f, -3.5f),
-                    new Vector3(1.55f, 0.025f, -1.9f), new Vector3(-1.55f, 0.025f, -1.9f) });
+                Vector3 table = HouseSceneLayout.DiningTable;
+                float y = HouseSceneLayout.FloorY + 0.025f;
+                line.SetPositions(new[] { new Vector3(table.x - 1.55f, y, table.z - 0.8f),
+                    new Vector3(table.x + 1.55f, y, table.z - 0.8f),
+                    new Vector3(table.x + 1.55f, y, table.z + 0.8f),
+                    new Vector3(table.x - 1.55f, y, table.z + 0.8f) });
                 Material marker = new Material(Shader.Find("Sprites/Default"));
                 owned.Add(marker); line.sharedMaterial = marker;
                 line.startColor = line.endColor = new Color(0.05f, 0.85f, 0.25f);
@@ -341,23 +345,41 @@ namespace ChulaEarthquakeVR
         private void DressHouse()
         {
             Hide("HouseSofa", "HouseCoffeeTable", "HousePlant", "HouseShelfBook", "HousePhoto", "HouseRug");
-            if (TeamDecor("Sofa", new Vector3(-3.5f, 0f, -4.6f), new Vector3(2.2f, 0.95f, 1.0f)) == null)
-                Decor("loungeSofaLong", new Vector3(-3.5f, 0, -4.6f), new Vector3(2.2f, 1.1f, 0.85f));
-            TeamDecor("Sofa_Pillows", new Vector3(-3.5f, 0.50f, -4.83f), new Vector3(1.45f, 0.42f, 0.28f));
-            Decor("tableCoffee", new Vector3(-3.45f, 0, -3.25f), new Vector3(1.7f, 0.48f, 0.9f));
-            Decor("rugRectangle", new Vector3(-3.45f, 0.01f, -3.7f), new Vector3(3, 0.02f, 2.5f));
-            Decor("pottedPlant", new Vector3(4.6f, 0, -4.8f), new Vector3(0.7f, 1.35f, 0.7f));
-            Decor("cabinetTelevision", new Vector3(-3.5f, 0, -1.85f), new Vector3(2, 0.65f, 0.5f), 180);
-            Decor("televisionModern", new Vector3(-3.5f, 0.65f, -1.85f), new Vector3(1.45f, 0.85f, 0.22f), 180);
-            Decor("kitchenCabinet", new Vector3(2.25f, 0, 1.15f), new Vector3(1.1f, 0.9f, 0.65f));
-            Decor("kitchenSink", new Vector3(3.35f, 0, 1.15f), new Vector3(1.1f, 0.9f, 0.65f));
-            Decor("kitchenStove", new Vector3(4.45f, 0, 1.15f), new Vector3(0.9f, 0.9f, 0.65f));
-            Decor("lampRoundFloor", new Vector3(-4.9f, 0, -4.9f), new Vector3(0.45f, 1.6f, 0.45f));
-            TeamDecor("Bed", new Vector3(-3.8f, 0f, 4.55f), new Vector3(1.65f, 0.68f, 2.10f), 0f, true);
-            TeamDecor("Bed_Pillow", new Vector3(-3.8f, 0.68f, 5.15f), new Vector3(0.72f, 0.18f, 0.42f));
-            CreateShakingVase(new Vector3(-3.45f, 0.49f, -3.25f));
-            // Two restrained warm fills; no extra realtime shadow maps for the VR scene.
-            foreach (Vector3 position in new[] { new Vector3(-3.3f, 2.5f, -3.8f), new Vector3(2.6f, 2.5f, -0.5f) })
+
+            if (TeamDecor("Sofa", HouseSceneLayout.Sofa, new Vector3(2.2f, 0.95f, 1.0f), 90f, true) == null)
+                Decor("loungeSofaLong", HouseSceneLayout.Sofa, new Vector3(2.2f, 1.1f, 0.85f), 90f);
+            TeamDecor("Sofa_Pillows", HouseSceneLayout.Sofa + new Vector3(0.22f, 0.50f, 0f),
+                new Vector3(1.45f, 0.42f, 0.28f), 90f);
+
+            Decor("tableCoffee", HouseSceneLayout.CoffeeTable, new Vector3(1.7f, 0.48f, 0.9f), 90f);
+            Decor("rugRectangle", HouseSceneLayout.Rug + Vector3.up * 0.01f,
+                new Vector3(2.5f, 0.02f, 3.0f), 90f);
+            Decor("pottedPlant", HouseSceneLayout.Plant, new Vector3(0.7f, 1.35f, 0.7f));
+            Decor("cabinetTelevision", HouseSceneLayout.Television,
+                new Vector3(2.0f, 0.65f, 0.5f), -90f);
+            Decor("televisionModern", HouseSceneLayout.Television + Vector3.up * 0.65f,
+                new Vector3(1.45f, 0.85f, 0.22f), -90f);
+
+            // Kitchen line stays against the north wall and clear of the stair volume.
+            Decor("kitchenCabinet", HouseSceneLayout.KitchenCabinet,
+                new Vector3(1.05f, 0.9f, 0.65f), 180f);
+            Decor("kitchenSink", HouseSceneLayout.KitchenSink,
+                new Vector3(1.05f, 0.9f, 0.65f), 180f);
+            Decor("kitchenStove", HouseSceneLayout.KitchenStove,
+                new Vector3(0.9f, 0.9f, 0.65f), 180f);
+
+            Decor("lampRoundFloor", HouseSceneLayout.OnFloor(-4.0f, 1.75f),
+                new Vector3(0.45f, 1.6f, 0.45f));
+            TeamDecor("Bed", HouseSceneLayout.Bed, new Vector3(1.80f, 0.72f, 2.40f), 0f, true);
+            TeamDecor("Bed_Pillow", HouseSceneLayout.BedPillow,
+                new Vector3(0.72f, 0.18f, 0.42f));
+            CreateShakingVase(HouseSceneLayout.CoffeeTable + Vector3.up * 0.49f);
+
+            foreach (Vector3 position in new[]
+            {
+                HouseSceneLayout.OnFloor(-2.8f, 0.6f, 2.5f),
+                HouseSceneLayout.OnFloor(3.4f, 5.2f, 2.5f)
+            })
             {
                 var lamp = new GameObject("HouseWarmFill");
                 lamp.transform.SetParent(transform, false);
@@ -372,6 +394,33 @@ namespace ChulaEarthquakeVR
                     new Vector3(0.8f, 0.15f, 0.5f), Quaternion.identity);
                 if (fixture != null) fixture.AddComponent<VisualQuakeSway>();
             }
+
+            ValidateHouseFurnitureBounds();
+        }
+
+        private void ValidateHouseFurnitureBounds()
+        {
+            foreach (Renderer renderer in GetComponentsInChildren<Renderer>(true))
+            {
+                if (!renderer.enabled || !IsTeamFurnitureRenderer(renderer.transform)) continue;
+                Bounds bounds = renderer.bounds;
+                if (bounds.min.y < HouseSceneLayout.FloorY - 0.06f)
+                    Debug.LogError($"CEVR furniture below the authored floor: {renderer.name} at y={bounds.min.y:F2}.");
+                if (bounds.center.x < -5.0f || bounds.center.x > 7.0f ||
+                    bounds.center.z < -7.5f || bounds.center.z > 7.5f)
+                    Debug.LogError($"CEVR furniture outside the authored house: {renderer.name} at {bounds.center}.");
+            }
+        }
+
+        private bool IsTeamFurnitureRenderer(Transform candidate)
+        {
+            Transform current = candidate;
+            while (current != null && current != transform)
+            {
+                if (current.name.StartsWith("TeamFurniture_", StringComparison.Ordinal)) return true;
+                current = current.parent;
+            }
+            return false;
         }
 
         private void DressTutorial()

@@ -54,7 +54,12 @@ namespace ChulaEarthquakeVR
         private void BuildFloorDebris()
         {
             var debris = new GameObject("BrokenGlassFloorHazard");
-            debris.transform.position = new Vector3(transform.position.x, 0.035f, transform.position.z - 0.7f);
+            float floorY = 0f;
+            Vector3 rayOrigin = transform.position + Vector3.up * 0.25f + transform.forward * 0.70f;
+            if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit floorHit, 20f,
+                Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+                floorY = floorHit.point.y;
+            debris.transform.position = new Vector3(rayOrigin.x, floorY + 0.035f, rayOrigin.z);
             BoxCollider trigger = debris.AddComponent<BoxCollider>();
             trigger.isTrigger = true;
             trigger.size = new Vector3(1.7f, 0.08f, 1.25f);
