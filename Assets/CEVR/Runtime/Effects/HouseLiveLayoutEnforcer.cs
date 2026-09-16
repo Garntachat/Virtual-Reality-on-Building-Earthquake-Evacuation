@@ -1,15 +1,12 @@
 using System;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace ChulaEarthquakeVR
 {
     /// <summary>
-    /// Final House layout enforcer. This exists because the House visual dressing is created at
-    /// runtime and earlier one-shot correction passes could execute before those objects existed.
-    /// The enforcer waits for the actual Pleng/Kenney objects, applies the correction once, and
-    /// then stops touching gameplay furniture so grabbing/earthquake physics remain free.
+    /// Final House layout enforcer. It waits for runtime dressing, then fixes the actual visible
+    /// Pleng/Kenney objects. It keeps retrying briefly because those visuals are created during Start.
     /// </summary>
     [DefaultExecutionOrder(32000)]
     public sealed class HouseLiveLayoutEnforcer : MonoBehaviour
@@ -17,6 +14,7 @@ namespace ChulaEarthquakeVR
         private bool diningDone;
         private bool bedDone;
         private bool tvDone;
+        private bool ceilingDone;
         private float deadline;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -35,26 +33,27 @@ namespace ChulaEarthquakeVR
 
         private void Awake()
         {
-            deadline = Time.unscaledTime + 5f;
+            deadline = Time.unscaledTime + 8f;
             Debug.Log("CEVR HOUSE LIVE LAYOUT ENFORCER STARTED");
         }
 
         private void LateUpdate()
         {
-            if (Time.unscaledTime > deadline)
+            if (!diningDone) diningDone = TryFixDining();
+            if (!bedDone) bedDone = TryFixBed();
+            if (!tvDone) tvDone = TryFixTelevision();
+            if (!ceilingDone) ceilingDone = TryFixCeilingObjects();
+
+            if (diningDone && bedDone && tvDone && ceilingDone)
             {
-                Debug.Log($"CEVR HOUSE LIVE LAYOUT FINAL: dining={diningDone}, bed={bedDone}, tv={tvDone}");
+                Debug.Log("CEVR HOUSE LIVE LAYOUT FINAL: dining=True, bed=True, tv=True, ceiling=True");
                 enabled = false;
                 return;
             }
 
-            if (!diningDone) diningDone = TryFixDining();
-            if (!bedDone) bedDone = TryFixBed();
-            if (!tvDone) tvDone = TryFixTelevision();
-
-            if (diningDone && bedDone && tvDone)
+            if (Time.unscaledTime > deadline)
             {
-                Debug.Log("CEVR HOUSE LIVE LAYOUT FINAL: dining=True, bed=True, tv=True");
+                Debug.LogWarning($"CEVR HOUSE LIVE LAYOUT PARTIAL: dining={diningDone}, bed={bedDone}, tv={tvDone}, ceiling={ceilingDone}");
                 enabled = false;
             }
         }
@@ -81,11 +80,10 @@ namespace ChulaEarthquakeVR
             tableVisual.rotation = Quaternion.identity;
             FitWorldBounds(tableVisual, new Vector3(1.65f, 0.81f, 0.94f), c);
 
-            // Equal offsets from table center. All chairs face inward.
-            PlaceChair(south, southVisual, new Vector3(c.x, HouseSceneLayout.FloorY, c.z - 0.82f), 180f);
-            PlaceChair(north, northVisual, new Vector3(c.x, HouseSceneLayout.FloorY, c.z + 0.82f), 0f);
-            PlaceChair(west, westVisual, new Vector3(c.x - 1.12f, HouseSceneLayout.FloorY, c.z), -90f);
-            PlaceChair(east, eastVisual, new Vector3(c.x + 1.12f, HouseSceneLayout.FloorY, c.z), 90f);
+            PlaceChair(south, southVisual, new Vector3(c.x, HouseSceneLayout.FloorY, c.z - 0.80f), 180f);
+            PlaceChair(north, northVisual, new Vector3(c.x, HouseSceneLayout.FloorY, c.z + 0.80f), 0f);
+            PlaceChair(west, westVisual, new Vector3(c.x - 1.08f, HouseSceneLayout.FloorY, c.z), -90f);
+            PlaceChair(east, eastVisual, new Vector3(c.x + 1.08f, HouseSceneLayout.FloorY, c.z), 90f);
             return true;
         }
 
@@ -101,21 +99,20 @@ namespace ChulaEarthquakeVR
             Transform bed = FindSceneTransform("TeamFurniture_Bed");
             if (bed == null) return false;
 
-            // Analyzer: upper-floor walkable area x=4.25..6.25, z=0.25..3.00 at y=4.0.
-            // Stairs (1) reaches x=1..5 and z=1.5..3.0. Keep the entire bed east of x=5.05,
-            // with a 1.10m width, so it cannot overlap the stair mesh.
-            Vector3 bottom = new Vector3(5.68f, HouseSceneLayout.SecondFloorY, 1.33f);
-            bed.rotation = Quaternion.identity;
-            FitWorldBounds(bed, new Vector3(1.10f, 0.88f, 1.85f), bottom);
+            // The upper stair occupies x<=5 and z>=1.5. Put the bed crosswise in the clear strip
+            // z=0.25..1.35, x=4.35..6.05 so no part of the bed touches the stair footprint.
+            Vector3 bottom = new Vector3(5.20f, HouseSceneLayout.SecondFloorY, 0.80f);
+            bed.rotation = Quaternion.Euler(0f, 90f, 0f);
+            FitWorldBounds(bed, new Vector3(1.70f, 0.88f, 0.90f), bottom);
 
             GameObject protective = GameObject.Find("ProtectivePillow");
             foreach (Transform t in FindObjectsByType<Transform>(FindObjectsSortMode.None))
             {
                 if (t == null || t.name != "TeamFurniture_Bed_Pillow") continue;
                 if (protective != null && t.IsChildOf(protective.transform)) continue;
-                t.rotation = Quaternion.identity;
-                FitWorldBounds(t, new Vector3(0.58f, 0.085f, 0.27f),
-                    new Vector3(5.68f, HouseSceneLayout.SecondFloorY + 0.55f, 1.92f));
+                t.rotation = Quaternion.Euler(0f, 90f, 0f);
+                FitWorldBounds(t, new Vector3(0.48f, 0.085f, 0.24f),
+                    new Vector3(5.70f, HouseSceneLayout.SecondFloorY + 0.54f, 0.80f));
             }
             return true;
         }
@@ -129,11 +126,43 @@ namespace ChulaEarthquakeVR
             tv.position = HouseSceneLayout.Television + Vector3.up * 0.65f;
             cabinet.position = HouseSceneLayout.Television;
 
-            // User's Game view shows the screen facing away from the sofa. Rotate both exactly
-            // 180 degrees from the orientation created by FurnitureSceneDressing, rather than
-            // guessing another absolute yaw.
-            tv.rotation = tv.rotation * Quaternion.Euler(0f, 180f, 0f);
-            cabinet.rotation = cabinet.rotation * Quaternion.Euler(0f, 180f, 0f);
+            // FurnitureSceneDressing creates both at -90 degrees. The model's visible screen is on
+            // the opposite face, so +90 is the exact 180-degree correction requested by the user.
+            tv.rotation = Quaternion.Euler(0f, 90f, 0f);
+            cabinet.rotation = Quaternion.Euler(0f, 90f, 0f);
+            return true;
+        }
+
+        private static bool TryFixCeilingObjects()
+        {
+            int found = 0;
+            const float targetTop = 3.96f;
+
+            foreach (GameObject go in FindObjectsByType<GameObject>(FindObjectsSortMode.None))
+            {
+                if (go == null || !go.name.StartsWith("HouseFallingObject_", StringComparison.Ordinal)) continue;
+                if (SnapTop(go.transform, targetTop)) found++;
+            }
+
+            foreach (Transform t in FindObjectsByType<Transform>(FindObjectsSortMode.None))
+            {
+                if (t == null) continue;
+                if (t.name != "Kenney_lampSquareCeiling" &&
+                    !t.name.StartsWith("HangingLamp_", StringComparison.Ordinal)) continue;
+                if (!TryBounds(t, out Bounds b)) continue;
+                if (b.center.y < 2f || b.center.y > 4.8f) continue;
+                if (SnapTop(t, targetTop)) found++;
+            }
+
+            // Bootstrap creates four falling hazards. Requiring at least four prevents us from
+            // declaring success before those runtime objects are present.
+            return found >= 4;
+        }
+
+        private static bool SnapTop(Transform target, float targetTop)
+        {
+            if (!TryBounds(target, out Bounds b)) return false;
+            target.position += Vector3.up * (targetTop - b.max.y);
             return true;
         }
 
