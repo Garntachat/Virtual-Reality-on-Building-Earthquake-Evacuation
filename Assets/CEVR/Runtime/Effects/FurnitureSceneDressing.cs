@@ -301,12 +301,12 @@ namespace ChulaEarthquakeVR
                 var line = outline.AddComponent<LineRenderer>();
                 line.useWorldSpace = true; line.loop = true; line.widthMultiplier = 0.04f;
                 line.positionCount = 4;
-                Vector3 table = HouseSceneLayout.DiningTable;
+                Vector3 coverAnchor = HouseSceneLayout.DiningTable;
                 float y = HouseSceneLayout.FloorY + 0.025f;
-                line.SetPositions(new[] { new Vector3(table.x - 1.55f, y, table.z - 0.8f),
-                    new Vector3(table.x + 1.55f, y, table.z - 0.8f),
-                    new Vector3(table.x + 1.55f, y, table.z + 0.8f),
-                    new Vector3(table.x - 1.55f, y, table.z + 0.8f) });
+                line.SetPositions(new[] { new Vector3(coverAnchor.x - 1.55f, y, coverAnchor.z - 0.8f),
+                    new Vector3(coverAnchor.x + 1.55f, y, coverAnchor.z - 0.8f),
+                    new Vector3(coverAnchor.x + 1.55f, y, coverAnchor.z + 0.8f),
+                    new Vector3(coverAnchor.x - 1.55f, y, coverAnchor.z + 0.8f) });
                 Material marker = new Material(Shader.Find("Sprites/Default"));
                 owned.Add(marker); line.sharedMaterial = marker;
                 line.startColor = line.endColor = new Color(0.05f, 0.85f, 0.25f);

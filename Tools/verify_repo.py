@@ -416,6 +416,9 @@ def check_team_furniture(errors: list[str]) -> None:
         if fragment not in dressing:
             fail(errors, f"team furniture integration is missing: {fragment}")
 
+    if re.search(r"\\bstring\\s+table\\b[\\s\\S]*\\bVector3\\s+table\\b", dressing):
+        fail(errors, "FurnitureSceneDressing.Start has a C# CS0136 local variable collision for table")
+
 
 def check_house_layout_analyzer(errors: list[str]) -> None:
     analyzer_path = ROOT / "Assets/CEVR/Editor/HouseProBuilderLayoutAnalyzer.cs"
