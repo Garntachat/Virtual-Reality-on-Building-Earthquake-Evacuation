@@ -44,6 +44,81 @@ namespace ChulaEarthquakeVR
             BuildLighting(context);
         }
 
+        public static bool ValidateBuiltLayout(Scene scene, Transform root, out string report)
+        {
+            var problems = new List<string>();
+            if (root == null)
+            {
+                report = "missing layout root";
+                return false;
+            }
+
+            RequireCount(root, "HouseLayout_DiningTable", 1, problems);
+            RequireCount(root, "HouseLayout_DiningChair", 4, problems);
+            RequireCount(root, "HouseLayout_Sofa", 1, problems);
+            RequireCount(root, "HouseLayout_televisionModern", 1, problems);
+            RequireCount(root, "HouseLayout_Bed", 1, problems);
+            RequireCount(root, "HouseLayout_Fridge", 1, problems);
+            RequireCount(root, "HouseLayout_Wandrobe", 1, problems);
+            RequireCount(root, "HouseLayout_WindowGlass", 1, problems);
+
+            Transform bed = FindChildExact(root, "HouseLayout_Bed");
+            if (bed != null && HouseFurnitureGeometry.TryVisibleBounds(bed, out Bounds bedBounds))
+            {
+                if (Mathf.Abs(bedBounds.min.y - HouseSceneLayout.SecondFloorY) > 0.06f)
+                    problems.Add($"bed bottom is y={bedBounds.min.y:F2}, expected {HouseSceneLayout.SecondFloorY:F2}");
+
+                GameObject stairObject = FindSceneObject(scene, "Stairs (1)");
+                Collider stair = stairObject == null ? null : stairObject.GetComponent<Collider>();
+                if (stair != null)
+                {
+                    Bounds sb = stair.bounds;
+                    bool xz = bedBounds.max.x > sb.min.x && bedBounds.min.x < sb.max.x &&
+                              bedBounds.max.z > sb.min.z && bedBounds.min.z < sb.max.z;
+                    bool y = bedBounds.max.y > sb.min.y && bedBounds.min.y < sb.max.y + 0.25f;
+                    if (xz && y) problems.Add("bed overlaps Stairs (1)");
+                }
+            }
+
+            Transform table = FindChildExact(root, "HouseLayout_DiningTable");
+            if (table != null && HouseFurnitureGeometry.TryVisibleBounds(table, out Bounds tableBounds) &&
+                Mathf.Abs(tableBounds.min.y - HouseSceneLayout.FloorY) > 0.06f)
+                problems.Add($"dining table bottom is y={tableBounds.min.y:F2}, expected {HouseSceneLayout.FloorY:F2}");
+
+            Transform tv = FindChildExact(root, "HouseLayout_televisionModern");
+            if (tv != null)
+            {
+                float yaw = NormalizeYaw(tv.eulerAngles.y);
+                if (Mathf.Abs(Mathf.DeltaAngle(yaw, HouseSceneLayout.TelevisionYaw)) > 1f)
+                    problems.Add($"TV yaw is {yaw:F1}, expected {HouseSceneLayout.TelevisionYaw:F1}");
+            }
+
+            report = problems.Count == 0 ? "PASS" : string.Join("; ", problems);
+            return problems.Count == 0;
+        }
+
+        private static void RequireCount(Transform root, string exactName, int expected, List<string> problems)
+        {
+            int count = 0;
+            foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
+                if (t.name == exactName) count++;
+            if (count != expected) problems.Add($"{exactName} count={count}, expected {expected}");
+        }
+
+        private static Transform FindChildExact(Transform root, string exactName)
+        {
+            foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
+                if (t.name == exactName) return t;
+            return null;
+        }
+
+        private static float NormalizeYaw(float yaw)
+        {
+            yaw %= 360f;
+            if (yaw < 0f) yaw += 360f;
+            return yaw;
+        }
+
         /// <summary>
         /// Mirrors the non-visual authored-object changes required by Play mode. This is deliberately
         /// shared with Edit mode so the scene cannot show old placeholder furniture underneath the
