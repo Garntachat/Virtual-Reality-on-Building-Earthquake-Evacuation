@@ -5,9 +5,11 @@ using UnityEngine.SceneManagement;
 namespace ChulaEarthquakeVR
 {
     /// <summary>
-    /// Play-mode wrapper for the shared House layout.
-    /// The actual furniture/decor construction lives in HouseLayoutSharedBuilder, which is also
-    /// called by the Edit-mode preview. That guarantees Scene view and Play use the same builder.
+    /// Runtime binder for the House.
+    ///
+    /// Preferred path: use the normal serialized HouseFurniture hierarchy saved in House.unity.
+    /// Fallback path: if an older scene has not been baked yet, build the same shared layout at
+    /// runtime so gameplay remains usable.
     /// </summary>
     [DefaultExecutionOrder(-9000)]
     public sealed class HouseSourceLayoutOverride : MonoBehaviour
@@ -38,17 +40,36 @@ namespace ChulaEarthquakeVR
                 return;
             }
 
-            // House uses the shared builder exclusively. The generic dresser still handles Tutorial.
+            // Tutorial still uses FurnitureSceneDressing. House does not.
             FurnitureSceneDressing generic = gameplayRoot.GetComponent<FurnitureSceneDressing>();
             if (generic != null) generic.enabled = false;
 
-            // The editor preview is built with the same builder. Hide it in Play so the runtime copy
-            // is the only active set and receives runtime colliders / window behaviour.
-            GameObject preview = GameObject.Find("CEVR_HouseEditorFurniturePreview");
-            if (preview != null) preview.SetActive(false);
+            GroundMotionPlayer motion = FindFirstObjectByType<GroundMotionPlayer>();
+            SessionLogger logger = FindFirstObjectByType<SessionLogger>();
 
-            GameObject oldRuntime = GameObject.Find("CEVR_HouseRuntimeLayout");
-            if (oldRuntime != null) Destroy(oldRuntime);
+            GameObject baked = GameObject.Find("HouseFurniture");
+            if (baked != null)
+            {
+                baked.SetActive(true);
+                HouseLayoutSharedBuilder.PrepareBakedRuntime(scene, baked.transform, motion, logger);
+
+                bool valid = HouseLayoutSharedBuilder.ValidateBuiltLayout(scene, baked.transform, out string report);
+                string signature = HouseLayoutSharedBuilder.ComputeVisualSignature(baked.transform);
+                if (valid)
+                    Debug.Log("CEVR HOUSE BAKED LAYOUT VALIDATION PASS. visual-signature=" + signature);
+                else
+                    Debug.LogError("CEVR HOUSE BAKED LAYOUT VALIDATION FAILED: " + report + "; visual-signature=" + signature);
+
+                if (gameplayRoot.GetComponent<QuakeLightFailures>() == null)
+                    gameplayRoot.gameObject.AddComponent<QuakeLightFailures>();
+
+                Debug.Log("CEVR HOUSE USING SERIALIZED HouseFurniture FROM House.unity. No runtime visual rebuild.");
+                return;
+            }
+
+            Debug.LogWarning(
+                "CEVR HouseFurniture is not baked into House.unity yet. Falling back to runtime generation. " +
+                "Use CEVR > House > Bake Play Layout Into House Scene.");
 
             GameObject root = new GameObject("CEVR_HouseRuntimeLayout");
             root.transform.SetParent(gameplayRoot, false);
@@ -59,21 +80,21 @@ namespace ChulaEarthquakeVR
                 scene = scene,
                 root = root.transform,
                 runtime = true,
-                groundMotion = FindFirstObjectByType<GroundMotionPlayer>(),
-                logger = FindFirstObjectByType<SessionLogger>()
+                groundMotion = motion,
+                logger = logger
             };
             HouseLayoutSharedBuilder.Build(context);
 
-            bool valid = HouseLayoutSharedBuilder.ValidateBuiltLayout(scene, root.transform, out string report);
-            if (valid)
-                Debug.Log("CEVR HOUSE RUNTIME LAYOUT VALIDATION PASS.");
+            bool fallbackValid = HouseLayoutSharedBuilder.ValidateBuiltLayout(scene, root.transform, out string fallbackReport);
+            string fallbackSignature = HouseLayoutSharedBuilder.ComputeVisualSignature(root.transform);
+            if (fallbackValid)
+                Debug.Log("CEVR HOUSE FALLBACK LAYOUT VALIDATION PASS. visual-signature=" + fallbackSignature);
             else
-                Debug.LogError("CEVR HOUSE RUNTIME LAYOUT VALIDATION FAILED: " + report);
+                Debug.LogError("CEVR HOUSE FALLBACK LAYOUT VALIDATION FAILED: " + fallbackReport +
+                               "; visual-signature=" + fallbackSignature);
 
             if (gameplayRoot.GetComponent<QuakeLightFailures>() == null)
                 gameplayRoot.gameObject.AddComponent<QuakeLightFailures>();
-
-            Debug.Log("CEVR HOUSE RUNTIME LAYOUT READY: built by the exact same HouseLayoutSharedBuilder used in Scene view.");
         }
     }
 }
