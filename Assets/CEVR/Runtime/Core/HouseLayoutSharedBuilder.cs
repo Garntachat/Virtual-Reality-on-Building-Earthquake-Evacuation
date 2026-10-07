@@ -53,15 +53,12 @@ namespace ChulaEarthquakeVR
 
             string[] colliderObjects =
             {
-                "HouseLayout_DiningTable",
                 "HouseLayout_Sofa",
                 "HouseLayout_tableCoffee",
                 "HouseLayout_cabinetTelevision",
                 "HouseLayout_kitchenCabinet",
                 "HouseLayout_kitchenSink",
                 "HouseLayout_kitchenStove",
-                "HouseLayout_Fridge",
-                "HouseLayout_Wandrobe",
                 "HouseLayout_Bed",
                 "HouseLayout_bookcaseOpen"
             };
@@ -618,7 +615,10 @@ namespace ChulaEarthquakeVR
             Transform visual = FindChildExact(root, visualName);
             GameObject anchor = FindSceneObject(scene, anchorName);
             if (visual == null || anchor == null) return;
-            visual.SetParent(anchor.transform, true);
+
+            HouseVisualRuntimeFollower follower = visual.GetComponent<HouseVisualRuntimeFollower>();
+            if (follower == null) follower = visual.gameObject.AddComponent<HouseVisualRuntimeFollower>();
+            follower.Configure(anchor.transform);
         }
 
         private static void Rename(GameObject go, string name)
