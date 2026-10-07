@@ -44,6 +44,55 @@ namespace ChulaEarthquakeVR
             BuildLighting(context);
         }
 
+        public static void PrepareBakedRuntime(Scene scene, Transform root,
+            GroundMotionPlayer groundMotion, SessionLogger logger)
+        {
+            if (root == null) return;
+
+            ApplyAuthoredState(scene);
+
+            string[] colliderObjects =
+            {
+                "HouseLayout_DiningTable",
+                "HouseLayout_Sofa",
+                "HouseLayout_tableCoffee",
+                "HouseLayout_cabinetTelevision",
+                "HouseLayout_kitchenCabinet",
+                "HouseLayout_kitchenSink",
+                "HouseLayout_kitchenStove",
+                "HouseLayout_Fridge",
+                "HouseLayout_Wandrobe",
+                "HouseLayout_Bed",
+                "HouseLayout_bookcaseOpen"
+            };
+
+            foreach (string exactName in colliderObjects)
+            {
+                Transform t = FindChildExact(root, exactName);
+                if (t == null) continue;
+                bool hasEnabledCollider = false;
+                foreach (Collider existing in t.GetComponents<Collider>())
+                {
+                    if (!existing.enabled) continue;
+                    hasEnabledCollider = true;
+                    break;
+                }
+                if (!hasEnabledCollider) AddBoundsCollider(t.gameObject);
+            }
+
+            Transform glass = FindChildExact(root, "HouseLayout_WindowGlass");
+            if (glass != null)
+            {
+                WindowView view = glass.GetComponent<WindowView>();
+                if (view == null) view = glass.gameObject.AddComponent<WindowView>();
+                view.Configure();
+
+                BreakableWindow breakable = glass.GetComponent<BreakableWindow>();
+                if (breakable == null) breakable = glass.gameObject.AddComponent<BreakableWindow>();
+                breakable.Configure("house-window-real", groundMotion, logger);
+            }
+        }
+
         public static string ComputeVisualSignature(Transform root)
         {
             if (root == null) return "missing";
