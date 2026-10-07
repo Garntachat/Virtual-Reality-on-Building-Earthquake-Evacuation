@@ -44,8 +44,11 @@ namespace ChulaEarthquakeVR
 
             FurnitureSceneDressing generic = gameplayRoot.GetComponent<FurnitureSceneDressing>();
             if (generic != null) generic.enabled = false;
-            HouseLiveLayoutEnforcer oldEnforcer = FindFirstObjectByType<HouseLiveLayoutEnforcer>();
-            if (oldEnforcer != null) oldEnforcer.enabled = false;
+
+            // Edit-mode preview exists only so the authored House is visible without pressing Play.
+            // Disable it before creating the real runtime/gameplay furniture to guarantee no duplicates.
+            GameObject editorPreview = GameObject.Find("CEVR_HouseEditorFurniturePreview");
+            if (editorPreview != null) editorPreview.SetActive(false);
 
             RemoveOldRuntimeVisuals();
             BuildDiningSet();
