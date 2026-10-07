@@ -458,6 +458,7 @@ namespace ChulaEarthquakeVR
 
             GameObject go = UnityEngine.Object.Instantiate(template);
             go.name = "HouseLayout_" + resource;
+            SetHideFlagsRecursive(go, HideFlags.None);
             go.SetActive(true);
             go.transform.SetParent(c.root, true);
 
@@ -712,6 +713,14 @@ namespace ChulaEarthquakeVR
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
             return mesh;
+        }
+
+        private static void SetHideFlagsRecursive(GameObject root, HideFlags flags)
+        {
+            if (root == null) return;
+            root.hideFlags = flags;
+            foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
+                t.gameObject.hideFlags = flags;
         }
 
         private static void SafeDestroy(UnityEngine.Object obj)
