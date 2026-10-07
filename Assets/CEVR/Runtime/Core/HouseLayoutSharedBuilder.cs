@@ -353,6 +353,8 @@ namespace ChulaEarthquakeVR
                 if (HouseFurnitureGeometry.IsCollisionVisual(renderer.transform, go.transform))
                     renderer.enabled = false;
 
+            ConvertMaterials(go);
+
             if (!HouseFurnitureGeometry.FitAndPlace(go.transform, desiredSize, bottomCenter, yaw))
             {
                 SafeDestroy(go);
@@ -544,6 +546,43 @@ namespace ChulaEarthquakeVR
             foreach (GameObject root in scene.GetRootGameObjects())
                 result.AddRange(root.GetComponentsInChildren<T>(true));
             return result;
+        }
+
+        private static void ConvertMaterials(GameObject root)
+        {
+            Shader shader = LitShader();
+            var cache = new Dictionary<Material, Material>();
+            foreach (Renderer renderer in root.GetComponentsInChildren<Renderer>(true))
+            {
+                Material[] slots = renderer.sharedMaterials;
+                for (int i = 0; i < slots.Length; i++)
+                {
+                    Material original = slots[i];
+                    if (original != null && cache.TryGetValue(original, out Material existing))
+                    {
+                        slots[i] = existing;
+                        continue;
+                    }
+
+                    Color color = original != null && original.HasProperty("_BaseColor")
+                        ? original.GetColor("_BaseColor")
+                        : original != null && original.HasProperty("_Color")
+                            ? original.color
+                            : new Color(0.72f, 0.72f, 0.72f);
+
+                    Material converted = new Material(shader)
+                    {
+                        name = "HouseLayout_" + (original == null ? "Material" : original.name),
+                        color = color,
+                        mainTexture = original == null ? null : original.mainTexture
+                    };
+                    if (converted.HasProperty("_Smoothness")) converted.SetFloat("_Smoothness", 0.18f);
+                    if (converted.HasProperty("_Glossiness")) converted.SetFloat("_Glossiness", 0.18f);
+                    if (original != null) cache[original] = converted;
+                    slots[i] = converted;
+                }
+                renderer.sharedMaterials = slots;
+            }
         }
 
         private static void AddBoundsCollider(GameObject go)
