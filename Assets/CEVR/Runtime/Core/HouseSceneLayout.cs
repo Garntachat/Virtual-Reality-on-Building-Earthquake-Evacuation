@@ -16,21 +16,37 @@ namespace ChulaEarthquakeVR
         public static readonly Vector3 PlayerSpawn = OnFloor(-1.90f, -5.55f, 0.03f);
 
         public static readonly Vector3 DiningTable = OnFloor(-1.90f, -2.70f);
+        public static readonly Vector3 DiningTableSize = new Vector3(1.50f, 0.734f, 0.85f);
+        public const float DiningTableYaw = 0f;
+        public static readonly Vector3 DiningChairSize = new Vector3(0.421f, 0.90f, 0.401f);
         public static readonly Vector3 CoverObstacleChair = OnFloor(-1.90f, -3.48f);
         public static readonly Vector3 SpareChair = OnFloor(-1.90f, -1.92f);
         public static readonly Vector3 DiningLeftChair = OnFloor(-2.93f, -2.70f);
         public static readonly Vector3 DiningRightChair = OnFloor(-0.87f, -2.70f);
 
         public static readonly Vector3 Sofa = OnFloor(-3.65f, 0.55f);
+        public static readonly Vector3 SofaSize = new Vector3(1.90f, 0.811f, 0.942f);
+        public const float SofaYaw = 90f;
+        public static readonly Vector3 SofaPillows = Sofa + new Vector3(0f, 0.46f, 0f);
+        public static readonly Vector3 SofaPillowsSize = new Vector3(1.546f, 0.210f, 0.246f);
         public static readonly Vector3 CoffeeTable = OnFloor(-2.10f, 0.55f);
+        public static readonly Vector3 CoffeeTableSize = new Vector3(1.35f, 0.45f, 0.72f);
         public static readonly Vector3 Rug = OnFloor(-2.65f, 0.55f);
+        public static readonly Vector3 RugSize = new Vector3(2.50f, 0.02f, 3.00f);
         public static readonly Vector3 Television = OnFloor(-0.55f, 0.55f);
+        public static readonly Vector3 TelevisionCabinetSize = new Vector3(2.00f, 0.65f, 0.50f);
+        public static readonly Vector3 TelevisionSize = new Vector3(1.45f, 0.85f, 0.22f);
+        public const float TelevisionYaw = 90f;
         public static readonly Vector3 Plant = OnFloor(5.55f, 4.85f);
 
-        // Analyzer: second-floor landing x=4.25..6.25, z=0.25..3.0; upper stair starts at z~1.5.
-        // Put the bed entirely in the clear z<1.5 strip and rotate it east-west.
-        public static readonly Vector3 Bed = new Vector3(5.45f, SecondFloorY, 0.70f);
-        public static readonly Vector3 BedPillow = new Vector3(5.78f, SecondFloorY + 0.51f, 0.70f);
+        // Analyzer: second-floor landing x=4.25..6.25, z=0.25..3.0. The upper stair spans
+        // approximately x=1..5 and z=1.5..3.0. The bed is a compact single-bed footprint placed
+        // entirely inside x=4.35..6.20 and z=0.225..1.375, so it does not sit on the stair.
+        public static readonly Vector3 Bed = new Vector3(5.275f, SecondFloorY, 0.80f);
+        public static readonly Vector3 BedSize = new Vector3(1.15f, 0.72f, 1.85f);
+        public const float BedYaw = 90f;
+        public static readonly Vector3 BedPillow = new Vector3(4.58f, SecondFloorY + 0.54f, 0.80f);
+        public static readonly Vector3 BedPillowSize = new Vector3(0.58f, 0.10f, 0.28f);
 
         public static readonly Vector3 WardrobeBottom = OnFloor(-3.70f, 2.80f);
         public static readonly Vector3 WardrobeCenter = OnFloor(-3.70f, 2.80f, 1.15f);
