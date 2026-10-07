@@ -32,9 +32,9 @@ namespace ChulaEarthquakeVR.Editor
 
         static HouseFurnitureBaker()
         {
-            EditorSceneManager.sceneOpened -= OnSceneOpened;
-            EditorSceneManager.sceneOpened += OnSceneOpened;
-            EditorApplication.delayCall += EnsureActiveHouseIsBaked;
+            // IMPORTANT: Never auto-bake or auto-save House.unity.
+            // The student may be manually editing the whole House scene.
+            // Baking is now explicit only through the CEVR > House menu commands below.
         }
 
         [MenuItem("CEVR/House/Bake Play Layout Into House Scene", priority = 10)]
@@ -46,28 +46,6 @@ namespace ChulaEarthquakeVR.Editor
         [MenuItem("CEVR/House/Rebuild House Furniture From Play Layout", priority = 11)]
         public static void RebuildMenu()
         {
-            BakeActiveHouseScene(true, true);
-        }
-
-        private static void OnSceneOpened(Scene scene, OpenSceneMode mode)
-        {
-            if (!IsHouse(scene)) return;
-            EditorApplication.delayCall += EnsureActiveHouseIsBaked;
-        }
-
-        private static void EnsureActiveHouseIsBaked()
-        {
-            if (baking || EditorApplication.isPlayingOrWillChangePlaymode) return;
-            Scene scene = SceneManager.GetActiveScene();
-            if (!IsHouse(scene)) return;
-
-            GameObject root = FindRoot(scene, RootName);
-            HouseBakedLayoutMarker marker = root == null ? null : root.GetComponent<HouseBakedLayoutMarker>();
-            if (root != null && marker != null &&
-                marker.LayoutVersion == HouseBakedLayoutMarker.CurrentLayoutVersion)
-                return;
-
-            Debug.Log("CEVR House scene has no current serialized furniture layout. Baking the exact Play layout into House.unity now.");
             BakeActiveHouseScene(true, true);
         }
 
