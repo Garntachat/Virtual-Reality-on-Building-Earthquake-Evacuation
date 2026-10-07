@@ -100,7 +100,7 @@ namespace ChulaEarthquakeVR
                 Renderer r = tableTop.GetComponent<Renderer>(); if (r != null) r.enabled = false;
                 BoxCollider box = tableTop.GetComponent<BoxCollider>();
                 if (box != null) box.size = new Vector3(1.55f, 0.14f, 0.88f);
-                Team("DiningTable", tableTop.transform, c, new Vector3(1.55f, 0.74f, 0.88f), 0f, false);
+                Team("DiningTable", tableTop.transform, c, HouseSceneLayout.DiningTableSize, HouseSceneLayout.DiningTableYaw, false);
             }
 
             var legs = new List<GameObject>();
@@ -136,21 +136,21 @@ namespace ChulaEarthquakeVR
             chair.transform.localScale = new Vector3(0.52f, 0.98f, 0.52f);
             chair.transform.SetPositionAndRotation(bottomCenter, Quaternion.Euler(0f, yaw, 0f));
             foreach (Renderer r in chair.GetComponentsInChildren<Renderer>(true)) r.enabled = false;
-            Team("DiningChair", chair.transform, bottomCenter, new Vector3(0.44f, 0.94f, 0.42f), yaw, false);
+            Team("DiningChair", chair.transform, bottomCenter, HouseSceneLayout.DiningChairSize, yaw, false);
         }
 
         private void BuildLivingRoom()
         {
-            Team("Sofa", gameplayRoot, HouseSceneLayout.Sofa, new Vector3(2.05f, 0.88f, 1.02f), 90f, true);
-            Team("Sofa_Pillows", gameplayRoot, HouseSceneLayout.Sofa + new Vector3(0.18f, 0.48f, 0f),
-                new Vector3(1.55f, 0.21f, 0.25f), 90f, false);
-            Kenney("tableCoffee", gameplayRoot, HouseSceneLayout.CoffeeTable, new Vector3(1.55f, 0.48f, 0.82f), 90f, true);
-            Kenney("rugRectangle", gameplayRoot, HouseSceneLayout.Rug + Vector3.up * 0.01f, new Vector3(2.50f, 0.02f, 3.00f), 90f, false);
+            Team("Sofa", gameplayRoot, HouseSceneLayout.Sofa, HouseSceneLayout.SofaSize, HouseSceneLayout.SofaYaw, true);
+            Team("Sofa_Pillows", gameplayRoot, HouseSceneLayout.SofaPillows,
+                HouseSceneLayout.SofaPillowsSize, HouseSceneLayout.SofaYaw, false);
+            Kenney("tableCoffee", gameplayRoot, HouseSceneLayout.CoffeeTable, HouseSceneLayout.CoffeeTableSize, 90f, true);
+            Kenney("rugRectangle", gameplayRoot, HouseSceneLayout.Rug + Vector3.up * 0.01f, HouseSceneLayout.RugSize, 90f, false);
 
-            // Sofa is west of TV; +90 faces the display toward the sofa instead of showing its back.
-            Kenney("cabinetTelevision", gameplayRoot, HouseSceneLayout.Television, new Vector3(2.0f, 0.65f, 0.50f), 90f, true);
+            // Sofa is west of TV; the shared +90 yaw makes both editor and runtime face it.
+            Kenney("cabinetTelevision", gameplayRoot, HouseSceneLayout.Television, HouseSceneLayout.TelevisionCabinetSize, HouseSceneLayout.TelevisionYaw, true);
             Kenney("televisionModern", gameplayRoot, HouseSceneLayout.Television + Vector3.up * 0.65f,
-                new Vector3(1.45f, 0.85f, 0.22f), 90f, false);
+                HouseSceneLayout.TelevisionSize, HouseSceneLayout.TelevisionYaw, false);
 
             Kenney("pottedPlant", gameplayRoot, HouseSceneLayout.OnFloor(-4.45f, -0.95f), new Vector3(0.58f, 1.18f, 0.58f), 0f, false);
             Kenney("lampRoundFloor", gameplayRoot, HouseSceneLayout.OnFloor(-4.45f, 1.90f), new Vector3(0.42f, 1.45f, 0.42f), 0f, false);
@@ -184,23 +184,16 @@ namespace ChulaEarthquakeVR
 
         private void BuildBedroomUpstairs()
         {
-            // Measured upper landing: x=4.25..6.25, z=0.25..3.00 at y=4.0.
-            // Upper stair reaches into z>=1.5 and roughly x<=5.0. Therefore the entire bed is forced
-            // into the guaranteed-clear rectangle x=4.75..6.12, z=0.28..1.12.
-            Vector3 bedBottom = new Vector3(5.44f, HouseSceneLayout.SecondFloorY, 0.70f);
-            GameObject bed = Team("Bed", gameplayRoot, bedBottom, new Vector3(1.36f, 0.82f, 0.84f), 90f, true);
-            Team("Bed_Pillow", gameplayRoot, new Vector3(5.78f, HouseSceneLayout.SecondFloorY + 0.50f, 0.70f),
-                new Vector3(0.48f, 0.08f, 0.24f), 90f, false);
+            // Keep the small upper landing simple: bed + pillow + rug only. The shared placement data
+            // is used by the editor preview too, so what you see before Play is what runtime builds.
+            GameObject bed = Team("Bed", gameplayRoot, HouseSceneLayout.Bed,
+                HouseSceneLayout.BedSize, HouseSceneLayout.BedYaw, true);
+            Team("Bed_Pillow", gameplayRoot, HouseSceneLayout.BedPillow,
+                HouseSceneLayout.BedPillowSize, HouseSceneLayout.BedYaw, false);
 
-            // Bedroom details stay in z<1.45 so none can block the stair arrival at z>=1.5.
-            Kenney("rugRectangle", gameplayRoot, new Vector3(5.25f, HouseSceneLayout.SecondFloorY + 0.01f, 0.82f),
-                new Vector3(1.75f, 0.02f, 1.10f), 90f, false);
-            Kenney("tableCoffee", gameplayRoot, new Vector3(4.45f, HouseSceneLayout.SecondFloorY, 0.55f),
-                new Vector3(0.46f, 0.48f, 0.42f), 0f, true);
-            Kenney("lampRoundFloor", gameplayRoot, new Vector3(4.45f, HouseSceneLayout.SecondFloorY, 1.05f),
-                new Vector3(0.32f, 1.10f, 0.32f), 0f, false);
-            Kenney("books", gameplayRoot, new Vector3(4.45f, HouseSceneLayout.SecondFloorY + 0.49f, 0.55f),
-                new Vector3(0.22f, 0.10f, 0.18f), 0f, false);
+            Kenney("rugRectangle", gameplayRoot,
+                new Vector3(HouseSceneLayout.Bed.x, HouseSceneLayout.SecondFloorY + 0.01f, HouseSceneLayout.Bed.z),
+                new Vector3(1.75f, 0.02f, 1.35f), 90f, false);
 
             if (bed != null) ValidateBedClearOfUpperStairs(bed);
         }
@@ -227,8 +220,8 @@ namespace ChulaEarthquakeVR
             }
 
             // Defensive fallback: pull the bed farther south into the guaranteed-clear strip.
-            Vector3 targetBottom = new Vector3(5.45f, HouseSceneLayout.SecondFloorY, 0.52f);
-            Fit(bed.transform, new Vector3(1.30f, 0.80f, 0.68f), targetBottom);
+            Vector3 targetBottom = new Vector3(5.25f, HouseSceneLayout.SecondFloorY, 0.68f);
+            HouseFurnitureGeometry.FitAndPlace(bed.transform, new Vector3(1.05f, 0.70f, 1.70f), targetBottom, HouseSceneLayout.BedYaw);
             Debug.LogWarning("CEVR upstairs bed overlapped Stairs (1); moved to defensive clear-strip fallback.");
         }
 
@@ -354,9 +347,11 @@ namespace ChulaEarthquakeVR
             foreach (Renderer r in go.GetComponentsInChildren<Renderer>(true))
                 if (CollisionNamed(r.transform, go.transform)) r.enabled = false;
             ConvertMaterials(go);
-            go.transform.SetPositionAndRotation(Vector3.zero, Quaternion.Euler(0f, yaw, 0f));
-            go.transform.localScale = Vector3.one;
-            if (!Fit(go.transform, desiredSize, bottomCenter)) { Destroy(go); return null; }
+            if (!HouseFurnitureGeometry.FitAndPlace(go.transform, desiredSize, bottomCenter, yaw))
+            {
+                Destroy(go);
+                return null;
+            }
             go.transform.SetParent(parent, true);
             if (collider) AddBoundsCollider(go);
             return go;
@@ -369,9 +364,11 @@ namespace ChulaEarthquakeVR
             GameObject go = Instantiate(template);
             go.name = "HouseFinal_" + resource;
             go.SetActive(true);
-            go.transform.SetPositionAndRotation(Vector3.zero, Quaternion.Euler(0f, yaw, 0f));
-            go.transform.localScale = Vector3.one;
-            if (!Fit(go.transform, desiredSize, bottomCenter)) { Destroy(go); return null; }
+            if (!HouseFurnitureGeometry.FitAndPlace(go.transform, desiredSize, bottomCenter, yaw))
+            {
+                Destroy(go);
+                return null;
+            }
             go.transform.SetParent(parent, true);
             if (collider) AddBoundsCollider(go);
             return go;
