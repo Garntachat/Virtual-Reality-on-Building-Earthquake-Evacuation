@@ -132,6 +132,12 @@ namespace ChulaEarthquakeVR.Editor
                 };
                 HouseLayoutSharedBuilder.Build(context);
 
+                bool valid = HouseLayoutSharedBuilder.ValidateBuiltLayout(scene, root.transform, out string report);
+                if (valid)
+                    Debug.Log("CEVR HOUSE EDITOR LAYOUT VALIDATION PASS.");
+                else
+                    Debug.LogError("CEVR HOUSE EDITOR LAYOUT VALIDATION FAILED: " + report);
+
                 // ApplyAuthoredState changes the real House placeholders so that the Edit scene
                 // itself visually matches Play. The preview root remains non-saved/EditorOnly.
                 EditorSceneManager.MarkSceneDirty(scene);
