@@ -96,10 +96,10 @@ namespace ChulaEarthquakeVR
             GameObject tableTop = GameObject.Find("HouseSturdyTableTop");
             if (tableTop != null)
             {
-                tableTop.transform.SetPositionAndRotation(c + Vector3.up * 0.74f, Quaternion.identity);
+                tableTop.transform.SetPositionAndRotation(c + Vector3.up * HouseSceneLayout.DiningTableSize.y, Quaternion.identity);
                 Renderer r = tableTop.GetComponent<Renderer>(); if (r != null) r.enabled = false;
                 BoxCollider box = tableTop.GetComponent<BoxCollider>();
-                if (box != null) box.size = new Vector3(1.55f, 0.14f, 0.88f);
+                if (box != null) box.size = new Vector3(HouseSceneLayout.DiningTableSize.x, 0.14f, HouseSceneLayout.DiningTableSize.z);
                 Team("DiningTable", tableTop.transform, c, HouseSceneLayout.DiningTableSize, HouseSceneLayout.DiningTableYaw, false);
             }
 
@@ -118,10 +118,10 @@ namespace ChulaEarthquakeVR
                 BoxCollider b = legs[i].GetComponent<BoxCollider>(); if (b != null) b.size = new Vector3(0.10f, 0.72f, 0.10f);
             }
 
-            Chair("HouseChair_CoverObstacle", new Vector3(c.x, HouseSceneLayout.FloorY, c.z - 0.78f), 180f);
-            Chair("HouseChair_Spare", new Vector3(c.x, HouseSceneLayout.FloorY, c.z + 0.78f), 0f);
-            Chair("HouseChair_DiningLeft", new Vector3(c.x - 1.03f, HouseSceneLayout.FloorY, c.z), -90f);
-            Chair("HouseChair_DiningRight", new Vector3(c.x + 1.03f, HouseSceneLayout.FloorY, c.z), 90f);
+            Chair("HouseChair_CoverObstacle", HouseSceneLayout.CoverObstacleChair, 180f);
+            Chair("HouseChair_Spare", HouseSceneLayout.SpareChair, 0f);
+            Chair("HouseChair_DiningLeft", HouseSceneLayout.DiningLeftChair, -90f);
+            Chair("HouseChair_DiningRight", HouseSceneLayout.DiningRightChair, 90f);
 
             // A small centerpiece and rug make the dining area read as a real room without blocking
             // the crawl/cover training path.
