@@ -44,6 +44,38 @@ namespace ChulaEarthquakeVR
             BuildLighting(context);
         }
 
+        public static string ComputeVisualSignature(Transform root)
+        {
+            if (root == null) return "missing";
+            var entries = new List<string>();
+            foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
+            {
+                if (t == root || t.name.StartsWith("HouseLayoutTemplate_", StringComparison.Ordinal)) continue;
+                if (!t.name.StartsWith("HouseLayout_", StringComparison.Ordinal)) continue;
+
+                Vector3 p = t.position;
+                Vector3 r = t.eulerAngles;
+                Vector3 s = t.lossyScale;
+                entries.Add(
+                    $"{t.name}|{p.x:F3},{p.y:F3},{p.z:F3}|{r.x:F2},{r.y:F2},{r.z:F2}|{s.x:F3},{s.y:F3},{s.z:F3}");
+            }
+            entries.Sort(StringComparer.Ordinal);
+
+            unchecked
+            {
+                uint hash = 2166136261u;
+                foreach (string entry in entries)
+                {
+                    foreach (char ch in entry)
+                    {
+                        hash ^= ch;
+                        hash *= 16777619u;
+                    }
+                }
+                return $"{entries.Count}:{hash:X8}";
+            }
+        }
+
         public static bool ValidateBuiltLayout(Scene scene, Transform root, out string report)
         {
             var problems = new List<string>();
