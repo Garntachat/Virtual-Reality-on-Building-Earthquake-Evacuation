@@ -24,7 +24,9 @@ namespace ChulaEarthquakeVR
             Scene s = SceneManager.GetActiveScene();
             if (!s.IsValid() || !s.isLoaded) return;
             string n = s.name.ToLowerInvariant();
-            if (!n.Contains("house") && !n.Contains("tutorial")) return;
+            // House visuals are now built by HouseLayoutSharedBuilder in BOTH Scene and Play.
+            // Do not add a Play-only wallpaper layer to House, or the two modes can never match.
+            if (!n.Contains("tutorial")) return;
             if (FindFirstObjectByType<SceneWallpaperDecorator>() != null) return;
 
             GameObject host = new GameObject("CEVR_SceneWallpaperDecorator");
@@ -38,9 +40,7 @@ namespace ChulaEarthquakeVR
             yield return null;
             yield return null;
 
-            string n = scene.name.ToLowerInvariant();
-            if (n.Contains("house")) DecorateHouse();
-            else DecorateTutorial();
+            DecorateTutorial();
         }
 
         private void DecorateHouse()
