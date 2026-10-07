@@ -306,10 +306,13 @@ namespace ChulaEarthquakeVR
             windowRoot.transform.position = Vector3.zero;
 
             GameObject glass = BoxVisual(c, "WindowGlass", center, size, new Color(0.36f, 0.64f, 0.80f, 0.34f), windowRoot.transform);
-            if (glass != null && c.runtime)
+            if (glass != null)
             {
+                // WindowView is visual-only and is now Edit-mode safe, so both modes render the
+                // exact same transparent glass and exterior view. Breakable behaviour remains Play-only.
                 glass.AddComponent<WindowView>().Configure();
-                glass.AddComponent<BreakableWindow>().Configure("house-window-real", c.groundMotion, c.logger);
+                if (c.runtime)
+                    glass.AddComponent<BreakableWindow>().Configure("house-window-real", c.groundMotion, c.logger);
             }
 
             Color frame = new Color(0.08f, 0.10f, 0.12f);
@@ -401,6 +404,7 @@ namespace ChulaEarthquakeVR
             if (data == null || data.vertices == null || data.parts == null) return null;
 
             GameObject template = new GameObject("HouseLayoutTemplate_" + resource);
+            template.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSaveInEditor | HideFlags.DontSaveInBuild;
             template.transform.SetParent(c.root, false);
             template.SetActive(false);
 
