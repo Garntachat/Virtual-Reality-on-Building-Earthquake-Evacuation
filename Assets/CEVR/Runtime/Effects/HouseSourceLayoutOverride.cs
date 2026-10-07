@@ -64,6 +64,12 @@ namespace ChulaEarthquakeVR
             };
             HouseLayoutSharedBuilder.Build(context);
 
+            bool valid = HouseLayoutSharedBuilder.ValidateBuiltLayout(scene, root.transform, out string report);
+            if (valid)
+                Debug.Log("CEVR HOUSE RUNTIME LAYOUT VALIDATION PASS.");
+            else
+                Debug.LogError("CEVR HOUSE RUNTIME LAYOUT VALIDATION FAILED: " + report);
+
             if (gameplayRoot.GetComponent<QuakeLightFailures>() == null)
                 gameplayRoot.gameObject.AddComponent<QuakeLightFailures>();
 
