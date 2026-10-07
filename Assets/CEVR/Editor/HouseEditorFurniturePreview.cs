@@ -132,6 +132,11 @@ namespace ChulaEarthquakeVR.Editor
                 SceneManager.MoveGameObjectToScene(root, scene);
                 root.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
 
+                // Runtime does more than add furniture: it also moves/hides the authored placeholder
+                // anchors. Mirror those exact side effects in Edit mode first so Scene view is the
+                // same clean layout the player sees after pressing Play.
+                ApplyRuntimeAuthoredState(scene);
+
                 BuildDining(root.transform, scene);
                 BuildLiving(root.transform, scene);
                 BuildKitchen(root.transform, scene);
@@ -144,7 +149,7 @@ namespace ChulaEarthquakeVR.Editor
                 // mode. If the scene is saved, the EditorOnly root may persist in the .unity file but
                 // is stripped from builds and disabled before entering Play Mode.
                 EditorSceneManager.MarkSceneDirty(scene);
-                Debug.Log("CEVR HOUSE EDITOR PREVIEW READY: selectable furniture/decor is now present in the House Hierarchy without Play.");
+                Debug.Log("CEVR HOUSE EDITOR PREVIEW READY: Scene view now mirrors runtime furniture positions and hidden placeholder anchors.");
                 SceneView.RepaintAll();
                 EditorApplication.RepaintHierarchyWindow();
             }
@@ -186,6 +191,128 @@ namespace ChulaEarthquakeVR.Editor
                 if (go == null || go.name != RootName || !go.scene.IsValid()) continue;
                 go.SetActive(active);
             }
+        }
+
+        private static void ApplyRuntimeAuthoredState(Scene scene)
+        {
+            Vector3 c = HouseSceneLayout.DiningTable;
+
+            GameObject tableTop = FindSceneObject(scene, "HouseSturdyTableTop");
+            if (tableTop != null)
+            {
+                tableTop.transform.SetPositionAndRotation(c + Vector3.up * HouseSceneLayout.DiningTableSize.y, Quaternion.identity);
+                Renderer renderer = tableTop.GetComponent<Renderer>();
+                if (renderer != null) renderer.enabled = false;
+                BoxCollider box = tableTop.GetComponent<BoxCollider>();
+                if (box != null) box.size = new Vector3(HouseSceneLayout.DiningTableSize.x, 0.14f, HouseSceneLayout.DiningTableSize.z);
+            }
+
+            Vector3[] legOffsets =
+            {
+                new Vector3(-0.64f, 0.36f, -0.33f),
+                new Vector3( 0.64f, 0.36f, -0.33f),
+                new Vector3(-0.64f, 0.36f,  0.33f),
+                new Vector3( 0.64f, 0.36f,  0.33f)
+            };
+            int legIndex = 0;
+            foreach (GameObject go in scene.GetRootGameObjects())
+            {
+                foreach (Transform t in go.GetComponentsInChildren<Transform>(true))
+                {
+                    if (t.name != "HouseSturdyTableLeg" || legIndex >= legOffsets.Length) continue;
+                    t.position = c + legOffsets[legIndex++];
+                    Renderer r = t.GetComponent<Renderer>();
+                    if (r != null) r.enabled = false;
+                    BoxCollider b = t.GetComponent<BoxCollider>();
+                    if (b != null) b.size = new Vector3(0.10f, 0.72f, 0.10f);
+                }
+            }
+
+            ConfigureChairAnchor(scene, "HouseChair_CoverObstacle", HouseSceneLayout.CoverObstacleChair, 180f);
+            ConfigureChairAnchor(scene, "HouseChair_Spare", HouseSceneLayout.SpareChair, 0f);
+            ConfigureChairAnchor(scene, "HouseChair_DiningLeft", HouseSceneLayout.DiningLeftChair, -90f);
+            ConfigureChairAnchor(scene, "HouseChair_DiningRight", HouseSceneLayout.DiningRightChair, 90f);
+
+            string[] hiddenPrefixes =
+            {
+                "HouseSofa", "HouseCoffeeTable", "HousePlant", "HouseShelfBook", "HousePhoto", "HouseRug"
+            };
+            foreach (Renderer r in FindSceneComponents<Renderer>(scene))
+            {
+                foreach (string prefix in hiddenPrefixes)
+                {
+                    if (r.name.StartsWith(prefix, StringComparison.Ordinal))
+                    {
+                        r.enabled = false;
+                        break;
+                    }
+                }
+            }
+
+            GameObject fridgeAnchor = FindSceneObject(scene, "HouseTallCabinet_Left");
+            if (fridgeAnchor != null)
+            {
+                Renderer r = fridgeAnchor.GetComponent<Renderer>();
+                if (r != null) r.enabled = false;
+            }
+
+            GameObject wardrobeAnchor = FindSceneObject(scene, "HouseBookcase_Right");
+            if (wardrobeAnchor != null)
+            {
+                Renderer r = wardrobeAnchor.GetComponent<Renderer>();
+                if (r != null) r.enabled = false;
+            }
+
+            foreach (GameObject go in FindSceneGameObjects(scene))
+            {
+                if (go.name.StartsWith("HouseFallingObject_", StringComparison.Ordinal))
+                {
+                    go.transform.position = new Vector3(go.transform.position.x, 3.84f, go.transform.position.z);
+                    Renderer r = go.GetComponent<Renderer>();
+                    if (r != null) r.enabled = false;
+                }
+
+                if (go.name.StartsWith("HouseWindow_", StringComparison.Ordinal))
+                    go.SetActive(false);
+            }
+        }
+
+        private static void ConfigureChairAnchor(Scene scene, string name, Vector3 position, float yaw)
+        {
+            GameObject chair = FindSceneObject(scene, name);
+            if (chair == null) return;
+
+            chair.transform.localScale = new Vector3(0.52f, 0.98f, 0.52f);
+            chair.transform.SetPositionAndRotation(position, Quaternion.Euler(0f, yaw, 0f));
+            foreach (Renderer r in chair.GetComponentsInChildren<Renderer>(true))
+                r.enabled = false;
+        }
+
+        private static GameObject FindSceneObject(Scene scene, string exactName)
+        {
+            foreach (GameObject go in FindSceneGameObjects(scene))
+                if (go.name == exactName) return go;
+            return null;
+        }
+
+        private static List<GameObject> FindSceneGameObjects(Scene scene)
+        {
+            var result = new List<GameObject>();
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                result.Add(root);
+                foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
+                    if (t.gameObject != root) result.Add(t.gameObject);
+            }
+            return result;
+        }
+
+        private static List<T> FindSceneComponents<T>(Scene scene) where T : Component
+        {
+            var result = new List<T>();
+            foreach (GameObject root in scene.GetRootGameObjects())
+                result.AddRange(root.GetComponentsInChildren<T>(true));
+            return result;
         }
 
         private static void BuildDining(Transform root, Scene scene)
