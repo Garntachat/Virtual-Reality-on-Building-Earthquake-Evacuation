@@ -24,14 +24,65 @@ namespace ChulaEarthquakeVR.Editor
         [Serializable] private sealed class PartData { public float[] color; public int[] triangles; }
 
         private const string RootName = "CEVR_HouseEditorFurniturePreview";
-        private const HideFlags PreviewFlags = HideFlags.DontSaveInEditor | HideFlags.DontSaveInBuild;
+        // Keep the preview visible/selectable in the normal Hierarchy. The root is tagged EditorOnly,
+        // so Unity strips it from player builds; runtime furniture is still created separately.
+        private const HideFlags PreviewFlags = HideFlags.None;
         private static bool rebuilding;
+        private static double nextEnsureTime;
 
         static HouseEditorFurniturePreview()
         {
-            EditorSceneManager.sceneOpened += (_, __) => ScheduleRefresh();
+            InstallHooks();
+        }
+
+        [InitializeOnLoadMethod]
+        private static void InitializeAgain()
+        {
+            // InitializeOnLoadMethod is intentionally redundant with the static constructor.
+            // Some Unity domain-reload configurations can skip a one-shot delay callback; the
+            // persistent update hook below guarantees the House preview is eventually created.
+            InstallHooks();
+        }
+
+        private static void InstallHooks()
+        {
+            EditorSceneManager.sceneOpened -= OnSceneOpened;
+            EditorSceneManager.sceneOpened += OnSceneOpened;
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-            EditorApplication.delayCall += RefreshIfHouse;
+            EditorApplication.projectChanged -= ScheduleRefresh;
+            EditorApplication.projectChanged += ScheduleRefresh;
+            EditorApplication.hierarchyChanged -= EnsurePreviewSoon;
+            EditorApplication.hierarchyChanged += EnsurePreviewSoon;
+            EditorApplication.update -= EnsurePreviewOnEditorUpdate;
+            EditorApplication.update += EnsurePreviewOnEditorUpdate;
+            ScheduleRefresh();
+        }
+
+        private static void OnSceneOpened(Scene scene, OpenSceneMode mode)
+        {
+            ScheduleRefresh();
+        }
+
+        private static void EnsurePreviewSoon()
+        {
+            nextEnsureTime = 0d;
+        }
+
+        private static void EnsurePreviewOnEditorUpdate()
+        {
+            if (rebuilding || EditorApplication.isPlayingOrWillChangePlaymode) return;
+            if (EditorApplication.timeSinceStartup < nextEnsureTime) return;
+            nextEnsureTime = EditorApplication.timeSinceStartup + 1.0d;
+
+            Scene scene = SceneManager.GetActiveScene();
+            if (!IsHouse(scene)) return;
+
+            GameObject existing = FindPreviewRoot(scene);
+            if (existing == null)
+                RefreshIfHouse();
+            else if (!existing.activeSelf)
+                existing.SetActive(true);
         }
 
         [MenuItem("CEVR/House/Refresh Editor Furniture Preview", priority = 20)]
@@ -77,6 +128,7 @@ namespace ChulaEarthquakeVR.Editor
                 RemovePreview();
 
                 GameObject root = new GameObject(RootName) { hideFlags = PreviewFlags };
+                root.tag = "EditorOnly";
                 SceneManager.MoveGameObjectToScene(root, scene);
                 root.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
 
@@ -88,8 +140,13 @@ namespace ChulaEarthquakeVR.Editor
                 BuildCeilingHazards(root.transform, scene);
                 BuildWindow(root.transform, scene);
 
-                Debug.Log("CEVR HOUSE EDITOR PREVIEW READY: furniture/decor is visible in Scene view without Play. Preview is editor-only; runtime uses the same measured layout.");
+                // Marking dirty makes it obvious these are real, selectable scene objects in Edit
+                // mode. If the scene is saved, the EditorOnly root may persist in the .unity file but
+                // is stripped from builds and disabled before entering Play Mode.
+                EditorSceneManager.MarkSceneDirty(scene);
+                Debug.Log("CEVR HOUSE EDITOR PREVIEW READY: selectable furniture/decor is now present in the House Hierarchy without Play.");
                 SceneView.RepaintAll();
+                EditorApplication.RepaintHierarchyWindow();
             }
             finally
             {
@@ -101,6 +158,16 @@ namespace ChulaEarthquakeVR.Editor
         {
             return scene.IsValid() && scene.isLoaded &&
                    scene.name.IndexOf("house", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static GameObject FindPreviewRoot(Scene scene)
+        {
+            foreach (GameObject go in Resources.FindObjectsOfTypeAll<GameObject>())
+            {
+                if (go == null || go.name != RootName || go.scene != scene) continue;
+                return go;
+            }
+            return null;
         }
 
         private static void RemovePreview()
