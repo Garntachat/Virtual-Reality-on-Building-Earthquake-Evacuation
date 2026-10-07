@@ -50,6 +50,7 @@ namespace ChulaEarthquakeVR
             if (root == null) return;
 
             ApplyAuthoredState(scene);
+            SyncGameplayAnchorsFromBakedVisuals(scene, root);
 
             string[] colliderObjects =
             {
@@ -608,6 +609,96 @@ namespace ChulaEarthquakeVR
                 new Vector3(5.25f, HouseSceneLayout.SecondFloorY, 0.62f),
                 HouseSceneLayout.BedYaw);
             Debug.LogWarning("CEVR House bed intersected Stairs (1); compact clear-strip fallback applied.");
+        }
+
+        private static void SyncGameplayAnchorsFromBakedVisuals(Scene scene, Transform root)
+        {
+            // Dining table: make the invisible gameplay collision table follow the saved scene table,
+            // including any manual Scene-view edits the student makes later.
+            Transform tableVisual = FindChildExact(root, "HouseLayout_DiningTable");
+            if (tableVisual != null && HouseFurnitureGeometry.TryVisibleBounds(tableVisual, out Bounds tableBounds))
+            {
+                GameObject top = FindSceneObject(scene, "HouseSturdyTableTop");
+                if (top != null)
+                {
+                    top.transform.SetPositionAndRotation(
+                        new Vector3(tableBounds.center.x, tableBounds.max.y - 0.07f, tableBounds.center.z),
+                        Quaternion.Euler(0f, tableVisual.eulerAngles.y, 0f));
+                    top.transform.localScale = new Vector3(tableBounds.size.x, 0.14f, tableBounds.size.z);
+                    BoxCollider box = top.GetComponent<BoxCollider>();
+                    if (box != null) box.size = Vector3.one;
+                }
+
+                var legs = new List<GameObject>();
+                foreach (GameObject go in FindSceneObjects(scene))
+                    if (go.name == "HouseSturdyTableLeg") legs.Add(go);
+
+                float lx = Mathf.Max(0.10f, tableBounds.extents.x - 0.12f);
+                float lz = Mathf.Max(0.10f, tableBounds.extents.z - 0.12f);
+                Vector3[] offsets =
+                {
+                    new Vector3(-lx, 0.36f, -lz),
+                    new Vector3( lx, 0.36f, -lz),
+                    new Vector3(-lx, 0.36f,  lz),
+                    new Vector3( lx, 0.36f,  lz)
+                };
+                for (int i = 0; i < legs.Count && i < offsets.Length; i++)
+                {
+                    legs[i].transform.position =
+                        new Vector3(tableBounds.center.x, tableBounds.min.y, tableBounds.center.z) + offsets[i];
+                    legs[i].transform.localScale = new Vector3(0.10f, 0.72f, 0.10f);
+                    BoxCollider b = legs[i].GetComponent<BoxCollider>();
+                    if (b != null) b.size = Vector3.one;
+                }
+
+                GameObject cover = FindSceneObject(scene, "HouseCoverZone");
+                if (cover != null)
+                    cover.transform.position = new Vector3(tableBounds.center.x, tableBounds.min.y + 0.42f, tableBounds.center.z);
+
+                GameObject crawl = FindSceneObject(scene, "HouseCrawlHereMarker");
+                if (crawl != null)
+                    crawl.transform.position = new Vector3(tableBounds.center.x, tableBounds.min.y + 0.012f, tableBounds.center.z);
+            }
+
+            AlignBottomPivotAnchor(root, scene, "HouseLayout_DiningChair_CoverObstacle", "HouseChair_CoverObstacle");
+            AlignBottomPivotAnchor(root, scene, "HouseLayout_DiningChair_Spare", "HouseChair_Spare");
+            AlignBottomPivotAnchor(root, scene, "HouseLayout_DiningChair_Left", "HouseChair_DiningLeft");
+            AlignBottomPivotAnchor(root, scene, "HouseLayout_DiningChair_Right", "HouseChair_DiningRight");
+
+            AlignCenterPivotAnchor(root, scene, "HouseLayout_Fridge", "HouseTallCabinet_Left");
+            AlignCenterPivotAnchor(root, scene, "HouseLayout_Wandrobe", "HouseBookcase_Right");
+
+            for (int i = 1; i <= HouseSceneLayout.OverheadHazards.Length; i++)
+                AlignCenterPivotAnchor(root, scene, "HouseLayout_HazardBooks_" + i, "HouseFallingObject_" + i);
+        }
+
+        private static void AlignBottomPivotAnchor(
+            Transform root, Scene scene, string visualName, string anchorName)
+        {
+            Transform visual = FindChildExact(root, visualName);
+            GameObject anchor = FindSceneObject(scene, anchorName);
+            if (visual == null || anchor == null ||
+                !HouseFurnitureGeometry.TryVisibleBounds(visual, out Bounds bounds))
+                return;
+
+            anchor.transform.SetPositionAndRotation(
+                new Vector3(bounds.center.x, bounds.min.y, bounds.center.z),
+                Quaternion.Euler(0f, visual.eulerAngles.y, 0f));
+        }
+
+        private static void AlignCenterPivotAnchor(
+            Transform root, Scene scene, string visualName, string anchorName)
+        {
+            Transform visual = FindChildExact(root, visualName);
+            GameObject anchor = FindSceneObject(scene, anchorName);
+            if (visual == null || anchor == null ||
+                !HouseFurnitureGeometry.TryVisibleBounds(visual, out Bounds bounds))
+                return;
+
+            anchor.transform.SetPositionAndRotation(bounds.center, visual.rotation);
+            anchor.transform.localScale = bounds.size;
+            BoxCollider box = anchor.GetComponent<BoxCollider>();
+            if (box != null) box.size = Vector3.one;
         }
 
         private static void BindVisualToRuntimeAnchor(Transform root, string visualName, Scene scene, string anchorName)
