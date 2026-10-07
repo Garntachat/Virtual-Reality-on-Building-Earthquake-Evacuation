@@ -259,7 +259,8 @@ namespace ChulaEarthquakeVR
                 new Vector3(HouseSceneLayout.Bed.x, HouseSceneLayout.SecondFloorY + 0.01f, HouseSceneLayout.Bed.z),
                 new Vector3(1.85f, 0.02f, 1.35f), 90f, false);
 
-            if (c.runtime && bed != null) VerifyBedAgainstStairs(c.scene, bed);
+            // Run the exact same stair-overlap fallback in BOTH Edit and Play modes.
+            if (bed != null) VerifyBedAgainstStairs(c.scene, bed);
         }
 
         private static void BuildDetails(BuildContext c)
