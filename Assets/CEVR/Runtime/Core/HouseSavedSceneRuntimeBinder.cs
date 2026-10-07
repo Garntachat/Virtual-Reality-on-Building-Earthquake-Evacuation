@@ -73,7 +73,7 @@ namespace ChulaEarthquakeVR
             }
 
             List<TransformSnapshot> snapshots = CaptureTransforms(savedRoot);
-            string signatureBefore = ComputeTransformSignature(savedRoot);
+            string signatureBefore = ComputeSnapshotSignature(snapshots);
 
             // Runtime-generated shapes are retained only as invisible gameplay/physics proxies.
             HideGeneratedPlaceholderVisuals(scene);
@@ -98,7 +98,7 @@ namespace ChulaEarthquakeVR
             // Defensive guarantee: setup is not allowed to shift any furniture that existed when
             // Play began. Restore exact serialized transforms if another setup component touched them.
             int restored = RestoreChangedTransforms(snapshots);
-            string signatureAfter = ComputeTransformSignature(savedRoot);
+            string signatureAfter = ComputeSnapshotSignature(snapshots);
 
             if (restored > 0)
                 Debug.LogWarning(
@@ -107,7 +107,7 @@ namespace ChulaEarthquakeVR
             bool exact = signatureBefore == signatureAfter;
             report =
                 $"saved-root={savedRoot.name}; visual-signature={signatureAfter}; " +
-                $"startup-transform-parity={(exact ? "PASS" : "RESTORED")}";
+                $"startup-transform-parity={(exact ? "PASS" : "FAILED")}";
 
             return true;
         }
@@ -137,7 +137,7 @@ namespace ChulaEarthquakeVR
                 // The saved House window is the visual window. The bootstrap window is only a
                 // duplicate runtime visual and must stay hidden.
                 if (n.StartsWith("HouseWindow_", StringComparison.Ordinal))
-                    SetRenderers(go, false);
+                    go.SetActive(false);
             }
         }
 
@@ -330,9 +330,10 @@ namespace ChulaEarthquakeVR
             Transform glass = FindFurniture(root, "HouseLayout_WindowGlass", "EDITOR_WindowGlass");
             if (glass == null) return;
 
+            // Preserve exactly what the Scene editor shows. Do not run WindowView at Play because
+            // it can replace the material or create extra exterior geometry.
             WindowView view = glass.GetComponent<WindowView>();
-            if (view == null) view = glass.gameObject.AddComponent<WindowView>();
-            view.Configure();
+            if (view != null) view.enabled = false;
 
             BreakableWindow breakable = glass.GetComponent<BreakableWindow>();
             if (breakable == null) breakable = glass.gameObject.AddComponent<BreakableWindow>();
@@ -424,16 +425,19 @@ namespace ChulaEarthquakeVR
             return restored;
         }
 
-        private static string ComputeTransformSignature(Transform root)
+        private static string ComputeSnapshotSignature(List<TransformSnapshot> snapshots)
         {
             var entries = new List<string>();
-            foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
+            foreach (TransformSnapshot snapshot in snapshots)
             {
+                Transform t = snapshot.transform;
+                if (t == null) continue;
+
                 Vector3 p = t.localPosition;
                 Vector3 s = t.localScale;
                 Quaternion r = t.localRotation;
                 entries.Add(
-                    $"{GetPath(root, t)}|" +
+                    $"{t.name}|" +
                     $"{p.x:F5},{p.y:F5},{p.z:F5}|" +
                     $"{r.x:F6},{r.y:F6},{r.z:F6},{r.w:F6}|" +
                     $"{s.x:F5},{s.y:F5},{s.z:F5}");
@@ -453,20 +457,6 @@ namespace ChulaEarthquakeVR
                 }
                 return $"{entries.Count}:{hash:X8}";
             }
-        }
-
-        private static string GetPath(Transform root, Transform target)
-        {
-            if (target == root) return root.name;
-            var parts = new List<string>();
-            Transform current = target;
-            while (current != null && current != root)
-            {
-                parts.Add(current.name);
-                current = current.parent;
-            }
-            parts.Reverse();
-            return root.name + "/" + string.Join("/", parts);
         }
 
         private static void SetRenderers(GameObject go, bool enabled)
