@@ -92,6 +92,7 @@ namespace ChulaEarthquakeVR.Editor
             }
 
             baking = true;
+            BackupSceneFile(scene);
             AssetDatabase.StartAssetEditing();
             try
             {
@@ -164,6 +165,19 @@ namespace ChulaEarthquakeVR.Editor
                 AssetDatabase.Refresh();
                 baking = false;
             }
+        }
+
+        private static void BackupSceneFile(Scene scene)
+        {
+            if (string.IsNullOrEmpty(scene.path) || !File.Exists(scene.path)) return;
+
+            string backupDirectory = Path.Combine("Library", "CEVRBackups");
+            Directory.CreateDirectory(backupDirectory);
+            string backupName =
+                $"House_before_bake_{DateTime.Now:yyyyMMdd_HHmmss}.unity";
+            string backupPath = Path.Combine(backupDirectory, backupName);
+            File.Copy(scene.path, backupPath, true);
+            Debug.Log("CEVR House bake backup created at " + backupPath);
         }
 
         private static void PersistTransientMeshesAndMaterials(GameObject root)
