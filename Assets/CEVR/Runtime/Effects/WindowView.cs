@@ -90,7 +90,13 @@ namespace ChulaEarthquakeVR
             panel.transform.localPosition = localPosition;
             panel.transform.localScale = localScale;
             Collider collider = panel.GetComponent<Collider>();
-            if (collider != null) Destroy(collider);
+            if (collider != null)
+            {
+                if (Application.isPlaying) Destroy(collider);
+#if UNITY_EDITOR
+                else DestroyImmediate(collider);
+#endif
+            }
             Renderer renderer = panel.GetComponent<Renderer>();
             if (renderer != null && material != null) renderer.sharedMaterial = material;
         }
