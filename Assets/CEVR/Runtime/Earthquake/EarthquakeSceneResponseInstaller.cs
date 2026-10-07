@@ -127,6 +127,7 @@ namespace ChulaEarthquakeVR
         {
             if (body == null || body.gameObject.scene != gameObject.scene) return false;
             if (body.GetComponentInParent<PlayerHealth>() != null) return false;
+            if (body.GetComponent<HousePetController>() != null) return false;
             if (body.GetComponentInParent<Camera>() != null) return false;
             if (body.GetComponentInChildren<Camera>(true) != null) return false;
             if (body.GetComponentInParent<Canvas>() != null) return false;

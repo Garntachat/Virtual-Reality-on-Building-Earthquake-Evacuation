@@ -128,6 +128,7 @@ namespace ChulaEarthquakeVR
 
             BuildHouseWindows(motion, logger, blueGlass, charcoal);
             BuildHouseDecoration(wood, cream, teal, green, charcoal);
+            HousePetModel.Create(transform, HouseSceneLayout.OnFloor(-2.8f, 1.8f, 0.02f), motion);
             Transform assembly = BuildAssemblyMarker(HouseSceneLayout.AssemblyPoint, green).transform;
             BuildCoverZone(HouseSceneLayout.CoverZone);
             EnsurePlayerFeatures(player, camera);

@@ -17,6 +17,7 @@ namespace ChulaEarthquakeVR
         private Rigidbody heldBody;
         private MovableFurniture heldFurniture;
         private ProtectivePillow heldPillow;
+        private HousePetController heldPet;
         private DesktopDebugRig desktopRig;
         private bool previousUseGravity;
         private float previousLinearDamping;
@@ -129,7 +130,8 @@ namespace ChulaEarthquakeVR
             if (viewCamera == null) return false;
             Ray ray = new Ray(viewCamera.transform.position, viewCamera.transform.forward);
             if (!RaycastTarget(ray, out RaycastHit hit)) return false;
-            return hit.collider.GetComponentInParent<MovableFurniture>() != null ||
+            return hit.collider.GetComponentInParent<HousePetController>() != null ||
+                   hit.collider.GetComponentInParent<MovableFurniture>() != null ||
                    hit.collider.GetComponentInParent<TaskItem>() != null ||
                    hit.collider.GetComponentInParent<ProtectivePillow>() != null ||
                    hit.collider.GetComponentInParent<WearableShoes>() != null;
@@ -138,6 +140,7 @@ namespace ChulaEarthquakeVR
         private string InteractionPrompt()
         {
             string use = secondaryPlayerControls ? "RIGHT SHIFT" : "E / LEFT CLICK";
+            if (heldPet != null) return $"CAT HELD  •  {use}: PUT DOWN";
             if (heldPillow != null) return $"PILLOW HELD OVER HEAD  •  {use}: RELEASE";
             if (heldBody != null) return secondaryPlayerControls
                 ? "RIGHT SHIFT: RELEASE"
@@ -147,6 +150,8 @@ namespace ChulaEarthquakeVR
             Ray ray = new Ray(viewCamera.transform.position, viewCamera.transform.forward);
             if (!RaycastTarget(ray, out RaycastHit hit))
                 return DefaultPrompt();
+            if (hit.collider.GetComponentInParent<HousePetController>() != null)
+                return $"{use}: PICK UP CAT";
             if (hit.collider.GetComponentInParent<MovableFurniture>() != null)
                 return $"{use}: GRAB AND SLIDE CHAIR";
             if (hit.collider.GetComponentInParent<TaskItem>() != null)
@@ -190,6 +195,7 @@ namespace ChulaEarthquakeVR
             Ray ray = new Ray(viewCamera.transform.position, viewCamera.transform.forward);
             if (!RaycastTarget(ray, out RaycastHit hit)) return;
 
+            HousePetController pet = hit.collider.GetComponentInParent<HousePetController>();
             TaskItem item = hit.collider.GetComponentInParent<TaskItem>();
             MovableFurniture furniture = hit.collider.GetComponentInParent<MovableFurniture>();
             ProtectivePillow pillow = hit.collider.GetComponentInParent<ProtectivePillow>();
@@ -199,14 +205,16 @@ namespace ChulaEarthquakeVR
                 shoes.Equip(GetComponent<PlayerHealth>(), transform);
                 return;
             }
-            if (item == null && furniture == null && pillow == null) return;
+            if (item == null && furniture == null && pillow == null && pet == null) return;
 
             Rigidbody body = item != null
                 ? item.GetComponent<Rigidbody>()
-                : furniture != null ? furniture.GetComponent<Rigidbody>() : pillow.GetComponent<Rigidbody>();
+                : furniture != null ? furniture.GetComponent<Rigidbody>() : pillow != null ? pillow.GetComponent<Rigidbody>() : pet.GetComponent<Rigidbody>();
             ClaimedBodies.RemoveWhere(claimed => claimed == null);
             if (body == null || body.isKinematic || ClaimedBodies.Contains(body)) return;
 
+            if (pet != null && !pet.TryHold()) return;
+            heldPet = pet;
             heldBody = body;
             ClaimedBodies.Add(body);
             previousUseGravity = body.useGravity;
@@ -237,6 +245,8 @@ namespace ChulaEarthquakeVR
             EndFurnitureInteraction();
             heldPillow?.SetHeldBy(GetComponent<PlayerHealth>(), false);
             heldPillow = null;
+            heldPet?.Release();
+            heldPet = null;
             if (restorePhysics && !heldBody.isKinematic)
             {
                 heldBody.useGravity = previousUseGravity;

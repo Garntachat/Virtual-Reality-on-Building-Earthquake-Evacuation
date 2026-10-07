@@ -3,7 +3,8 @@
   "rootNamespace": "ChulaEarthquakeVR",
   "references": [
     "Unity.InputSystem",
-    "Unity.ugui"
+    "Unity.ugui",
+    "Unity.XR.Interaction.Toolkit"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
