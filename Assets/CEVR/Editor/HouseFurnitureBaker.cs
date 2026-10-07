@@ -93,7 +93,6 @@ namespace ChulaEarthquakeVR.Editor
 
             baking = true;
             BackupSceneFile(scene);
-            AssetDatabase.StartAssetEditing();
             try
             {
                 RemoveRoot(scene, OldPreviewRoot);
@@ -128,6 +127,7 @@ namespace ChulaEarthquakeVR.Editor
                 PersistTransientMeshesAndMaterials(root);
 
                 bool valid = HouseLayoutSharedBuilder.ValidateBuiltLayout(scene, root.transform, out string report);
+                bool persistent = ValidatePersistentAssets(root, out string persistenceReport);
                 string signature = HouseLayoutSharedBuilder.ComputeVisualSignature(root.transform);
 
                 EditorUtility.SetDirty(root);
@@ -142,7 +142,7 @@ namespace ChulaEarthquakeVR.Editor
                 EditorApplication.RepaintHierarchyWindow();
                 SceneView.RepaintAll();
 
-                if (valid)
+                if (valid && persistent)
                 {
                     Debug.Log(
                         "CEVR HOUSE BAKE PASS: HouseFurniture is now normal saved scene furniture. " +
@@ -151,8 +151,8 @@ namespace ChulaEarthquakeVR.Editor
                 else
                 {
                     Debug.LogError(
-                        "CEVR HOUSE BAKE VALIDATION FAILED: " + report +
-                        "; visual-signature=" + signature);
+                        "CEVR HOUSE BAKE VALIDATION FAILED: layout=[" + report + "] persistence=[" +
+                        persistenceReport + "]; visual-signature=" + signature);
                 }
             }
             catch (Exception ex)
@@ -161,10 +161,37 @@ namespace ChulaEarthquakeVR.Editor
             }
             finally
             {
-                AssetDatabase.StopAssetEditing();
                 AssetDatabase.Refresh();
                 baking = false;
             }
+        }
+
+        private static bool ValidatePersistentAssets(GameObject root, out string report)
+        {
+            var problems = new List<string>();
+
+            if (root.hideFlags != HideFlags.None)
+                problems.Add("HouseFurniture root has non-zero HideFlags");
+            if (root.CompareTag("EditorOnly"))
+                problems.Add("HouseFurniture is tagged EditorOnly");
+
+            foreach (MeshFilter filter in root.GetComponentsInChildren<MeshFilter>(true))
+            {
+                if (filter.sharedMesh != null && !EditorUtility.IsPersistent(filter.sharedMesh))
+                    problems.Add("transient mesh on " + filter.gameObject.name);
+            }
+
+            foreach (Renderer renderer in root.GetComponentsInChildren<Renderer>(true))
+            {
+                foreach (Material material in renderer.sharedMaterials)
+                {
+                    if (material != null && !EditorUtility.IsPersistent(material))
+                        problems.Add("transient material on " + renderer.gameObject.name);
+                }
+            }
+
+            report = problems.Count == 0 ? "PASS" : string.Join("; ", problems);
+            return problems.Count == 0;
         }
 
         private static void BackupSceneFile(Scene scene)
