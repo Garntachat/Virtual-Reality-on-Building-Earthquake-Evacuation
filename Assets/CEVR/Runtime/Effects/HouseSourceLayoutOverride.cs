@@ -48,6 +48,12 @@ namespace ChulaEarthquakeVR
             if (oldEnforcer != null) oldEnforcer.enabled = false;
 
             RemoveOldRuntimeVisuals();
+            HouseAuthoredFurniture authored = FindFirstObjectByType<HouseAuthoredFurniture>();
+            if (authored != null)
+            {
+                authored.BindRuntimeAnchors();
+                return;
+            }
             BuildDiningSet();
             BuildLivingRoom();
             BuildKitchen();
@@ -64,7 +70,7 @@ namespace ChulaEarthquakeVR
         {
             foreach (Renderer r in FindObjectsByType<Renderer>(FindObjectsSortMode.None))
             {
-                if (r == null) continue;
+                if (r == null || r.GetComponentInParent<HouseAuthoredFurniture>() != null) continue;
                 string n = r.name;
                 if (n.StartsWith("HouseSofa", StringComparison.Ordinal) ||
                     n.StartsWith("HouseCoffeeTable", StringComparison.Ordinal) ||
@@ -77,7 +83,7 @@ namespace ChulaEarthquakeVR
 
             foreach (GameObject go in FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
-                if (go == null) continue;
+                if (go == null || go.GetComponentInParent<HouseAuthoredFurniture>() != null) continue;
                 if (go.name.StartsWith("HouseWindow_", StringComparison.Ordinal) ||
                     go.name.StartsWith("Kenney_", StringComparison.Ordinal) ||
                     go.name.StartsWith("TeamFurniture_", StringComparison.Ordinal) ||
