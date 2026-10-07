@@ -8,7 +8,7 @@ namespace ChulaEarthquakeVR
     [DisallowMultipleComponent]
     public sealed class HouseBakedLayoutMarker : MonoBehaviour
     {
-        public const int CurrentLayoutVersion = 2;
+        public const int CurrentLayoutVersion = 3;
         [SerializeField] private int layoutVersion = CurrentLayoutVersion;
 
         public int LayoutVersion => layoutVersion;
