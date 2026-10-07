@@ -87,6 +87,11 @@ namespace ChulaEarthquakeVR
             BindFollower(savedRoot, "HouseLayout_DiningChair_Spare", scene, "HouseChair_Spare");
             BindFollower(savedRoot, "HouseLayout_DiningChair_Left", scene, "HouseChair_DiningLeft");
             BindFollower(savedRoot, "HouseLayout_DiningChair_Right", scene, "HouseChair_DiningRight");
+
+            // Older saved editor layouts used four identical EDITOR_DiningChair names. Pair them to
+            // gameplay proxies by nearest starting position so those manually edited scenes still work.
+            BindLegacyEditorChairsIfNeeded(savedRoot, scene);
+
             BindFollower(savedRoot, "HouseLayout_Fridge", scene, "HouseTallCabinet_Left");
             BindFollower(savedRoot, "HouseLayout_Wandrobe", scene, "HouseBookcase_Right");
 
@@ -303,6 +308,63 @@ namespace ChulaEarthquakeVR
             }
         }
 
+        private static void BindLegacyEditorChairsIfNeeded(Transform root, Scene scene)
+        {
+            if (FindFurniture(root, "HouseLayout_DiningChair_CoverObstacle") != null ||
+                FindFurniture(root, "HouseLayout_DiningChair_Spare") != null ||
+                FindFurniture(root, "HouseLayout_DiningChair_Left") != null ||
+                FindFurniture(root, "HouseLayout_DiningChair_Right") != null)
+                return;
+
+            var chairs = new List<Transform>();
+            foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
+                if (t.name == "EDITOR_DiningChair")
+                    chairs.Add(t);
+
+            if (chairs.Count == 0) return;
+
+            string[] proxies =
+            {
+                "HouseChair_CoverObstacle",
+                "HouseChair_Spare",
+                "HouseChair_DiningLeft",
+                "HouseChair_DiningRight"
+            };
+
+            var unused = new List<Transform>(chairs);
+            foreach (string proxyName in proxies)
+            {
+                GameObject proxy = FindSceneObject(scene, proxyName);
+                if (proxy == null || unused.Count == 0) continue;
+
+                Transform nearest = null;
+                float best = float.PositiveInfinity;
+                foreach (Transform candidate in unused)
+                {
+                    float distance = (candidate.position - proxy.transform.position).sqrMagnitude;
+                    if (distance >= best) continue;
+                    best = distance;
+                    nearest = candidate;
+                }
+
+                if (nearest == null) continue;
+                unused.Remove(nearest);
+
+                if (TryLocalVisibleBounds(nearest, out Bounds local))
+                {
+                    Vector3 bottom = nearest.TransformPoint(
+                        new Vector3(local.center.x, local.min.y, local.center.z));
+                    proxy.transform.SetPositionAndRotation(bottom, nearest.rotation);
+                }
+                else
+                {
+                    proxy.transform.SetPositionAndRotation(nearest.position, nearest.rotation);
+                }
+
+                BindFollower(nearest, proxy);
+            }
+        }
+
         private static void BindFollower(
             Transform root,
             string visualName,
@@ -311,6 +373,12 @@ namespace ChulaEarthquakeVR
         {
             Transform visual = FindFurniture(root, visualName);
             GameObject proxy = FindSceneObject(scene, proxyName);
+            if (visual == null || proxy == null) return;
+            BindFollower(visual, proxy);
+        }
+
+        private static void BindFollower(Transform visual, GameObject proxy)
+        {
             if (visual == null || proxy == null) return;
 
             foreach (Collider collider in visual.GetComponentsInChildren<Collider>(true))
