@@ -80,6 +80,15 @@ namespace ChulaEarthquakeVR
                 if (!hasEnabledCollider) AddBoundsCollider(t.gameObject);
             }
 
+            BindVisualToRuntimeAnchor(root, "HouseLayout_DiningChair_CoverObstacle", scene, "HouseChair_CoverObstacle");
+            BindVisualToRuntimeAnchor(root, "HouseLayout_DiningChair_Spare", scene, "HouseChair_Spare");
+            BindVisualToRuntimeAnchor(root, "HouseLayout_DiningChair_Left", scene, "HouseChair_DiningLeft");
+            BindVisualToRuntimeAnchor(root, "HouseLayout_DiningChair_Right", scene, "HouseChair_DiningRight");
+            BindVisualToRuntimeAnchor(root, "HouseLayout_Fridge", scene, "HouseTallCabinet_Left");
+            BindVisualToRuntimeAnchor(root, "HouseLayout_Wandrobe", scene, "HouseBookcase_Right");
+            for (int i = 1; i <= HouseSceneLayout.OverheadHazards.Length; i++)
+                BindVisualToRuntimeAnchor(root, "HouseLayout_HazardBooks_" + i, scene, "HouseFallingObject_" + i);
+
             Transform glass = FindChildExact(root, "HouseLayout_WindowGlass");
             if (glass != null)
             {
@@ -135,7 +144,10 @@ namespace ChulaEarthquakeVR
             }
 
             RequireCount(root, "HouseLayout_DiningTable", 1, problems);
-            RequireCount(root, "HouseLayout_DiningChair", 4, problems);
+            RequireCount(root, "HouseLayout_DiningChair_CoverObstacle", 1, problems);
+            RequireCount(root, "HouseLayout_DiningChair_Spare", 1, problems);
+            RequireCount(root, "HouseLayout_DiningChair_Left", 1, problems);
+            RequireCount(root, "HouseLayout_DiningChair_Right", 1, problems);
             RequireCount(root, "HouseLayout_Sofa", 1, problems);
             RequireCount(root, "HouseLayout_televisionModern", 1, problems);
             RequireCount(root, "HouseLayout_Bed", 1, problems);
@@ -280,10 +292,14 @@ namespace ChulaEarthquakeVR
         {
             Vector3 p = HouseSceneLayout.DiningTable;
             Team(c, "DiningTable", p, HouseSceneLayout.DiningTableSize, HouseSceneLayout.DiningTableYaw, c.runtime);
-            Team(c, "DiningChair", HouseSceneLayout.CoverObstacleChair, HouseSceneLayout.DiningChairSize, 180f, false);
-            Team(c, "DiningChair", HouseSceneLayout.SpareChair, HouseSceneLayout.DiningChairSize, 0f, false);
-            Team(c, "DiningChair", HouseSceneLayout.DiningLeftChair, HouseSceneLayout.DiningChairSize, -90f, false);
-            Team(c, "DiningChair", HouseSceneLayout.DiningRightChair, HouseSceneLayout.DiningChairSize, 90f, false);
+            Rename(Team(c, "DiningChair", HouseSceneLayout.CoverObstacleChair, HouseSceneLayout.DiningChairSize, 180f, false),
+                "HouseLayout_DiningChair_CoverObstacle");
+            Rename(Team(c, "DiningChair", HouseSceneLayout.SpareChair, HouseSceneLayout.DiningChairSize, 0f, false),
+                "HouseLayout_DiningChair_Spare");
+            Rename(Team(c, "DiningChair", HouseSceneLayout.DiningLeftChair, HouseSceneLayout.DiningChairSize, -90f, false),
+                "HouseLayout_DiningChair_Left");
+            Rename(Team(c, "DiningChair", HouseSceneLayout.DiningRightChair, HouseSceneLayout.DiningChairSize, 90f, false),
+                "HouseLayout_DiningChair_Right");
 
             Team(c, "Vase", p + Vector3.up * HouseSceneLayout.DiningTableSize.y,
                 new Vector3(0.16f, 0.30f, 0.16f), 0f, false);
@@ -366,9 +382,13 @@ namespace ChulaEarthquakeVR
 
         private static void BuildCeilingHazards(BuildContext c)
         {
-            foreach (Vector3 p in HouseSceneLayout.OverheadHazards)
-                Kenney(c, "books", new Vector3(p.x, 3.78f, p.z),
-                    new Vector3(0.55f, 0.18f, 0.38f), 0f, false);
+            for (int i = 0; i < HouseSceneLayout.OverheadHazards.Length; i++)
+            {
+                Vector3 p = HouseSceneLayout.OverheadHazards[i];
+                Rename(Kenney(c, "books", new Vector3(p.x, 3.78f, p.z),
+                    new Vector3(0.55f, 0.18f, 0.38f), 0f, false),
+                    "HouseLayout_HazardBooks_" + (i + 1));
+            }
 
             Kenney(c, "lampSquareCeiling", new Vector3(-2.8f, 3.76f, 0.60f),
                 new Vector3(0.75f, 0.20f, 0.45f), 0f, false);
@@ -591,6 +611,19 @@ namespace ChulaEarthquakeVR
                 new Vector3(5.25f, HouseSceneLayout.SecondFloorY, 0.62f),
                 HouseSceneLayout.BedYaw);
             Debug.LogWarning("CEVR House bed intersected Stairs (1); compact clear-strip fallback applied.");
+        }
+
+        private static void BindVisualToRuntimeAnchor(Transform root, string visualName, Scene scene, string anchorName)
+        {
+            Transform visual = FindChildExact(root, visualName);
+            GameObject anchor = FindSceneObject(scene, anchorName);
+            if (visual == null || anchor == null) return;
+            visual.SetParent(anchor.transform, true);
+        }
+
+        private static void Rename(GameObject go, string name)
+        {
+            if (go != null) go.name = name;
         }
 
         private static void ConfigureChairAnchor(Scene scene, string name, Vector3 position, float yaw)
