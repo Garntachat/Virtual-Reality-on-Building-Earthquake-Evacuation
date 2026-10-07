@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 namespace ChulaEarthquakeVR
 {
@@ -36,6 +37,15 @@ namespace ChulaEarthquakeVR
                 target.SetPositionAndRotation(entry.furnishing.position, entry.furnishing.rotation);
                 target.localScale = entry.furnishing.lossyScale;
                 entry.furnishing.SetParent(target, true);
+                XRGrabInteractable grab = target.GetComponent<XRGrabInteractable>();
+                if (grab != null)
+                {
+                    // Refresh the collider list cached when the runtime anchor was created.
+                    grab.enabled = false;
+                    grab.colliders.Clear();
+                    grab.colliders.AddRange(target.GetComponentsInChildren<Collider>().Where(c => c.enabled));
+                    grab.enabled = true;
+                }
             }
         }
     }
