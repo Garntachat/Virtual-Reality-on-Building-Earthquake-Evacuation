@@ -191,23 +191,23 @@ namespace ChulaEarthquakeVR.Editor
         private static void BuildDining(Transform root, Scene scene)
         {
             Vector3 c = HouseSceneLayout.DiningTable;
-            Team("DiningTable", root, scene, c, new Vector3(1.55f, 0.74f, 0.88f), 0f);
-            Team("DiningChair", root, scene, new Vector3(c.x, HouseSceneLayout.FloorY, c.z - 0.78f), new Vector3(0.44f, 0.94f, 0.42f), 180f);
-            Team("DiningChair", root, scene, new Vector3(c.x, HouseSceneLayout.FloorY, c.z + 0.78f), new Vector3(0.44f, 0.94f, 0.42f), 0f);
-            Team("DiningChair", root, scene, new Vector3(c.x - 1.03f, HouseSceneLayout.FloorY, c.z), new Vector3(0.44f, 0.94f, 0.42f), -90f);
-            Team("DiningChair", root, scene, new Vector3(c.x + 1.03f, HouseSceneLayout.FloorY, c.z), new Vector3(0.44f, 0.94f, 0.42f), 90f);
+            Team("DiningTable", root, scene, c, HouseSceneLayout.DiningTableSize, HouseSceneLayout.DiningTableYaw);
+            Team("DiningChair", root, scene, HouseSceneLayout.CoverObstacleChair, HouseSceneLayout.DiningChairSize, 180f);
+            Team("DiningChair", root, scene, HouseSceneLayout.SpareChair, HouseSceneLayout.DiningChairSize, 0f);
+            Team("DiningChair", root, scene, HouseSceneLayout.DiningLeftChair, HouseSceneLayout.DiningChairSize, -90f);
+            Team("DiningChair", root, scene, HouseSceneLayout.DiningRightChair, HouseSceneLayout.DiningChairSize, 90f);
             Team("Vase", root, scene, c + Vector3.up * 0.74f, new Vector3(0.16f, 0.30f, 0.16f), 0f);
             Kenney("rugRectangle", root, scene, c + new Vector3(0f, 0.012f, 0f), new Vector3(2.55f, 0.02f, 1.95f), 0f);
         }
 
         private static void BuildLiving(Transform root, Scene scene)
         {
-            Team("Sofa", root, scene, HouseSceneLayout.Sofa, new Vector3(2.05f, 0.88f, 1.02f), 90f);
-            Team("Sofa_Pillows", root, scene, HouseSceneLayout.Sofa + new Vector3(0.18f, 0.48f, 0f), new Vector3(1.55f, 0.21f, 0.25f), 90f);
-            Kenney("tableCoffee", root, scene, HouseSceneLayout.CoffeeTable, new Vector3(1.55f, 0.48f, 0.82f), 90f);
-            Kenney("rugRectangle", root, scene, HouseSceneLayout.Rug + Vector3.up * 0.01f, new Vector3(2.50f, 0.02f, 3.00f), 90f);
-            Kenney("cabinetTelevision", root, scene, HouseSceneLayout.Television, new Vector3(2.0f, 0.65f, 0.50f), 90f);
-            Kenney("televisionModern", root, scene, HouseSceneLayout.Television + Vector3.up * 0.65f, new Vector3(1.45f, 0.85f, 0.22f), 90f);
+            Team("Sofa", root, scene, HouseSceneLayout.Sofa, HouseSceneLayout.SofaSize, HouseSceneLayout.SofaYaw);
+            Team("Sofa_Pillows", root, scene, HouseSceneLayout.SofaPillows, HouseSceneLayout.SofaPillowsSize, HouseSceneLayout.SofaYaw);
+            Kenney("tableCoffee", root, scene, HouseSceneLayout.CoffeeTable, HouseSceneLayout.CoffeeTableSize, 90f);
+            Kenney("rugRectangle", root, scene, HouseSceneLayout.Rug + Vector3.up * 0.01f, HouseSceneLayout.RugSize, 90f);
+            Kenney("cabinetTelevision", root, scene, HouseSceneLayout.Television, HouseSceneLayout.TelevisionCabinetSize, HouseSceneLayout.TelevisionYaw);
+            Kenney("televisionModern", root, scene, HouseSceneLayout.Television + Vector3.up * 0.65f, HouseSceneLayout.TelevisionSize, HouseSceneLayout.TelevisionYaw);
             Kenney("pottedPlant", root, scene, HouseSceneLayout.OnFloor(-4.45f, -0.95f), new Vector3(0.58f, 1.18f, 0.58f), 0f);
             Kenney("lampRoundFloor", root, scene, HouseSceneLayout.OnFloor(-4.45f, 1.90f), new Vector3(0.42f, 1.45f, 0.42f), 0f);
             Kenney("books", root, scene, HouseSceneLayout.CoffeeTable + Vector3.up * 0.49f + new Vector3(0.20f, 0f, -0.12f), new Vector3(0.30f, 0.12f, 0.24f), 15f);
@@ -226,14 +226,11 @@ namespace ChulaEarthquakeVR.Editor
 
         private static void BuildBedroom(Transform root, Scene scene)
         {
-            // This is the same guaranteed-clear second-floor rectangle used at runtime.
-            // Bed visual bounds stay approximately x=4.76..6.12 and z=0.28..1.12 at y=4.
-            Team("Bed", root, scene, new Vector3(5.44f, HouseSceneLayout.SecondFloorY, 0.70f), new Vector3(1.36f, 0.82f, 0.84f), 90f);
-            Team("Bed_Pillow", root, scene, new Vector3(5.78f, HouseSceneLayout.SecondFloorY + 0.50f, 0.70f), new Vector3(0.48f, 0.08f, 0.24f), 90f);
-            Kenney("rugRectangle", root, scene, new Vector3(5.25f, HouseSceneLayout.SecondFloorY + 0.01f, 0.82f), new Vector3(1.75f, 0.02f, 1.10f), 90f);
-            Kenney("tableCoffee", root, scene, new Vector3(4.45f, HouseSceneLayout.SecondFloorY, 0.55f), new Vector3(0.46f, 0.48f, 0.42f), 0f);
-            Kenney("lampRoundFloor", root, scene, new Vector3(4.45f, HouseSceneLayout.SecondFloorY, 1.05f), new Vector3(0.32f, 1.10f, 0.32f), 0f);
-            Kenney("books", root, scene, new Vector3(4.45f, HouseSceneLayout.SecondFloorY + 0.49f, 0.55f), new Vector3(0.22f, 0.10f, 0.18f), 0f);
+            Team("Bed", root, scene, HouseSceneLayout.Bed, HouseSceneLayout.BedSize, HouseSceneLayout.BedYaw);
+            Team("Bed_Pillow", root, scene, HouseSceneLayout.BedPillow, HouseSceneLayout.BedPillowSize, HouseSceneLayout.BedYaw);
+            Kenney("rugRectangle", root, scene,
+                new Vector3(HouseSceneLayout.Bed.x, HouseSceneLayout.SecondFloorY + 0.01f, HouseSceneLayout.Bed.z),
+                new Vector3(1.75f, 0.02f, 1.35f), 90f);
         }
 
         private static void BuildDetails(Transform root, Scene scene)
@@ -290,9 +287,7 @@ namespace ChulaEarthquakeVR.Editor
             foreach (Renderer renderer in go.GetComponentsInChildren<Renderer>(true))
                 if (CollisionNamed(renderer.transform, go.transform)) renderer.enabled = false;
 
-            go.transform.SetPositionAndRotation(Vector3.zero, Quaternion.Euler(0f, yaw, 0f));
-            go.transform.localScale = Vector3.one;
-            if (!Fit(go.transform, desiredSize, bottomCenter))
+            if (!HouseFurnitureGeometry.FitAndPlace(go.transform, desiredSize, bottomCenter, yaw))
             {
                 UnityEngine.Object.DestroyImmediate(go);
                 return null;
@@ -346,9 +341,7 @@ namespace ChulaEarthquakeVR.Editor
                 surface.AddComponent<MeshRenderer>().sharedMaterial = material;
             }
 
-            go.transform.SetPositionAndRotation(Vector3.zero, Quaternion.Euler(0f, yaw, 0f));
-            go.transform.localScale = Vector3.one;
-            if (!Fit(go.transform, desiredSize, bottomCenter))
+            if (!HouseFurnitureGeometry.FitAndPlace(go.transform, desiredSize, bottomCenter, yaw))
             {
                 UnityEngine.Object.DestroyImmediate(go);
                 return null;
