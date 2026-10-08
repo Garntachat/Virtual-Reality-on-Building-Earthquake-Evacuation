@@ -91,6 +91,10 @@ namespace ChulaEarthquakeVR.Editor
             {
                 if (renderer == null || renderer.gameObject.scene != scene) continue;
 
+                // HouseFurniture has its own source-aware visual repair. Never replace its materials
+                // with generic wall/floor fallbacks, otherwise all furniture becomes white.
+                if (IsUnderHouseFurniture(renderer.transform)) continue;
+
                 Material[] materials = renderer.sharedMaterials;
                 bool changed = false;
                 Material fallback = SelectFallback(renderer, wall, floor);
@@ -109,6 +113,17 @@ namespace ChulaEarthquakeVR.Editor
             }
 
             return repairedSlots;
+        }
+
+        private static bool IsUnderHouseFurniture(Transform transform)
+        {
+            Transform current = transform;
+            while (current != null)
+            {
+                if (current.name == "HouseFurniture") return true;
+                current = current.parent;
+            }
+            return false;
         }
 
         private static Material SelectFallback(Renderer renderer, Material wall, Material floor)
