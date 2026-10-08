@@ -69,6 +69,10 @@ namespace ChulaEarthquakeVR
 
         private void InstallHouseScenario()
         {
+            Scene activeScene = SceneManager.GetActiveScene();
+            bool useSavedHouseVisuals =
+                HouseSavedSceneRuntimeBinder.FindSavedFurnitureRoot(activeScene) != null;
+
             Camera camera = FindFirstObjectByType<Camera>();
             if (camera == null)
             {
@@ -126,8 +130,17 @@ namespace ChulaEarthquakeVR
                     i % 2 == 0 ? amber : charcoal, motion, $"house-overhead-{i + 1}"));
             hazardDirector.Configure(staged);
 
-            BuildHouseWindows(motion, logger, blueGlass, charcoal);
-            BuildHouseDecoration(wood, cream, teal, green, charcoal);
+            if (!useSavedHouseVisuals)
+            {
+                BuildHouseWindows(motion, logger, blueGlass, charcoal);
+                BuildHouseDecoration(wood, cream, teal, green, charcoal);
+            }
+            else
+            {
+                HideSavedHouseProxyVisuals();
+                Debug.Log("CEVR House: saved HouseFurniture detected; runtime duplicate furniture visuals disabled.");
+            }
+
             Transform assembly = BuildAssemblyMarker(HouseSceneLayout.AssemblyPoint, green).transform;
             BuildCoverZone(HouseSceneLayout.CoverZone);
             EnsurePlayerFeatures(player, camera);
@@ -136,6 +149,30 @@ namespace ChulaEarthquakeVR
             HouseScenarioController scenario = systems.AddComponent<HouseScenarioController>();
             scenario.Configure(motion, hazardDirector, health, player.transform, assembly, logger);
             Debug.Log("CEVR installed the complete house tutorial gameplay without modifying the house mesh.");
+        }
+
+        private void HideSavedHouseProxyVisuals()
+        {
+            foreach (Renderer renderer in GetComponentsInChildren<Renderer>(true))
+            {
+                Transform t = renderer.transform;
+                string n = t.name;
+                string parent = t.parent == null ? string.Empty : t.parent.name;
+
+                bool hide =
+                    n == "HouseSturdyTableTop" ||
+                    n == "HouseSturdyTableLeg" ||
+                    n.StartsWith("HouseChair_", StringComparison.Ordinal) ||
+                    parent.StartsWith("HouseChair_", StringComparison.Ordinal) ||
+                    n == "HouseTallCabinet_Left" ||
+                    parent == "HouseTallCabinet_Left" ||
+                    n == "HouseBookcase_Right" ||
+                    parent == "HouseBookcase_Right" ||
+                    n.StartsWith("HouseFallingObject_", StringComparison.Ordinal) ||
+                    parent.StartsWith("HouseFallingObject_", StringComparison.Ordinal);
+
+                if (hide) renderer.enabled = false;
+            }
         }
 
         private GameObject PrepareHousePlayer(Camera camera)
