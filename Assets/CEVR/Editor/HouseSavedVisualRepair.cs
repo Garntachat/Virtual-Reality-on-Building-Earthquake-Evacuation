@@ -9,16 +9,18 @@ using UnityEngine.SceneManagement;
 namespace ChulaEarthquakeVR.Editor
 {
     /// <summary>
-    /// Repairs missing House furniture meshes/materials WITHOUT moving, rebuilding, deleting,
-    /// or auto-saving the user's House layout.
+    /// Restores the VISUAL layer of the saved House furniture without changing the user's layout.
     ///
-    /// The saved HouseFurniture transforms are treated as read-only. A temporary preview scene is
-    /// used to rebuild visual source data, then only missing MeshFilter/Renderer references are
-    /// copied back to the existing saved furniture.
+    /// HouseFurniture root transforms are the source of truth. For every HouseLayout_* item we build
+    /// a clean visual source in a temporary preview scene, place that visual INSIDE the already-saved
+    /// furniture root, and keep the saved root position/rotation/scale untouched.
+    ///
+    /// Nothing runs automatically and this tool never saves House.unity for the user.
     /// </summary>
     public static class HouseSavedVisualRepair
     {
         private const string RootName = "HouseFurniture";
+        private const string RestoredVisualName = "__CEVR_RESTORED_VISUAL";
         private const string AssetFolder = "Assets/CEVR/Generated/HouseVisualAssets";
 
         private sealed class TransformState
@@ -29,12 +31,12 @@ namespace ChulaEarthquakeVR.Editor
             public Vector3 localScale;
         }
 
-        [MenuItem("CEVR/House/Repair Missing Furniture Visuals (KEEP TRANSFORMS)", priority = 5)]
-        public static void Repair()
+        [MenuItem("CEVR/House/RESTORE Furniture Colors + Kitchen (KEEP LAYOUT)", priority = 1)]
+        public static void RestoreAllFurnitureVisuals()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
             {
-                Debug.LogError("CEVR House visual repair: stop Play mode first.");
+                Debug.LogError("CEVR House restore: stop Play mode first.");
                 return;
             }
 
@@ -42,24 +44,27 @@ namespace ChulaEarthquakeVR.Editor
             if (!scene.IsValid() || !scene.isLoaded ||
                 scene.name.IndexOf("house", StringComparison.OrdinalIgnoreCase) < 0)
             {
-                Debug.LogError("CEVR House visual repair: open House.unity first.");
+                Debug.LogError("CEVR House restore: open House.unity first.");
                 return;
             }
 
             GameObject savedRoot = FindRoot(scene, RootName);
             if (savedRoot == null)
             {
-                Debug.LogError("CEVR House visual repair: HouseFurniture was not found. Nothing was changed.");
+                Debug.LogError(
+                    "CEVR House restore: HouseFurniture was not found. Nothing was changed.");
                 return;
             }
 
             BackupScene(scene);
-            List<TransformState> transforms = CaptureTransforms(savedRoot.transform);
+            List<TransformState> savedTransforms = CaptureTransforms(savedRoot.transform);
 
             Scene previewScene = default;
             GameObject sourceRoot = null;
-            int repairedMeshes = 0;
-            int repairedMaterials = 0;
+            int restoredObjects = 0;
+            int restoredRenderers = 0;
+            int persistedMeshes = 0;
+            int persistedMaterials = 0;
 
             try
             {
@@ -95,45 +100,61 @@ namespace ChulaEarthquakeVR.Editor
                     List<Transform> targets = pair.Value;
                     for (int i = 0; i < targets.Count; i++)
                     {
+                        Transform target = targets[i];
                         Transform source = sources[Mathf.Min(i, sources.Count - 1)];
-                        RepairSubtree(
-                            targets[i],
-                            source,
-                            ref repairedMeshes,
-                            ref repairedMaterials);
+
+                        if (!HasVisualContent(source))
+                            continue;
+
+                        RemovePreviousRestoredVisual(target);
+                        DisableOldVisualRenderers(target);
+
+                        GameObject visual = UnityEngine.Object.Instantiate(source.gameObject);
+                        visual.name = RestoredVisualName;
+                        visual.transform.SetParent(target, false);
+                        visual.transform.localPosition = Vector3.zero;
+                        visual.transform.localRotation = Quaternion.identity;
+                        visual.transform.localScale = Vector3.one;
+                        SetHideFlagsRecursive(visual, HideFlags.None);
+
+                        StripNonVisualComponents(visual);
+                        PersistVisualAssets(
+                            visual,
+                            Safe(target.name) + "_" + i.ToString("D2"),
+                            ref persistedMeshes,
+                            ref persistedMaterials);
+
+                        restoredObjects++;
+                        restoredRenderers += visual.GetComponentsInChildren<Renderer>(true).Length;
                     }
                 }
 
-                int restoredTransforms = RestoreTransforms(transforms);
-                if (restoredTransforms != 0)
-                {
-                    Debug.LogWarning(
-                        "CEVR House visual repair restored " + restoredTransforms +
-                        " transform change(s). Furniture positions/rotations/scales remain exactly as saved.");
-                }
+                int transformCorrections = RestoreTransforms(savedTransforms);
 
-                if (repairedMeshes == 0 && repairedMaterials == 0)
-                {
-                    Debug.Log(
-                        "CEVR HOUSE VISUAL REPAIR: no missing mesh/material references were found. " +
-                        "House transforms were not changed.");
-                    return;
-                }
-
-                AssetDatabase.SaveAssets();
                 EditorSceneManager.MarkSceneDirty(scene);
+                AssetDatabase.SaveAssets();
                 SceneView.RepaintAll();
                 EditorApplication.RepaintHierarchyWindow();
 
+                if (transformCorrections != 0)
+                {
+                    Debug.LogWarning(
+                        "CEVR House restore blocked " + transformCorrections +
+                        " transform change(s). Your saved furniture layout was restored exactly.");
+                }
+
                 Debug.Log(
-                    "CEVR HOUSE VISUAL REPAIR PASS: repaired " + repairedMeshes +
-                    " mesh reference(s) and " + repairedMaterials +
-                    " material reference(s). NO furniture transform was changed. " +
-                    "Inspect the House, then press Cmd/Ctrl+S only if it looks correct.");
+                    "CEVR HOUSE COLORS/KITCHEN RESTORE READY: rebuilt visuals for " +
+                    restoredObjects + " furniture/decor root(s), " +
+                    restoredRenderers + " renderer(s), " +
+                    persistedMeshes + " generated mesh asset(s), and " +
+                    persistedMaterials + " generated material asset(s). " +
+                    "Furniture ROOT position/rotation/scale was NOT changed. " +
+                    "Inspect the House now. Press Cmd/Ctrl+S only after it looks correct.");
             }
             catch (Exception ex)
             {
-                RestoreTransforms(transforms);
+                RestoreTransforms(savedTransforms);
                 Debug.LogException(ex);
             }
             finally
@@ -145,111 +166,155 @@ namespace ChulaEarthquakeVR.Editor
             }
         }
 
-        private static void RepairSubtree(
-            Transform targetRoot,
-            Transform sourceRoot,
-            ref int repairedMeshes,
-            ref int repairedMaterials)
+        // Keep the previous menu name as an alias so an older instruction still works.
+        [MenuItem("CEVR/House/Repair Missing Furniture Visuals (KEEP TRANSFORMS)", priority = 2)]
+        public static void RepairMissingFurnitureVisuals()
         {
-            MeshFilter[] targetFilters = targetRoot.GetComponentsInChildren<MeshFilter>(true);
-            MeshFilter[] sourceFilters = sourceRoot.GetComponentsInChildren<MeshFilter>(true);
-            int filterCount = Mathf.Min(targetFilters.Length, sourceFilters.Length);
+            RestoreAllFurnitureVisuals();
+        }
 
-            for (int i = 0; i < filterCount; i++)
+        private static bool HasVisualContent(Transform root)
+        {
+            return root.GetComponentsInChildren<Renderer>(true).Length > 0;
+        }
+
+        private static void RemovePreviousRestoredVisual(Transform target)
+        {
+            Transform previous = target.Find(RestoredVisualName);
+            if (previous != null)
+                UnityEngine.Object.DestroyImmediate(previous.gameObject);
+        }
+
+        private static void DisableOldVisualRenderers(Transform target)
+        {
+            foreach (Renderer renderer in target.GetComponentsInChildren<Renderer>(true))
             {
-                if (targetFilters[i].sharedMesh != null) continue;
-                Mesh source = sourceFilters[i].sharedMesh;
-                if (source == null) continue;
+                if (renderer.transform.IsChildOf(target) &&
+                    renderer.transform.parent != null &&
+                    renderer.transform.parent.name == RestoredVisualName)
+                    continue;
 
-                targetFilters[i].sharedMesh =
-                    PersistMesh(source, targetRoot.name, i);
-                EditorUtility.SetDirty(targetFilters[i]);
-                repairedMeshes++;
+                renderer.enabled = false;
+            }
+        }
+
+        private static void PersistVisualAssets(
+            GameObject visualRoot,
+            string assetPrefix,
+            ref int meshCount,
+            ref int materialCount)
+        {
+            MeshFilter[] filters = visualRoot.GetComponentsInChildren<MeshFilter>(true);
+            for (int i = 0; i < filters.Length; i++)
+            {
+                Mesh mesh = filters[i].sharedMesh;
+                if (mesh == null || EditorUtility.IsPersistent(mesh))
+                    continue;
+
+                string path =
+                    AssetFolder + "/" + assetPrefix + "_Mesh_" + i.ToString("D3") + ".asset";
+                Mesh persistent = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+
+                if (persistent == null)
+                {
+                    persistent = UnityEngine.Object.Instantiate(mesh);
+                    persistent.name = assetPrefix + "_Mesh_" + i.ToString("D3");
+                    AssetDatabase.CreateAsset(persistent, path);
+                    meshCount++;
+                }
+                else
+                {
+                    EditorUtility.CopySerialized(mesh, persistent);
+                    EditorUtility.SetDirty(persistent);
+                }
+
+                filters[i].sharedMesh = persistent;
+                EditorUtility.SetDirty(filters[i]);
             }
 
-            Renderer[] targetRenderers = targetRoot.GetComponentsInChildren<Renderer>(true);
-            Renderer[] sourceRenderers = sourceRoot.GetComponentsInChildren<Renderer>(true);
-            int rendererCount = Mathf.Min(targetRenderers.Length, sourceRenderers.Length);
-
-            for (int i = 0; i < rendererCount; i++)
+            var materialCache = new Dictionary<Material, Material>();
+            Renderer[] renderers = visualRoot.GetComponentsInChildren<Renderer>(true);
+            for (int r = 0; r < renderers.Length; r++)
             {
-                Material[] targetSlots = targetRenderers[i].sharedMaterials;
-                Material[] sourceSlots = sourceRenderers[i].sharedMaterials;
-                int slotCount = Mathf.Max(targetSlots.Length, sourceSlots.Length);
-                if (slotCount == 0) continue;
-
-                if (targetSlots.Length < slotCount)
-                    Array.Resize(ref targetSlots, slotCount);
-
+                Material[] slots = renderers[r].sharedMaterials;
                 bool changed = false;
-                for (int slot = 0; slot < slotCount; slot++)
-                {
-                    Material current = targetSlots[slot];
-                    bool broken =
-                        current == null ||
-                        (!EditorUtility.IsPersistent(current) &&
-                         (current.name == "Default-Material" ||
-                          current.name == "Default Material"));
 
-                    if (!broken || slot >= sourceSlots.Length || sourceSlots[slot] == null)
+                for (int slot = 0; slot < slots.Length; slot++)
+                {
+                    Material source = slots[slot];
+                    if (source == null)
                         continue;
 
-                    targetSlots[slot] =
-                        PersistMaterial(sourceSlots[slot], targetRoot.name, i, slot);
-                    repairedMaterials++;
+                    // Even if the source material is a persistent FBX sub-asset, create a normal
+                    // project material. That makes the restored color/shader portable and prevents
+                    // another missing/external-material reference.
+                    if (!materialCache.TryGetValue(source, out Material persistent))
+                    {
+                        string path =
+                            AssetFolder + "/" + assetPrefix + "_Mat_" +
+                            r.ToString("D3") + "_" + slot.ToString("D2") + ".mat";
+
+                        persistent = AssetDatabase.LoadAssetAtPath<Material>(path);
+                        if (persistent == null)
+                        {
+                            persistent = new Material(source)
+                            {
+                                name = assetPrefix + "_Mat_" +
+                                       r.ToString("D3") + "_" + slot.ToString("D2")
+                            };
+                            AssetDatabase.CreateAsset(persistent, path);
+                            materialCount++;
+                        }
+                        else
+                        {
+                            EditorUtility.CopySerialized(source, persistent);
+                            EditorUtility.SetDirty(persistent);
+                        }
+
+                        materialCache[source] = persistent;
+                    }
+
+                    slots[slot] = persistent;
                     changed = true;
                 }
 
                 if (!changed) continue;
-                targetRenderers[i].sharedMaterials = targetSlots;
-                EditorUtility.SetDirty(targetRenderers[i]);
+                renderers[r].sharedMaterials = slots;
+                EditorUtility.SetDirty(renderers[r]);
             }
         }
 
-        private static Mesh PersistMesh(Mesh source, string rootName, int index)
+        private static void StripNonVisualComponents(GameObject root)
         {
-            string path =
-                AssetFolder + "/" + Safe(rootName) + "_Mesh_" + index.ToString("D2") + ".asset";
+            foreach (Collider component in root.GetComponentsInChildren<Collider>(true))
+                UnityEngine.Object.DestroyImmediate(component);
 
-            Mesh existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
-            if (existing == null)
-            {
-                Mesh created = UnityEngine.Object.Instantiate(source);
-                created.name = Safe(rootName) + "_Mesh_" + index.ToString("D2");
-                AssetDatabase.CreateAsset(created, path);
-                return created;
-            }
+            foreach (Rigidbody component in root.GetComponentsInChildren<Rigidbody>(true))
+                UnityEngine.Object.DestroyImmediate(component);
 
-            EditorUtility.CopySerialized(source, existing);
-            EditorUtility.SetDirty(existing);
-            return existing;
+            foreach (Animator component in root.GetComponentsInChildren<Animator>(true))
+                UnityEngine.Object.DestroyImmediate(component);
+
+            foreach (Animation component in root.GetComponentsInChildren<Animation>(true))
+                UnityEngine.Object.DestroyImmediate(component);
+
+            foreach (AudioSource component in root.GetComponentsInChildren<AudioSource>(true))
+                UnityEngine.Object.DestroyImmediate(component);
+
+            // The source layout's lights already exist as separate saved HouseLayout_* objects.
+            // Do not duplicate a light if one ever appears inside a furniture prefab.
+            foreach (Light component in root.GetComponentsInChildren<Light>(true))
+                UnityEngine.Object.DestroyImmediate(component);
+
+            foreach (MonoBehaviour component in root.GetComponentsInChildren<MonoBehaviour>(true))
+                UnityEngine.Object.DestroyImmediate(component);
         }
 
-        private static Material PersistMaterial(
-            Material source,
-            string rootName,
-            int rendererIndex,
-            int slotIndex)
+        private static void SetHideFlagsRecursive(GameObject root, HideFlags flags)
         {
-            string path =
-                AssetFolder + "/" + Safe(rootName) + "_Mat_" +
-                rendererIndex.ToString("D2") + "_" + slotIndex.ToString("D2") + ".mat";
-
-            Material existing = AssetDatabase.LoadAssetAtPath<Material>(path);
-            if (existing == null)
-            {
-                Material created = new Material(source)
-                {
-                    name = Safe(rootName) + "_Mat_" +
-                           rendererIndex.ToString("D2") + "_" + slotIndex.ToString("D2")
-                };
-                AssetDatabase.CreateAsset(created, path);
-                return created;
-            }
-
-            EditorUtility.CopySerialized(source, existing);
-            EditorUtility.SetDirty(existing);
-            return existing;
+            root.hideFlags = flags;
+            foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
+                t.gameObject.hideFlags = flags;
         }
 
         private static Dictionary<string, List<Transform>> DirectChildrenByName(Transform root)
@@ -297,6 +362,7 @@ namespace ChulaEarthquakeVR.Editor
                     (t.localScale - state.localScale).sqrMagnitude > 0.00000001f;
 
                 if (!changed) continue;
+
                 t.localPosition = state.localPosition;
                 t.localRotation = state.localRotation;
                 t.localScale = state.localScale;
@@ -307,16 +373,17 @@ namespace ChulaEarthquakeVR.Editor
 
         private static void BackupScene(Scene scene)
         {
-            if (string.IsNullOrEmpty(scene.path) || !File.Exists(scene.path)) return;
+            if (string.IsNullOrEmpty(scene.path) || !File.Exists(scene.path))
+                return;
 
             string directory = Path.Combine("Library", "CEVRBackups");
             Directory.CreateDirectory(directory);
             string destination = Path.Combine(
                 directory,
-                "House_before_visual_repair_" +
+                "House_before_color_restore_" +
                 DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".unity");
             File.Copy(scene.path, destination, true);
-            Debug.Log("CEVR House visual repair backup: " + destination);
+            Debug.Log("CEVR House restore backup created: " + destination);
         }
 
         private static void EnsureAssetFolder()
