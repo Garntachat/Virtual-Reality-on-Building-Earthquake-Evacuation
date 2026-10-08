@@ -142,7 +142,7 @@ namespace ChulaEarthquakeVR
             else
             {
                 HideSavedHouseProxyVisuals();
-                InstallSavedHouseExtras(savedHouseRoot, charcoal, green);
+                InstallSavedHouseExtras(savedHouseRoot, charcoal, green, cream, teal, pink);
                 Debug.Log("CEVR House: saved HouseFurniture detected; runtime duplicate furniture visuals disabled.");
             }
 
@@ -159,17 +159,23 @@ namespace ChulaEarthquakeVR
         private void InstallSavedHouseExtras(
             Transform savedRoot,
             Material buttonBase,
-            Material buttonFace)
+            Material buttonFace,
+            Material dishMaterial,
+            Material dishAccent,
+            Material stoveHot)
         {
             if (savedRoot == null) return;
 
             Transform cat = null;
             Transform door = null;
+            Transform stove = null;
+            Transform kitchenCabinet = null;
             foreach (Transform t in savedRoot.GetComponentsInChildren<Transform>(true))
             {
                 if (cat == null && t.name == "HouseLayout_Cat") cat = t;
                 if (door == null && t.name == "HouseLayout_FrontDoor") door = t;
-                if (cat != null && door != null) break;
+                if (stove == null && t.name == "HouseLayout_kitchenStove") stove = t;
+                if (kitchenCabinet == null && t.name == "HouseLayout_kitchenCabinet") kitchenCabinet = t;
             }
 
             if (cat != null && cat.GetComponent<HouseSavedCatController>() == null)
@@ -193,6 +199,41 @@ namespace ChulaEarthquakeVR
             {
                 Debug.LogWarning("CEVR House: HouseLayout_FrontDoor was not found; door button was not installed.");
             }
+
+            if (stove != null)
+            {
+                HouseStoveController stoveController = stove.GetComponent<HouseStoveController>();
+                if (stoveController == null) stoveController = stove.gameObject.AddComponent<HouseStoveController>();
+                stoveController.Configure(buttonBase, stoveHot);
+            }
+
+            BuildKitchenDishes(kitchenCabinet, dishMaterial, dishAccent);
+        }
+
+        private void BuildKitchenDishes(Transform cabinet, Material dish, Material accent)
+        {
+            if (cabinet == null) return;
+            bool found=false; Bounds b=default;
+            foreach (Renderer r in cabinet.GetComponentsInChildren<Renderer>(true))
+            {
+                if (r == null || !r.enabled) continue;
+                if (!found) { b=r.bounds; found=true; } else b.Encapsulate(r.bounds);
+            }
+            if (!found) return;
+
+            Vector3 p = new Vector3(b.center.x, b.max.y+0.025f, b.center.z);
+            for (int i=0;i<3;i++)
+                Primitive("KitchenPlate_"+(i+1), PrimitiveType.Cylinder,
+                    p+new Vector3(-0.24f,i*0.025f,-0.05f),
+                    new Vector3(0.22f,0.012f,0.22f), dish, false);
+
+            Primitive("KitchenCup_1", PrimitiveType.Cylinder,
+                p+new Vector3(0.24f,0.10f,-0.03f),
+                new Vector3(0.10f,0.10f,0.10f), accent, false);
+
+            Primitive("KitchenBowl_1", PrimitiveType.Sphere,
+                p+new Vector3(0.02f,0.08f,0.22f),
+                new Vector3(0.28f,0.09f,0.28f), dish, false);
         }
 
         private void HideSavedHouseProxyVisuals()

@@ -29,6 +29,7 @@ namespace ChulaEarthquakeVR
         private Vector3 target;
         private int targetIndex;
         private float waitUntil;
+        private Transform furnitureRoot;
         private Transform tailBase;
         private Transform tailTip;
         private Transform[] legs;
@@ -42,6 +43,7 @@ namespace ChulaEarthquakeVR
             if (configured) return;
             configured = true;
 
+            furnitureRoot = transform.parent;
             home = transform.position;
             target = home;
 
@@ -96,7 +98,10 @@ namespace ChulaEarthquakeVR
             }
 
             Vector3 direction = flat.normalized;
-            if (!HasGroundAhead(position, direction) || ObstacleAhead(position, direction))
+            Vector3 next = position + direction * walkSpeed * Time.fixedDeltaTime;
+            next.y = home.y;
+
+            if (!HasGroundAt(next) || ObstacleAhead(position, direction) || !IsClearOfSavedFurniture(next))
             {
                 PickNextTarget();
                 Animate(false);
@@ -106,9 +111,6 @@ namespace ChulaEarthquakeVR
             Quaternion wanted = Quaternion.LookRotation(direction, Vector3.up);
             Quaternion rotation = Quaternion.RotateTowards(
                 body.rotation, wanted, turnSpeed * Time.fixedDeltaTime);
-            Vector3 step = direction * walkSpeed * Time.fixedDeltaTime;
-            Vector3 next = position + step;
-            next.y = home.y;
 
             body.MoveRotation(rotation);
             body.MovePosition(next);
@@ -126,9 +128,9 @@ namespace ChulaEarthquakeVR
             waitUntil = Time.time + 0.65f;
         }
 
-        private bool HasGroundAhead(Vector3 position, Vector3 direction)
+        private bool HasGroundAt(Vector3 position)
         {
-            Vector3 origin = position + direction * 0.34f + Vector3.up * 0.65f;
+            Vector3 origin = position + Vector3.up * 0.65f;
             RaycastHit[] hits = Physics.RaycastAll(
                 origin, Vector3.down, 1.30f,
                 Physics.DefaultRaycastLayers,
@@ -157,6 +159,35 @@ namespace ChulaEarthquakeVR
                 return true;
             }
             return false;
+        }
+
+        private bool IsClearOfSavedFurniture(Vector3 position)
+        {
+            if (furnitureRoot == null) return true;
+            foreach (Transform sibling in furnitureRoot)
+            {
+                if (sibling == null || sibling == transform || !sibling.gameObject.activeInHierarchy) continue;
+                string n = sibling.name.ToLowerInvariant();
+                if (n.Contains("rug") || n.Contains("window") || n.Contains("light") || n.Contains("art") || n.Contains("hazardbooks")) continue;
+
+                bool found = false;
+                Bounds bounds = default;
+                foreach (Renderer r in sibling.GetComponentsInChildren<Renderer>(true))
+                {
+                    if (r == null || !r.enabled) continue;
+                    if (!found) { bounds = r.bounds; found = true; }
+                    else bounds.Encapsulate(r.bounds);
+                }
+                if (!found) continue;
+
+                float catBottom = home.y + 0.05f, catTop = home.y + 0.65f;
+                if (bounds.max.y < catBottom || bounds.min.y > catTop) continue;
+                bounds.Expand(new Vector3(0.50f, 0f, 0.50f));
+
+                if (position.x >= bounds.min.x && position.x <= bounds.max.x &&
+                    position.z >= bounds.min.z && position.z <= bounds.max.z) return false;
+            }
+            return true;
         }
 
         private void Animate(bool walking)

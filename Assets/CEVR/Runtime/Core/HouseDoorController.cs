@@ -65,6 +65,10 @@ namespace ChulaEarthquakeVR
             hinge.localRotation = closedRotation;
             targetOpen = false;
 
+            HouseDoorButton panelButton = panel.GetComponent<HouseDoorButton>();
+            if (panelButton == null) panelButton = panel.gameObject.AddComponent<HouseDoorButton>();
+            panelButton.Configure(this);
+            BuildInteractionSurface();
             BuildButton(buttonBase, buttonFace);
         }
 
@@ -85,6 +89,17 @@ namespace ChulaEarthquakeVR
                 targetOpen ? GameplayAudioCue.FurnitureGrab : GameplayAudioCue.FurnitureRelease,
                 0.16f,
                 targetOpen ? 1.08f : 0.92f);
+        }
+
+        private void BuildInteractionSurface()
+        {
+            if (FindDirectChild("DoorInteractionSurface") != null) return;
+            GameObject surface = new GameObject("DoorInteractionSurface");
+            surface.transform.SetParent(transform, false);
+            surface.transform.localPosition = new Vector3(0f, 1.05f, 0.32f);
+            BoxCollider collider = surface.AddComponent<BoxCollider>();
+            collider.size = new Vector3(1.35f, 2.10f, 0.08f);
+            surface.AddComponent<HouseDoorButton>().Configure(this);
         }
 
         private void BuildButton(Material buttonBase, Material buttonFace)
@@ -157,9 +172,14 @@ namespace ChulaEarthquakeVR
         {
             if (door == null) return;
             door.ToggleDoor();
-            transform.localScale = restScale * 0.82f;
-            releaseAt = Time.time + 0.12f;
+            if (GetComponent<Renderer>() != null)
+            {
+                transform.localScale = restScale * 0.82f;
+                releaseAt = Time.time + 0.12f;
+            }
         }
+
+        private void OnMouseDown() => Press();
 
         private void Update()
         {
