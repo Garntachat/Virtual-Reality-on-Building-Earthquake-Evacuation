@@ -132,7 +132,8 @@ namespace ChulaEarthquakeVR
             return hit.collider.GetComponentInParent<MovableFurniture>() != null ||
                    hit.collider.GetComponentInParent<TaskItem>() != null ||
                    hit.collider.GetComponentInParent<ProtectivePillow>() != null ||
-                   hit.collider.GetComponentInParent<WearableShoes>() != null;
+                   hit.collider.GetComponentInParent<WearableShoes>() != null ||
+                   hit.collider.GetComponentInParent<HouseDoorButton>() != null;
         }
 
         private string InteractionPrompt()
@@ -155,6 +156,9 @@ namespace ChulaEarthquakeVR
                 return $"{use}: HOLD PILLOW OVER HEAD";
             if (hit.collider.GetComponentInParent<WearableShoes>() != null)
                 return $"{use}: WEAR SHOES";
+            HouseDoorButton doorButton = hit.collider.GetComponentInParent<HouseDoorButton>();
+            if (doorButton != null)
+                return $"{use}: {doorButton.Prompt}";
             return MovementPrompt();
         }
 
@@ -194,6 +198,12 @@ namespace ChulaEarthquakeVR
             MovableFurniture furniture = hit.collider.GetComponentInParent<MovableFurniture>();
             ProtectivePillow pillow = hit.collider.GetComponentInParent<ProtectivePillow>();
             WearableShoes shoes = hit.collider.GetComponentInParent<WearableShoes>();
+            HouseDoorButton doorButton = hit.collider.GetComponentInParent<HouseDoorButton>();
+            if (doorButton != null)
+            {
+                doorButton.Press();
+                return;
+            }
             if (shoes != null)
             {
                 shoes.Equip(GetComponent<PlayerHealth>(), transform);

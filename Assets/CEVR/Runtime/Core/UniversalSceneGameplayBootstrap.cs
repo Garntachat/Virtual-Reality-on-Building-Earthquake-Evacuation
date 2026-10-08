@@ -73,8 +73,9 @@ namespace ChulaEarthquakeVR
         private void InstallHouseScenario()
         {
             Scene activeScene = SceneManager.GetActiveScene();
-            bool useSavedHouseVisuals =
-                HouseSavedSceneRuntimeBinder.FindSavedFurnitureRoot(activeScene) != null;
+            Transform savedHouseRoot =
+                HouseSavedSceneRuntimeBinder.FindSavedFurnitureRoot(activeScene);
+            bool useSavedHouseVisuals = savedHouseRoot != null;
 
             Camera camera = FindFirstObjectByType<Camera>();
             if (camera == null)
@@ -141,6 +142,7 @@ namespace ChulaEarthquakeVR
             else
             {
                 HideSavedHouseProxyVisuals();
+                InstallSavedHouseExtras(savedHouseRoot, charcoal, green);
                 Debug.Log("CEVR House: saved HouseFurniture detected; runtime duplicate furniture visuals disabled.");
             }
 
@@ -152,6 +154,45 @@ namespace ChulaEarthquakeVR
             HouseScenarioController scenario = systems.AddComponent<HouseScenarioController>();
             scenario.Configure(motion, hazardDirector, health, player.transform, assembly, logger);
             Debug.Log("CEVR installed the complete house tutorial gameplay without modifying the house mesh.");
+        }
+
+        private void InstallSavedHouseExtras(
+            Transform savedRoot,
+            Material buttonBase,
+            Material buttonFace)
+        {
+            if (savedRoot == null) return;
+
+            Transform cat = null;
+            Transform door = null;
+            foreach (Transform t in savedRoot.GetComponentsInChildren<Transform>(true))
+            {
+                if (cat == null && t.name == "HouseLayout_Cat") cat = t;
+                if (door == null && t.name == "HouseLayout_FrontDoor") door = t;
+                if (cat != null && door != null) break;
+            }
+
+            if (cat != null && cat.GetComponent<HouseSavedCatController>() == null)
+            {
+                cat.gameObject.AddComponent<HouseSavedCatController>().Configure();
+                Debug.Log("CEVR House: saved cat movement enabled.");
+            }
+            else if (cat == null)
+            {
+                Debug.LogWarning("CEVR House: HouseLayout_Cat was not found; cat movement was not installed.");
+            }
+
+            if (door != null)
+            {
+                HouseDoorController controller = door.GetComponent<HouseDoorController>();
+                if (controller == null) controller = door.gameObject.AddComponent<HouseDoorController>();
+                controller.Configure(buttonBase, buttonFace);
+                Debug.Log("CEVR House: front door open/close button enabled.");
+            }
+            else
+            {
+                Debug.LogWarning("CEVR House: HouseLayout_FrontDoor was not found; door button was not installed.");
+            }
         }
 
         private void HideSavedHouseProxyVisuals()
