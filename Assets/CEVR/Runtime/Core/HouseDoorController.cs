@@ -12,7 +12,7 @@ namespace ChulaEarthquakeVR
         private const string HingeName = "CEVR_FrontDoorHinge";
         private const string ButtonName = "HouseFrontDoorButton";
 
-        [SerializeField] private float openAngle = 100f;
+        [SerializeField] private float openAngle = -100f;
         [SerializeField] private float degreesPerSecond = 150f;
 
         private Transform hinge;
