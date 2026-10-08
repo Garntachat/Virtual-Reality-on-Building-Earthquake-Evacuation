@@ -114,17 +114,13 @@ namespace ChulaEarthquakeVR
             SyncDiningTableProxy(gameplayRoot, diningTable);
 
             BindNamedChair(savedRoot, gameplayRoot,
-                "HouseLayout_DiningChair_CoverObstacle", "HouseChair_CoverObstacle",
-                "house-chair-cover-01", motion, logger);
+                "HouseLayout_DiningChair_CoverObstacle", "HouseChair_CoverObstacle");
             BindNamedChair(savedRoot, gameplayRoot,
-                "HouseLayout_DiningChair_Spare", "HouseChair_Spare",
-                "house-chair-spare-01", motion, logger);
+                "HouseLayout_DiningChair_Spare", "HouseChair_Spare");
             BindNamedChair(savedRoot, gameplayRoot,
-                "HouseLayout_DiningChair_Left", "HouseChair_DiningLeft",
-                "house-chair-left-01", motion, logger);
+                "HouseLayout_DiningChair_Left", "HouseChair_DiningLeft");
             BindNamedChair(savedRoot, gameplayRoot,
-                "HouseLayout_DiningChair_Right", "HouseChair_DiningRight",
-                "house-chair-right-01", motion, logger);
+                "HouseLayout_DiningChair_Right", "HouseChair_DiningRight");
             BindLegacyEditorChairsIfNeeded(savedRoot, gameplayRoot);
 
             BindCenterPhysicsVisual(savedRoot, gameplayRoot,
@@ -290,68 +286,14 @@ namespace ChulaEarthquakeVR
             Transform savedRoot,
             Transform gameplayRoot,
             string visualName,
-            string proxyName,
-            string furnitureId,
-            GroundMotionPlayer motion,
-            SessionLogger logger)
+            string proxyName)
         {
             Transform visual = FindFurniture(savedRoot, visualName);
             GameObject proxy = FindRuntimeObject(gameplayRoot, proxyName);
-            if (visual == null) return;
+            if (visual == null || proxy == null) return;
 
-            // Saved chair itself becomes the Play-mode interactable. This avoids the old problem
-            // where an invisible proxy collider could drift away from the visible chair and make
-            // the chair impossible to target with E / left click.
-            if (proxy != null)
-            {
-                foreach (Collider proxyCollider in proxy.GetComponentsInChildren<Collider>(true))
-                    proxyCollider.enabled = false;
-                Rigidbody proxyBody = proxy.GetComponent<Rigidbody>();
-                if (proxyBody != null)
-                {
-                    proxyBody.isKinematic = true;
-                    proxyBody.useGravity = false;
-                    proxyBody.linearVelocity = Vector3.zero;
-                    proxyBody.angularVelocity = Vector3.zero;
-                }
-            }
-
-            foreach (Collider oldCollider in visual.GetComponentsInChildren<Collider>(true))
-                oldCollider.enabled = false;
-
-            if (TryLocalVisibleBounds(visual, out Bounds local))
-            {
-                BoxCollider hitBox = visual.GetComponent<BoxCollider>();
-                if (hitBox == null) hitBox = visual.gameObject.AddComponent<BoxCollider>();
-                hitBox.enabled = true;
-                hitBox.center = local.center;
-                hitBox.size = new Vector3(
-                    Mathf.Max(0.30f, local.size.x),
-                    Mathf.Max(0.55f, local.size.y),
-                    Mathf.Max(0.30f, local.size.z));
-            }
-
-            Rigidbody body = visual.GetComponent<Rigidbody>();
-            if (body == null) body = visual.gameObject.AddComponent<Rigidbody>();
-            body.mass = 7.5f;
-            body.useGravity = false;
-            body.isKinematic = false;
-            body.interpolation = RigidbodyInterpolation.Interpolate;
-            body.collisionDetectionMode = CollisionDetectionMode.Continuous;
-            body.constraints =
-                RigidbodyConstraints.FreezePositionY |
-                RigidbodyConstraints.FreezeRotationX |
-                RigidbodyConstraints.FreezeRotationZ;
-
-            MovableFurniture movable = visual.GetComponent<MovableFurniture>();
-            if (movable == null) movable = visual.gameObject.AddComponent<MovableFurniture>();
-            movable.Configure(furnitureId, logger, motion);
-
-            InertialRigidbody inertial = visual.GetComponent<InertialRigidbody>();
-            if (inertial == null) inertial = visual.gameObject.AddComponent<InertialRigidbody>();
-            inertial.Configure(motion, 0.65f, false);
-
-            TryAddXrGrabInteractable(visual.gameObject);
+            AlignBottomProxyToVisual(proxy, visual);
+            AttachRuntimeFollower(visual, proxy);
         }
 
         private static void BindLegacyEditorChairsIfNeeded(
@@ -661,15 +603,6 @@ namespace ChulaEarthquakeVR
                 }
                 return $"{entries.Count}:{hash:X8}";
             }
-        }
-
-        private static void TryAddXrGrabInteractable(GameObject target)
-        {
-            if (target == null) return;
-            Type type = Type.GetType(
-                "UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable, Unity.XR.Interaction.Toolkit");
-            if (type != null && target.GetComponent(type) == null)
-                target.AddComponent(type);
         }
 
         private static void SetRenderers(GameObject go, bool enabled)
