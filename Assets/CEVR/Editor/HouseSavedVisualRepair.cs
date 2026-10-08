@@ -109,14 +109,29 @@ namespace ChulaEarthquakeVR.Editor
                         RemovePreviousRestoredVisual(target);
                         DisableOldVisualRenderers(target);
 
-                        GameObject visual = UnityEngine.Object.Instantiate(source.gameObject);
-                        visual.name = RestoredVisualName;
+                        GameObject visual = new GameObject(RestoredVisualName);
                         visual.transform.SetParent(target, false);
                         visual.transform.localPosition = Vector3.zero;
                         visual.transform.localRotation = Quaternion.identity;
                         visual.transform.localScale = Vector3.one;
-                        SetHideFlagsRecursive(visual, HideFlags.None);
 
+                        // Copy only the SOURCE ROOT'S VISUAL CONTENT. Do not clone the source root
+                        // transform itself, because target already contains the user's saved
+                        // position/rotation/scale. Cloning the source root and zeroing it was the
+                        // reason visuals disappeared or ended up the wrong size.
+                        CloneRootVisualComponents(source, visual.transform);
+                        foreach (Transform sourceChild in source)
+                        {
+                            GameObject clonedChild =
+                                UnityEngine.Object.Instantiate(sourceChild.gameObject);
+                            clonedChild.name = sourceChild.name;
+                            clonedChild.transform.SetParent(visual.transform, false);
+                            clonedChild.transform.localPosition = sourceChild.localPosition;
+                            clonedChild.transform.localRotation = sourceChild.localRotation;
+                            clonedChild.transform.localScale = sourceChild.localScale;
+                        }
+
+                        SetHideFlagsRecursive(visual, HideFlags.None);
                         StripNonVisualComponents(visual);
                         PersistVisualAssets(
                             visual,
@@ -150,6 +165,7 @@ namespace ChulaEarthquakeVR.Editor
                     persistedMeshes + " generated mesh asset(s), and " +
                     persistedMaterials + " generated material asset(s). " +
                     "Furniture ROOT position/rotation/scale was NOT changed. " +
+                    "Each restored object now has a __CEVR_RESTORED_VISUAL child. " +
                     "Inspect the House now. Press Cmd/Ctrl+S only after it looks correct.");
             }
             catch (Exception ex)
@@ -195,6 +211,35 @@ namespace ChulaEarthquakeVR.Editor
                     continue;
 
                 renderer.enabled = false;
+            }
+        }
+
+        private static void CloneRootVisualComponents(Transform source, Transform destination)
+        {
+            MeshFilter sourceFilter = source.GetComponent<MeshFilter>();
+            MeshRenderer sourceRenderer = source.GetComponent<MeshRenderer>();
+
+            if (sourceFilter == null && sourceRenderer == null)
+                return;
+
+            GameObject rootVisual = new GameObject("__RootVisual");
+            rootVisual.transform.SetParent(destination, false);
+            rootVisual.transform.localPosition = Vector3.zero;
+            rootVisual.transform.localRotation = Quaternion.identity;
+            rootVisual.transform.localScale = Vector3.one;
+
+            if (sourceFilter != null)
+            {
+                MeshFilter filter = rootVisual.AddComponent<MeshFilter>();
+                filter.sharedMesh = sourceFilter.sharedMesh;
+            }
+
+            if (sourceRenderer != null)
+            {
+                MeshRenderer renderer = rootVisual.AddComponent<MeshRenderer>();
+                renderer.sharedMaterials = sourceRenderer.sharedMaterials;
+                renderer.shadowCastingMode = sourceRenderer.shadowCastingMode;
+                renderer.receiveShadows = sourceRenderer.receiveShadows;
             }
         }
 
