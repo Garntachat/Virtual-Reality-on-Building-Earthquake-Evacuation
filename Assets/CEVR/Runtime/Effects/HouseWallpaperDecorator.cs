@@ -19,6 +19,7 @@ namespace ChulaEarthquakeVR
                 scene.name.ToLowerInvariant().Contains("house") == false)
                 return;
 
+            if (GameObject.Find("HouseWallpaper") != null) return;
             if (GameObject.Find(RootName) != null) return;
 
             GameObject root = new GameObject(RootName);
