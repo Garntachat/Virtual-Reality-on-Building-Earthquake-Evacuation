@@ -3,7 +3,6 @@ Shader "Lpk/LightModel/ToonLightBase"
     Properties
     {
         _BaseMap            ("Texture", 2D)                       = "white" {}
-        _BaseColor          ("Color", Color)                      = (0.5,0.5,0.5,1)
         
         [Space]
         _ShadowStep         ("ShadowStep", Range(0, 1))           = 0.5
@@ -20,203 +19,220 @@ Shader "Lpk/LightModel/ToonLightBase"
         _RimColor           ("RimColor", Color)                   = (1,1,1,1)
         
         [Space]   
-        _OutlineWidth      ("OutlineWidth", Range(0.0, 1.0))      = 0.15
-        _OutlineColor      ("OutlineColor", Color)                = (0.0, 0.0, 0.0, 1)
+        _OutlineWidth       ("OutlineWidth", Range(0.0, 1.0))     = 0.15
+        _OutlineColor       ("OutlineColor", Color)               = (0.0, 0.0, 0.0, 1)
+        _OutlineScreenBlend ("Outline Constant Screen Width (0 = scales with model)", Range(0, 1)) = 0
     }
+
     SubShader
     {
-        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
-        
-        Pass
+        Tags { "RenderType" = "Opaque" "Queue" = "Geometry" }
+
+        // Shared code for all passes (Built-in Render Pipeline)
+        CGINCLUDE
+        #include "UnityCG.cginc"
+        #include "Lighting.cginc"
+        #include "AutoLight.cginc"
+
+        sampler2D _BaseMap;
+        float4 _BaseMap_ST;
+        float _ShadowStep;
+        float _ShadowStepSmooth;
+        float _SpecularStep;
+        float _SpecularStepSmooth;
+        float4 _SpecularColor;
+        float _RimStep;
+        float _RimStepSmooth;
+        float4 _RimColor;
+        float _OutlineWidth;
+        float4 _OutlineColor;
+        float _OutlineScreenBlend;
+
+        struct appdata
         {
-            Name "UniversalForward"
-            Tags
-            {
-                "LightMode" = "UniversalForward"
-            }
-            HLSLPROGRAM
-            // Required to compile gles 2.0 with standard srp library
-            #pragma prefer_hlslcc gles
-            #pragma exclude_renderers d3d11_9x
+            float4 vertex : POSITION;
+            float3 normal : NORMAL;
+            float2 uv     : TEXCOORD0;
+            UNITY_VERTEX_INPUT_INSTANCE_ID
+        };
 
-            #pragma vertex vert
-            #pragma fragment frag
-            // #pragma shader_feature _ALPHATEST_ON
-            // #pragma shader_feature _ALPHAPREMULTIPLY_ON
-            #pragma multi_compile _ _SHADOWS_SOFT
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
-			#pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
-            // -------------------------------------
-            // Unity defined keywords
-            #pragma multi_compile_fog
-            #pragma multi_compile_instancing
-             
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+        struct v2f
+        {
+            float4 pos      : SV_POSITION;
+            float2 uv       : TEXCOORD0;
+            float3 normalWS : TEXCOORD1;
+            float3 posWS    : TEXCOORD2;
+            LIGHTING_COORDS(3, 4)
+            UNITY_FOG_COORDS(5)
+            UNITY_VERTEX_OUTPUT_STEREO
+        };
 
-            TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
+        v2f vert(appdata v)
+        {
+            v2f o;
+            UNITY_SETUP_INSTANCE_ID(v);
+            UNITY_INITIALIZE_OUTPUT(v2f, o);
+            UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-            CBUFFER_START(UnityPerMaterial)
-                float4 _BaseColor;
-                float _ShadowStep;
-                float _ShadowStepSmooth;
-                float _SpecularStep;
-                float _SpecularStepSmooth;
-                float4 _SpecularColor;
-                float _RimStepSmooth;
-                float _RimStep;
-                float4 _RimColor;
-            CBUFFER_END
+            o.pos = UnityObjectToClipPos(v.vertex);
+            o.uv = TRANSFORM_TEX(v.uv, _BaseMap);
+            o.normalWS = UnityObjectToWorldNormal(v.normal);
+            o.posWS = mul(unity_ObjectToWorld, v.vertex).xyz;
 
-            struct Attributes
-            {     
-                float4 positionOS   : POSITION;
-                float3 normalOS     : NORMAL;
-                float4 tangentOS    : TANGENT;
-                float2 uv           : TEXCOORD0;
-                UNITY_VERTEX_INPUT_INSTANCE_ID
-            }; 
-
-            struct Varyings
-            {
-                float2 uv            : TEXCOORD0;
-                float4 normalWS      : TEXCOORD1;    // xyz: normal, w: viewDir.x
-                float4 tangentWS     : TEXCOORD2;    // xyz: tangent, w: viewDir.y
-                float4 bitangentWS   : TEXCOORD3;    // xyz: bitangent, w: viewDir.z
-                float3 viewDirWS     : TEXCOORD4;
-				float4 shadowCoord	 : TEXCOORD5;	// shadow receive 
-				float4 fogCoord	     : TEXCOORD6;	
-				float3 positionWS	 : TEXCOORD7;	
-                float4 positionCS    : SV_POSITION;
-                UNITY_VERTEX_INPUT_INSTANCE_ID
-            };
-
-            Varyings vert(Attributes input)
-            {
-                Varyings output = (Varyings)0;
-                    
-                UNITY_SETUP_INSTANCE_ID(input);
-                UNITY_TRANSFER_INSTANCE_ID(input, output);
-
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
-                VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
-                float3 viewDirWS = GetCameraPositionWS() - vertexInput.positionWS;
-                float3 vertexLight = VertexLighting(vertexInput.positionWS, normalInput.normalWS);
-
-                output.positionCS = vertexInput.positionCS;
-                output.positionWS = vertexInput.positionWS;
-                output.uv = input.uv;
-                output.normalWS = float4(normalInput.normalWS, viewDirWS.x);
-                output.tangentWS = float4(normalInput.tangentWS, viewDirWS.y);
-                output.bitangentWS = float4(normalInput.bitangentWS, viewDirWS.z);
-                output.viewDirWS = viewDirWS;
-                output.fogCoord = ComputeFogFactor(output.positionCS.z);
-                return output;
-            }
-            
-            half remap(half x, half t1, half t2, half s1, half s2)
-            {
-                return (x - t1) / (t2 - t1) * (s2 - s1) + s1;
-            }
-            
-            float4 frag(Varyings input) : SV_Target
-            {
-                UNITY_SETUP_INSTANCE_ID(input);
-
-                float2 uv = input.uv;
-                float3 N = normalize(input.normalWS.xyz);
-                float3 T = normalize(input.tangentWS.xyz);
-                float3 B = normalize(input.bitangentWS.xyz);
-                float3 V = normalize(input.viewDirWS.xyz);
-                float3 L = normalize(_MainLightPosition.xyz);
-                float3 H = normalize(V+L);
-                
-                float NV = dot(N,V);
-                float NH = dot(N,H);
-                float NL = dot(N,L);
-                
-                NL = NL * 0.5 + 0.5;
-
-                float4 baseMap = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uv);
-
-                // return NH;
-               float specularNH = smoothstep((1-_SpecularStep * 0.05)  - _SpecularStepSmooth * 0.05, (1-_SpecularStep* 0.05)  + _SpecularStepSmooth * 0.05, NH) ;
-               float shadowNL = smoothstep(_ShadowStep - _ShadowStepSmooth, _ShadowStep + _ShadowStepSmooth, NL);
-
-				input.shadowCoord = TransformWorldToShadowCoord(input.positionWS);
-                
-                //shadow
-                float shadow = MainLightRealtimeShadow(input.shadowCoord);
-                
-                //rim
-                float rim = smoothstep((1-_RimStep) - _RimStepSmooth * 0.5, (1-_RimStep) + _RimStepSmooth * 0.5, 0.5 - NV);
-                
-                //diffuse
-                float3 diffuse = _MainLightColor.rgb * baseMap * _BaseColor * shadowNL * shadow;
-                
-                //specular
-                float3 specular = _SpecularColor * shadow * shadowNL *  specularNH;
-                
-                //ambient
-                float3 ambient =  rim * _RimColor + SampleSH(N) * _BaseColor * baseMap;
-            
-                float3 finalColor = diffuse + ambient + specular;
-                finalColor = MixFog(finalColor, input.fogCoord);
-                return float4(finalColor , 1.0);
-            }
-            ENDHLSL
+            TRANSFER_VERTEX_TO_FRAGMENT(o);
+            UNITY_TRANSFER_FOG(o, o.pos);
+            return o;
         }
-        
-        //Outline
+
+        // Toon lighting for a single light
+        float3 ToonLight(float3 N, float3 V, float3 L, float3 lightColor, float atten, float3 albedo, out float3 specular)
+        {
+            float3 H = normalize(V + L);
+            float NH = dot(N, H);
+            float NL = dot(N, L) * 0.5 + 0.5;
+
+            float specularNH = smoothstep(
+                (1 - _SpecularStep * 0.05) - _SpecularStepSmooth * 0.05,
+                (1 - _SpecularStep * 0.05) + _SpecularStepSmooth * 0.05,
+                NH);
+            float shadowNL = smoothstep(_ShadowStep - _ShadowStepSmooth, _ShadowStep + _ShadowStepSmooth, NL);
+
+            specular = _SpecularColor.rgb * lightColor * atten * shadowNL * specularNH;
+            return lightColor * albedo * atten * shadowNL;
+        }
+        ENDCG
+
+        // ------------------------------------------------------------
+        // Pass 1: main directional light + ambient + rim
+        // ------------------------------------------------------------
         Pass
         {
-            Name "Outline"
-            Cull Front
-            Tags
-            {
-                "LightMode" = "SRPDefaultUnlit"
-            }
-            HLSLPROGRAM
+            Name "FORWARD"
+            Tags { "LightMode" = "ForwardBase" }
+
+            CGPROGRAM
             #pragma vertex vert
-            #pragma fragment frag
+            #pragma fragment fragBase
+            #pragma multi_compile_fwdbase
             #pragma multi_compile_fog
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            
-            struct appdata
+
+            fixed4 fragBase(v2f i) : SV_Target
             {
-                float4 vertex : POSITION;
-                float3 normal : NORMAL;
-                float4 tangent : TANGENT;
+                float3 N = normalize(i.normalWS);
+                float3 V = normalize(UnityWorldSpaceViewDir(i.posWS));
+                float3 L = normalize(_WorldSpaceLightPos0.xyz);
+                float NV = dot(N, V);
+
+                float3 albedo = tex2D(_BaseMap, i.uv).rgb;
+
+                UNITY_LIGHT_ATTENUATION(atten, i, i.posWS);
+
+                float3 specular;
+                float3 diffuse = ToonLight(N, V, L, _LightColor0.rgb, atten, albedo, specular);
+
+                float rim = smoothstep((1 - _RimStep) - _RimStepSmooth * 0.5, (1 - _RimStep) + _RimStepSmooth * 0.5, 0.5 - NV);
+
+                float3 ambient = rim * _RimColor.rgb + ShadeSH9(float4(N, 1)) * albedo;
+
+                fixed4 col = fixed4(diffuse + ambient + specular, 1);
+                UNITY_APPLY_FOG(i.fogCoord, col);
+                return col;
+            }
+            ENDCG
+        }
+
+        // ------------------------------------------------------------
+        // Pass 2: additional lights (point / spot / extra directional)
+        // ------------------------------------------------------------
+        Pass
+        {
+            Name "FORWARD_ADD"
+            Tags { "LightMode" = "ForwardAdd" }
+            Blend One One
+            ZWrite Off
+
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment fragAdd
+            #pragma multi_compile_fwdadd_fullshadows
+            #pragma multi_compile_fog
+
+            fixed4 fragAdd(v2f i) : SV_Target
+            {
+                float3 N = normalize(i.normalWS);
+                float3 V = normalize(UnityWorldSpaceViewDir(i.posWS));
+                float3 L = normalize(UnityWorldSpaceLightDir(i.posWS));
+
+                float3 albedo = tex2D(_BaseMap, i.uv).rgb;
+
+                UNITY_LIGHT_ATTENUATION(atten, i, i.posWS);
+
+                float3 specular;
+                float3 diffuse = ToonLight(N, V, L, _LightColor0.rgb, atten, albedo, specular);
+
+                fixed4 col = fixed4(diffuse + specular, 1);
+                UNITY_APPLY_FOG_COLOR(i.fogCoord, col, fixed4(0, 0, 0, 0));
+                return col;
+            }
+            ENDCG
+        }
+
+        // ------------------------------------------------------------
+        // Pass 3: outline (constant screen-space width)
+        // ------------------------------------------------------------
+        Pass
+        {
+            Name "OUTLINE"
+            Cull Front
+
+            CGPROGRAM
+            #pragma vertex vertOutline
+            #pragma fragment fragOutline
+            #pragma multi_compile_fog
+
+            struct v2fOutline
+            {
+                float4 pos : SV_POSITION;
+                UNITY_FOG_COORDS(0)
+                UNITY_VERTEX_OUTPUT_STEREO
             };
 
-            struct v2f
+            v2fOutline vertOutline(appdata v)
             {
-                float4 pos      : SV_POSITION;
-                float4 fogCoord	: TEXCOORD0;	
-            };
-            
-            float _OutlineWidth;
-            float4 _OutlineColor;
-            
-            v2f vert(appdata v)
-            {
-                v2f o;
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(v.vertex.xyz);
-                o.pos = TransformObjectToHClip(float4(v.vertex.xyz + v.normal * _OutlineWidth * 0.1 ,1));
-                o.fogCoord = ComputeFogFactor(vertexInput.positionCS.z);
+                v2fOutline o;
+                UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_INITIALIZE_OUTPUT(v2fOutline, o);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
+                float3 posWS = mul(unity_ObjectToWorld, v.vertex).xyz;
+                float3 normalWS = normalize(UnityObjectToWorldNormal(v.normal));
+
+                // Distance of this vertex from the camera (clip-space w)
+                float4 posCS = mul(UNITY_MATRIX_VP, float4(posWS, 1.0));
+
+                // Default: fixed width in world units, so the outline keeps the
+                // same proportion to the model at any distance.
+                // _OutlineScreenBlend > 0 mixes in constant on-screen width
+                // (matches the world-space width at about 5 meters).
+                float widthScale = lerp(1.0, posCS.w * 0.2, _OutlineScreenBlend);
+
+                posWS += normalWS * _OutlineWidth * 0.1 * widthScale;
+
+                o.pos = mul(UNITY_MATRIX_VP, float4(posWS, 1.0));
+                UNITY_TRANSFER_FOG(o, o.pos);
                 return o;
             }
 
-            float4 frag(v2f i) : SV_Target
+            fixed4 fragOutline(v2fOutline i) : SV_Target
             {
-                float3 finalColor = MixFog(_OutlineColor, i.fogCoord);
-                return float4(finalColor,1.0);
+                fixed4 col = fixed4(_OutlineColor.rgb, 1);
+                UNITY_APPLY_FOG(i.fogCoord, col);
+                return col;
             }
-            
-            ENDHLSL
+            ENDCG
         }
-        UsePass "Universal Render Pipeline/Lit/ShadowCaster"
+
+        // Shadow casting
+        UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
     }
 }

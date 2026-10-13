@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Lpk_LightModel_ToonLightBase
+  m_Name: playergirl_mat
   m_Shader: {fileID: 4800000, guid: c6a9c91859b6b3642bac971c6d7b8882, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -22,9 +22,24 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs: []
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: b66c48ebdaa3d9d418d98c3faa0d86d2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
-    m_Floats: []
-    m_Colors: []
+    m_Floats:
+    - _OutlineScreenBlend: 0
+    - _OutlineWidth: 0.03
+    - _RimStep: 0
+    - _RimStepSmooth: 0
+    - _ShadowStep: 0.5
+    - _ShadowStepSmooth: 0
+    - _SpecularStep: 0
+    - _SpecularStepSmooth: 0
+    m_Colors:
+    - _OutlineColor: {r: 0.49394804, g: 0.5660378, b: 0.5660378, a: 1}
+    - _RimColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

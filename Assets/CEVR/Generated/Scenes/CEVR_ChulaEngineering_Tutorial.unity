@@ -1016,9 +1016,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DesktopDebugRig
   viewCamera: {fileID: 1370516796}
   moveSpeed: 2.4
+  runMultiplier: 1.75
   mouseSensitivity: 8
   standingHeight: 1.75
   crouchingHeight: 1.05
+  crawlingHeight: 0.58
+  crouchMoveMultiplier: 0.72
+  crawlMoveMultiplier: 0.68
+  jumpHeight: 1.05
+  gravity: 22
 --- !u!114 &115254027
 MonoBehaviour:
   m_ObjectHideFlags: 0
