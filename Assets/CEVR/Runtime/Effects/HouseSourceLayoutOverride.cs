@@ -18,8 +18,10 @@ namespace ChulaEarthquakeVR
         private static void Install()
         {
             Scene scene = SceneManager.GetActiveScene();
+            // New_House is a separate standalone Rigidbody test scene.
+            // Only the playable House scene has the saved HouseFurniture sync.
             if (!scene.IsValid() || !scene.isLoaded ||
-                scene.name.IndexOf("house", StringComparison.OrdinalIgnoreCase) < 0)
+                scene.name != MainMenuController.HouseScene)
                 return;
 
             if (FindFirstObjectByType<HouseSourceLayoutOverride>() != null)
