@@ -15,6 +15,18 @@ Clicking a small mesh such as **Seat** automatically selects its nearest editabl
 
 The same simple native Rigidbody force system is used by physical items in **Tutorial, Condo and New_House**. Existing Tutorial/Condo safety shoes and the stationary Condo cover table are given visual-only shake controls without rebuilding the scene.
 
+## Tutorial and Condo: editable settings on every furniture root
+
+**Tutorial**: Open `CEVR_ChulaEngineering_Tutorial.unity` in Edit mode. Its original and baked furniture roots (chairs, loose items, cabinet, cover table, lab benches, Kenney/team models, monitors, books, sofas, lighting and other furnishings) receive one simple, persistent control. **Condo**: Open `Condo.unity` in Edit mode. Its baked chairs, pillow, cabinet, falling props, protective table, shoes, and any additional identifiable furniture get the same treatment.
+
+The one-time scene bakers now save these controls directly, and **already-baked local scenes** are retrofitted on next opening. To rerun safely, use **CEVR > Earthquake > Add simple physics settings to scene**. To count and locate missing settings, use **CEVR > Earthquake > Check Tutorial or Condo furniture controls**. Click a mesh child and Unity will select its nearest furniture parent with the editable controls.
+
+**Movable or falling objects** with a Rigidbody use actual **Mass, Linear Damping, Angular Damping, Force (N), Torque (N m)** and Shake Strength. **Fixed tables, sofas, workstations, lamps and decorative models** use **Visual Shake Strength** only. They do **not** have physics mass because they are not Rigidbody objects; adding fake Rigidbodies to floors, anchored tables and safety props would break the scenario. Heavy cover tables start with visual strength 0 to keep the cover collider aligned, but the strength is editable.
+
+The shared runtime binder now connects **saved per-item visual responses** even if their names do not contain furniture keywords. It does not attach a second shaker to the entire `Tutorial Editable Furniture` or `Condo Gameplay` hierarchy. Existing Inspector values are preserved on later Play runs. No furniture location, scale, generated mesh, colliders or cover-zone triggers are changed by the editor coverage pass.
+
+**Manual validation after updating**: Stop Play, open Tutorial and run its coverage check; then open Condo and run the check there. Save both scenes. Set one chair's Mass and Damping, and change one lamp's Visual Shake Strength. Run each scenario twice and check that objects do not duplicate and the same edits remain after stopping Play. For hazard props, check that `Is Kinematic` is true before release—Mass will affect them after the hazard director releases them.
+
 ## One Rigidbody, one shaker
 
 Select a chair, cabinet, vase or other physical object in the **Hierarchy in Edit mode**, not during Play. It should have Unity's normal `Rigidbody` and a small `Inertial Rigidbody` component. The latter now shows the real Rigidbody properties at the top:
