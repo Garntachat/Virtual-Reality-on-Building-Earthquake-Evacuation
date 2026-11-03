@@ -217,9 +217,10 @@ namespace ChulaEarthquakeVR.Editor
         private static bool IsExcluded(Transform item)
         {
             string name = item.name.ToLowerInvariant();
-            if (name.Contains("floor") || name.Contains("ground") ||
+            bool fixture = name.Contains("lamp") || name.Contains("light");
+            if ((name.Contains("floor") && !fixture) || name.Contains("ground") ||
                 name.Contains("wall") || name.Contains("column") ||
-                name.Contains("ceiling") && !name.Contains("lamp") ||
+                (name.Contains("ceiling") && !fixture) ||
                 name.Contains("player") || name.Contains("camera") ||
                 name.Contains("canvas") || name.Contains("hud") ||
                 name.Contains("zone") || name.Contains("assembly") ||
