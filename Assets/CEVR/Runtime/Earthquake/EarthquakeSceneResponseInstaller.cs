@@ -94,6 +94,9 @@ namespace ChulaEarthquakeVR
                     body.GetComponent<FurnitureImpactAudio>() == null)
                     body.gameObject.AddComponent<FurnitureImpactAudio>();
 
+                // Tall unanchored furniture can tip, but the resulting component
+                // remains visible and adjustable in the saved scene Inspector.
+                TryAddToppleResponse(body);
                 bound++;
             }
             return bound;
@@ -163,6 +166,23 @@ namespace ChulaEarthquakeVR
                 current = current.parent;
             }
             return candidate;
+        }
+
+        private void TryAddToppleResponse(Rigidbody body)
+        {
+            // Existing and hand-authored toppling settings are never overwritten.
+            // The automatic fallback applies only to the tutorial preview.
+            if (motion == null || !motion.IsUsingPreview ||
+                body.isKinematic || body.GetComponent<ToppleableFurniture>() != null ||
+                body.GetComponent<MovableFurniture>() != null ||
+                body.GetComponent<ConfigurableJoint>() != null) return;
+
+            Bounds bounds = CalculateBounds(body.gameObject);
+            float footprint = Mathf.Max(0.05f, Mathf.Max(bounds.size.x, bounds.size.z));
+            if (bounds.size.y < 1.1f || bounds.size.y / footprint < 1.35f) return;
+
+            body.gameObject.AddComponent<ToppleableFurniture>()
+                .Configure(motion, 1f, Mathf.Max(0.45f, bounds.size.y * 0.35f));
         }
 
         private static bool IncludeVertical(Rigidbody body)
