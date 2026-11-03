@@ -64,6 +64,55 @@ namespace ChulaEarthquakeVR.Editor
             return new Values(2f, 0.70f, 1f, 8f, 2.5f);
         }
 
+        [MenuItem("CEVR/Earthquake/Review saved Mass and Damping (current scene)")]
+        private static void ReviewCurrentScene()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+            Scene scene = SceneManager.GetActiveScene();
+            if (!scene.IsValid() || !scene.isLoaded) return;
+
+            var report = new System.Text.StringBuilder();
+            report.AppendLine("CEVR SAVED EARTHQUAKE INSPECTOR VALUES - " + scene.name);
+            int physical = 0, proxies = 0, decorative = 0, pending = 0;
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                foreach (InertialRigidbody item in root.GetComponentsInChildren<InertialRigidbody>(true))
+                {
+                    if (!Eligible(item)) continue;
+                    Rigidbody body = item.GetComponent<Rigidbody>();
+                    physical++;
+                    if (!item.StarterPresetProcessed) pending++;
+                    report.AppendLine($"{item.name}: MASS {body.mass:F2} kg, LINEAR {body.linearDamping:F2}, " +
+                        $"ANGULAR {body.angularDamping:F2}, FORCE {item.ForceNewtons:F1} N, " +
+                        $"TORQUE {item.TorqueNewtonMeters:F1} Nm, STRENGTH {item.ShakeStrength:F2}" +
+                        (body.isKinematic ? " (kinematic until released)" : ""));
+                }
+                foreach (HouseProxyEarthquakeSettings item in root.GetComponentsInChildren<HouseProxyEarthquakeSettings>(true))
+                {
+                    proxies++;
+                    if (!item.StarterPresetProcessed) pending++;
+                    report.AppendLine($"{item.name} [House physics proxy]: MASS {item.Mass:F2} kg, " +
+                        $"LINEAR {item.LinearDamping:F2}, ANGULAR {item.AngularDamping:F2}, " +
+                        $"FORCE {item.ForceNewtons:F1} N, TORQUE {item.TorqueNewtonMeters:F1} Nm");
+                }
+                foreach (DecorativeQuakeResponse item in root.GetComponentsInChildren<DecorativeQuakeResponse>(true))
+                {
+                    decorative++;
+                    if (!item.StarterPresetProcessed) pending++;
+                    report.AppendLine($"{item.name} [visual only]: STRENGTH {item.ShakeStrength:F2}, " +
+                        $"VISUAL DAMPING {item.VisualDamping:F2}");
+                }
+            }
+            Debug.Log(report.ToString());
+            EditorUtility.DisplayDialog("Saved earthquake settings: " + scene.name,
+                physical + " physical Rigidbodies, " + proxies + " House physics proxies, " +
+                decorative + " visual-only responses.\n" +
+                pending + " item(s) have not yet been reviewed for starter presets.\n\n" +
+                "Open the Console to see EVERY item's exact saved settings. " +
+                "These are the values used during Play; gameplay may temporarily " +
+                "release kinematic objects as intended.", "OK");
+        }
+
         [MenuItem("CEVR/Earthquake/Apply suggested starter presets (preserve edits)")]
         private static void ApplyMenu()
         {
