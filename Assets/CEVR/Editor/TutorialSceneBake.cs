@@ -127,7 +127,13 @@ namespace ChulaEarthquakeVR.Editor
                 props.AddComponent<UniversalSceneGameplayBootstrap>().PrepareTutorialProps();
                 foreach (WearableShoes shoes in
                     UnityEngine.Object.FindObjectsByType<WearableShoes>(FindObjectsSortMode.None))
+                {
                     shoes.PrepareEditableVisual();
+                    if (shoes.GetComponent<Rigidbody>() == null &&
+                        shoes.GetComponent<DecorativeQuakeResponse>() == null)
+                        shoes.gameObject.AddComponent<DecorativeQuakeResponse>()
+                            .Configure(null, DecorativeQuakeMode.Loose, 0.4f);
+                }
 
                 var furniture = new GameObject("Tutorial Editable Furniture").AddComponent<FurnitureSceneDressing>();
                 furniture.BakeForEditing();
