@@ -15,6 +15,8 @@ namespace ChulaEarthquakeVR.Editor
     [InitializeOnLoad]
     public static class EditableRigidbodyEarthquakeSetup
     {
+        private const string MenuScenePath = "Assets/CEVR/Generated/Scenes/CEVR_MainMenu.unity";
+        private const string DirectTestKey = "CEVR.SimplePhysics.DirectPlay";
         private static bool queued;
         private static bool running;
 
@@ -22,11 +24,32 @@ namespace ChulaEarthquakeVR.Editor
         {
             EditorSceneManager.sceneOpened -= OnSceneOpened;
             EditorSceneManager.sceneOpened += OnSceneOpened;
+            EditorApplication.playModeStateChanged -= RestoreMenuAfterTest;
+            EditorApplication.playModeStateChanged += RestoreMenuAfterTest;
             Queue();
         }
 
         [MenuItem("CEVR/Earthquake/Add simple physics settings to scene")]
         private static void ApplyMenu() => Apply(false);
+
+        [MenuItem("CEVR/Earthquake/Test current scene (not Main Menu)")]
+        private static void TestCurrentScene()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            SessionState.SetBool(DirectTestKey, true);
+            EditorSceneManager.playModeStartScene = null;
+            EditorApplication.isPlaying = true;
+        }
+
+        private static void RestoreMenuAfterTest(PlayModeStateChange change)
+        {
+            if (change != PlayModeStateChange.EnteredEditMode ||
+                !SessionState.GetBool(DirectTestKey, false)) return;
+            SessionState.EraseBool(DirectTestKey);
+            SceneAsset menu = AssetDatabase.LoadAssetAtPath<SceneAsset>(MenuScenePath);
+            if (menu != null) EditorSceneManager.playModeStartScene = menu;
+        }
 
         private static void OnSceneOpened(Scene scene, OpenSceneMode mode) => Queue();
 
