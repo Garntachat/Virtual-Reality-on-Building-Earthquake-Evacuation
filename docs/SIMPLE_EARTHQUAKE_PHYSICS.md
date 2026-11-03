@@ -24,9 +24,13 @@ For example, with **15 N Force** and **Shake Strength 1**, an object of mass **5
 
 ## Getting the editable components into saved scenes
 
-**House and New_House:** Open the scene in Unity Edit mode after pulling the update. On first open, the tool adds `Inertial Rigidbody` to eligible saved physics objects, backs up the scene, and saves it. It does **not** create new furniture, move any existing GameObject, or change Mass, Damping, Colliders or Animation components.
+**House:** Open `House.unity` in Unity Edit mode after pulling the update. On first open, the tool attaches a **real Rigidbody, BoxCollider and InertialRigidbody to each of the four existing `HouseLayout_DiningChair_*` parent objects**, then saves the scene with a backup. It **does not create furniture or change any saved transform**. It preserves any existing authored Mass, Damping, collider shape or Shake Strength and adds defaults only when components are missing. Click a child mesh such as **Seat** and the Editor will automatically select the physical chair parent so you see its Mass and Damping controls. If you need to select a mesh child specifically, turn off **CEVR > Earthquake > Select chair physics when clicking a chair part**.
+
+**New_House:** The standalone scene already has many Rigidbodies. On first open, the tool adds `Inertial Rigidbody` to eligible saved physics objects without changing Mass or Damping. It also creates a scene backup.
 
 **Tutorial and Condo:** Their editable-scene tools already add this component to generated furniture. For any additional manually created Rigidbody objects, run **CEVR > Earthquake > Add simple physics settings to scene** (outside Play mode). This command is safe to repeat; it skips objects that already have the component and does not reset Inspector values.
+
+**Quick House check:** After opening House in Edit mode, choose **CEVR > Earthquake > Check House chair physics**. It should report **4/4**. If not, run **CEVR > Earthquake > Add simple physics settings to scene**. Select a chair seat again and check that the Inspector shows both **Rigidbody** and **Inertial Rigidbody** on its parent.
 
 **Testing any scene directly:** Unity's normal Play button opens the Main Menu, so use **CEVR > Earthquake > Test current scene (not Main Menu)** to start from the open House or New_House scene. When you stop Play, the normal Main Menu startup is restored.
 
