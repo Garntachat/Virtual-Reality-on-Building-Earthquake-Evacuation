@@ -36,6 +36,11 @@ namespace ChulaEarthquakeVR
                 applicationPoint, ForceMode.Acceleration);
         }
 
+        public void ConnectMotionIfMissing(GroundMotionPlayer source)
+        {
+            if (motion == null) motion = source;
+        }
+
         public void Configure(GroundMotionPlayer source, float scale, float height)
         {
             motion = source;
