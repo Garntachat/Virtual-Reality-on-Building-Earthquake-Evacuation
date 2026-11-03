@@ -2,6 +2,19 @@
 
 The goal is **one understandable physics system** for Tutorial, House, Condo and standalone New_House furniture. The shared `GroundMotionPlayer` still controls the beginning/end of shaking, timed hazards, warning cues, gameplay outcomes and recorded research profiles. Only the force applied to individual Rigidbody objects has changed.
 
+## Every House furniture object has an understandable control
+
+The saved `House.unity` currently has 43 immediate children under `HouseFurniture`. The **40 furniture/decorative roots** (everything except the dedicated front door, window assembly and animated cat) receive one appropriate editable setting after the one-time editor setup:
+
+- **Four dining chairs:** real `Rigidbody` + `InertialRigidbody` + `BoxCollider` on each saved chair parent. Edit **Mass**, **Linear Damping**, **Angular Damping**, **Force**, **Torque** and **Shake Strength**.
+- **Fridge, wardrobe and four overhead falling-book hazards:** `House Proxy Earthquake Settings` on each saved *visible* root, with the same Mass/Damping/Force/Torque controls. In Play, these values configure the **one existing physics Rigidbody** for that object. That collision body remains separate so the authored visual meshes and hazard-release mechanics remain intact. A duplicate visual shaker is blocked.
+- **Other standalone furniture and decorations** (such as sofa, beds, books, plants, paintings, fixtures and rugs): `Decorative Quake Response` with a clear **Visual Shake Strength** slider. They are not independent physical falling bodies, so Mass and Damping would not be meaningful. Stationary cover furniture and other collidable large items default to strength 0 to keep their visuals aligned with safety colliders; you can adjust the visual setting manually.
+- **Building structure, door, window and animated cat:** left under their existing static/gameplay controllers, instead of adding physics that would break the house.
+
+Clicking a small mesh such as **Seat** automatically selects its nearest editable furniture parent in Edit mode. The toggle is **CEVR > Earthquake > Select furniture earthquake controls from mesh parts**. Run **CEVR > Earthquake > Check all House furniture earthquake controls** to check the whole saved hierarchy (the baseline scene should report at least 40/40, unless you have added or removed objects). The setup creates a timestamped backup and never replaces your saved furniture locations.
+
+The same simple native Rigidbody force system is used by physical items in **Tutorial, Condo and New_House**. Existing Tutorial/Condo safety shoes and the stationary Condo cover table are given visual-only shake controls without rebuilding the scene.
+
 ## One Rigidbody, one shaker
 
 Select a chair, cabinet, vase or other physical object in the **Hierarchy in Edit mode**, not during Play. It should have Unity's normal `Rigidbody` and a small `Inertial Rigidbody` component. The latter now shows the real Rigidbody properties at the top:
@@ -30,7 +43,7 @@ For example, with **15 N Force** and **Shake Strength 1**, an object of mass **5
 
 **Tutorial and Condo:** Their editable-scene tools already add this component to generated furniture. For any additional manually created Rigidbody objects, run **CEVR > Earthquake > Add simple physics settings to scene** (outside Play mode). This command is safe to repeat; it skips objects that already have the component and does not reset Inspector values.
 
-**Quick House check:** After opening House in Edit mode, choose **CEVR > Earthquake > Check House chair physics**. It should report **4/4**. If not, run **CEVR > Earthquake > Add simple physics settings to scene**. Select a chair seat again and check that the Inspector shows both **Rigidbody** and **Inertial Rigidbody** on its parent.
+**Quick House check:** After opening House in Edit mode, choose **CEVR > Earthquake > Check all House furniture earthquake controls**. If any items are missing, run **CEVR > Earthquake > Add simple physics settings to scene**. Select a chair Seat again and check that the Inspector shows both **Rigidbody** and **Inertial Rigidbody** on its parent.
 
 **Testing any scene directly:** Unity's normal Play button opens the Main Menu, so use **CEVR > Earthquake > Test current scene (not Main Menu)** to start from the open House or New_House scene. When you stop Play, the normal Main Menu startup is restored.
 
