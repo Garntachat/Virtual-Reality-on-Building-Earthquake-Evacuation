@@ -4,6 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace ChulaEarthquakeVR.Editor
 {
@@ -85,6 +86,21 @@ namespace ChulaEarthquakeVR.Editor
             Selection.activeGameObject = root;
         }
 
+        // Also upgrades a previously saved editable Canvas the next time it opens.
+        // The small IMGUI fallback already contains Play Condo without any bake.
+        internal static void UpgradeOpenMenu()
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (scene.path != ScenePath || EditorApplication.isPlayingOrWillChangePlaymode) return;
+            var controller = Object.FindFirstObjectByType<MainMenuController>();
+            if (controller == null || controller.editableCanvas == null ||
+                controller.editableCanvas.transform.Find("Play Condo") != null) return;
+            EnsureCondoButton(controller.editableCanvas.transform, controller);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log("CEVR Main Menu: added Play Condo to the existing editable UI.");
+        }
+
         private static void EnsureCondoButton(Transform canvas, MainMenuController controller)
         {
             if (canvas.Find("Play Condo") != null) return;
@@ -151,4 +167,36 @@ namespace ChulaEarthquakeVR.Editor
             text.alignment = TextAnchor.MiddleCenter;
         }
     }
+
+    [InitializeOnLoad]
+    internal static class CondoMenuSceneUpgrade
+    {
+        private static bool pending;
+
+        static CondoMenuSceneUpgrade()
+        {
+            EditorSceneManager.sceneOpened -= OnOpened;
+            EditorSceneManager.sceneOpened += OnOpened;
+            QueueCheck();
+        }
+
+        private static void OnOpened(Scene scene, OpenSceneMode mode) => QueueCheck();
+
+        private static void QueueCheck()
+        {
+            if (pending) return;
+            pending = true;
+            EditorApplication.update += Check;
+        }
+
+        private static void Check()
+        {
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating) return;
+            EditorApplication.update -= Check;
+            pending = false;
+            if (!Application.isBatchMode)
+                EditableMainMenu.UpgradeOpenMenu();
+        }
+    }
+
 }
