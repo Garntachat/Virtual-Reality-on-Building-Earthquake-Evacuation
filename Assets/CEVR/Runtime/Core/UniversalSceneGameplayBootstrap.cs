@@ -90,9 +90,21 @@ namespace ChulaEarthquakeVR
             bool useSavedHouseVisuals = savedHouseRoot != null;
 
             Camera camera = FindFirstObjectByType<Camera>();
+            if (camera == null && activeScene.name == MainMenuController.HouseScene)
+            {
+                // New_House is intentionally an editable furniture/physics scene.
+                // It originally had no camera, so create ONLY a gameplay camera;
+                // never rebuild or replace any of the saved furniture and meshes.
+                var view = new GameObject("New House Gameplay Camera");
+                SceneManager.MoveGameObjectToScene(view, activeScene);
+                view.tag = "MainCamera";
+                view.transform.position = HouseSceneLayout.PlayerSpawn + Vector3.up * 1.63f;
+                camera = view.AddComponent<Camera>();
+                view.AddComponent<AudioListener>();
+            }
             if (camera == null)
             {
-                Debug.LogError("House scene requires one camera before CEVR gameplay can be installed.");
+                Debug.LogError("House gameplay could not find or create a camera.");
                 return;
             }
 

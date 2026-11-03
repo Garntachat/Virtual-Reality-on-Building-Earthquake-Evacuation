@@ -9,7 +9,9 @@ namespace ChulaEarthquakeVR
     {
         public const string MenuScene = "CEVR_MainMenu";
         public const string TutorialScene = "CEVR_ChulaEngineering_Tutorial";
-        public const string HouseScene = "House";
+        // Play House now opens the independently editable New_House scene.
+        // The original House.unity remains untouched as a fallback asset.
+        public const string HouseScene = "New_House";
         public const string CondoScene = "Condo";
         private bool loading;
         public Canvas editableCanvas;
