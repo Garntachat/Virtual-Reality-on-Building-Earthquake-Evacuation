@@ -25,6 +25,10 @@ namespace ChulaEarthquakeVR
             logger = sessionLogger;
         }
 
+        // Bake the exact Play-mode shoe meshes into the saved Edit-mode scene.
+        // Start() will see AuthoredSafetyShoes and never add duplicates.
+        public void PrepareEditableVisual() => EnsureAuthoredVisual();
+
         private void EnsureAuthoredVisual()
         {
             if (transform.Find("AuthoredSafetyShoes") != null) return;
@@ -155,7 +159,13 @@ namespace ChulaEarthquakeVR
 
         private void OnDestroy()
         {
-            foreach (Object resource in visualResources) if (resource != null) Destroy(resource);
+            foreach (Object resource in visualResources)
+            {
+                if (resource == null) continue;
+                if (Application.isPlaying) Destroy(resource);
+                else DestroyImmediate(resource);
+            }
+            visualResources.Clear();
         }
     }
 }
