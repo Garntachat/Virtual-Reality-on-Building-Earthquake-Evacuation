@@ -121,14 +121,33 @@ namespace ChulaEarthquakeVR.Editor
             if (!scene.IsValid() || !scene.isLoaded || scene.path.Length == 0)
                 return;
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            if (!HasPending(scene))
+            {
+                EditorUtility.DisplayDialog("Earthquake starter presets",
+                    "Every existing physics/visual component has already been reviewed. " +
+                    "Your saved Inspector values will not be reset.", "OK");
+                return;
+            }
+
+            // A deliberate manual pass also gets an independent pre-change scene
+            // backup, even when all the objects were already customized.
+            string backup = AssetDatabase.GenerateUniqueAssetPath(
+                scene.path.Replace(".unity",
+                    "_BeforeStarterPresets_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".unity"));
+            if (!EditorSceneManager.SaveScene(scene, backup, true))
+            {
+                EditorUtility.DisplayDialog("Backup failed",
+                    "No presets were applied because the scene backup could not be saved.", "OK");
+                return;
+            }
             int modified = ApplyOnce(scene);
-            if (modified > 0)
-                EditorSceneManager.SaveScene(scene);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
             EditorUtility.DisplayDialog("Earthquake starter presets",
-                "Applied suggested starting values to " + modified + " unmodified physical/visual item(s). " +
-                "Customized objects were preserved and will not be overwritten later. " +
-                "You can now edit Mass, both Damping values, Force and Torque in the Inspector.",
-                "OK");
+                "Applied suggested starting values to " + modified + " untouched item(s). " +
+                "Customized items were kept unchanged and their protection markers saved. " +
+                "You can now edit Mass, both Damping values, Force and Torque in the Inspector." +
+                "\n\nBackup: " + backup, "OK");
         }
 
         public static bool HasPending(Scene scene)
