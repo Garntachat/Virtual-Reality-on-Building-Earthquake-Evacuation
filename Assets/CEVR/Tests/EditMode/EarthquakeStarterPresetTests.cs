@@ -119,6 +119,79 @@ namespace ChulaEarthquakeVR.Tests
         }
 
         [Test]
+        public void TutorialFallingHazard_PresetDoesNotReleaseItsKinematicBody()
+        {
+            Scene scene = EditorSceneManager.NewPreviewScene();
+            try
+            {
+                GameObject books = new GameObject("StagedFallingHazard_1");
+                SceneManager.MoveGameObjectToScene(books, scene);
+                Rigidbody body = books.AddComponent<Rigidbody>();
+                body.mass = 2.5f;
+                body.isKinematic = true;
+                body.useGravity = false;
+                var shaker = books.AddComponent<InertialRigidbody>();
+                shaker.Configure(null, 1f, true);
+                Assert.AreEqual(1, EarthquakeStarterPresets.ApplyOnce(scene));
+                Assert.That(body.mass, Is.EqualTo(2.2f));
+                Assert.That(body.linearDamping, Is.EqualTo(0.3f));
+                Assert.That(shaker.ForceNewtons, Is.EqualTo(7f));
+                Assert.IsTrue(body.isKinematic);
+                Assert.IsFalse(body.useGravity);
+            }
+            finally { EditorSceneManager.ClosePreviewScene(scene); }
+        }
+
+        [Test]
+        public void CondoCabinet_GetsDifferentPresetAndPreservesItsHazardState()
+        {
+            Scene scene = EditorSceneManager.NewPreviewScene();
+            try
+            {
+                GameObject cabinet = new GameObject("Condo Unsecured Cabinet");
+                SceneManager.MoveGameObjectToScene(cabinet, scene);
+                Rigidbody body = cabinet.AddComponent<Rigidbody>();
+                body.mass = 22f;
+                body.isKinematic = true;
+                body.useGravity = false;
+                var shaker = cabinet.AddComponent<InertialRigidbody>();
+                shaker.Configure(null, 1f, false);
+                Assert.AreEqual(1, EarthquakeStarterPresets.ApplyOnce(scene));
+                Assert.That(body.mass, Is.EqualTo(38f));
+                Assert.That(body.linearDamping, Is.EqualTo(0.8f));
+                Assert.That(body.angularDamping, Is.EqualTo(1.1f));
+                Assert.That(shaker.ForceNewtons, Is.EqualTo(95f));
+                Assert.That(shaker.TorqueNewtonMeters, Is.EqualTo(40f));
+                Assert.IsTrue(body.isKinematic);
+                Assert.IsFalse(body.useGravity);
+            }
+            finally { EditorSceneManager.ClosePreviewScene(scene); }
+        }
+
+        [Test]
+        public void HouseCustomizedProxy_LeavesAllSavedMassAndDampingUntouched()
+        {
+            Scene scene = EditorSceneManager.NewPreviewScene();
+            try
+            {
+                GameObject fridge = new GameObject("HouseLayout_Fridge");
+                SceneManager.MoveGameObjectToScene(fridge, scene);
+                HouseProxyEarthquakeSettings settings =
+                    fridge.AddComponent<HouseProxyEarthquakeSettings>();
+                settings.SetDefaultsForNewComponent(false);
+                var fields = new UnityEditor.SerializedObject(settings);
+                fields.FindProperty("mass").floatValue = 88f;
+                fields.FindProperty("linearDamping").floatValue = 2f;
+                fields.ApplyModifiedProperties();
+                Assert.AreEqual(0, EarthquakeStarterPresets.ApplyOnce(scene));
+                Assert.IsTrue(settings.StarterPresetProcessed);
+                Assert.That(settings.Mass, Is.EqualTo(88f));
+                Assert.That(settings.LinearDamping, Is.EqualTo(2f));
+            }
+            finally { EditorSceneManager.ClosePreviewScene(scene); }
+        }
+
+        [Test]
         public void DecorativeFurniture_HasEditableVisualDamping_NotFakeMass()
         {
             Scene scene = EditorSceneManager.NewPreviewScene();
