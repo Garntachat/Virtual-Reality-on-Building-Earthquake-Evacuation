@@ -121,6 +121,8 @@ namespace ChulaEarthquakeVR.Editor
                 foreach (WearableShoes shoe in root.GetComponentsInChildren<WearableShoes>(true))
                     shoe.PrepareEditableVisual();
 
+                EarthquakeStarterPresets.ApplyOnce(scene);
+
                 var saved = new Dictionary<UnityEngine.Object, UnityEngine.Object>();
                 foreach (MeshFilter filter in root.GetComponentsInChildren<MeshFilter>(true))
                     filter.sharedMesh = Persist(filter.sharedMesh, folder, saved);

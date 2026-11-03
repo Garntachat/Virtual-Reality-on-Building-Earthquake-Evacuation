@@ -410,8 +410,9 @@ namespace ChulaEarthquakeVR.Editor
                 foreach (Rigidbody body in root.GetComponentsInChildren<Rigidbody>(true))
                     if (IsEligible(body)) candidates.Add(body);
             bool missingTutorialCondo = SceneFurnitureEarthquakeCoverage.NeedsSetup(scene);
+            bool missingStarterPresets = EarthquakeStarterPresets.HasPending(scene);
             if (candidates.Count == 0 && !missingChairPhysics &&
-                !missingHouseFurniture && !missingTutorialCondo)
+                !missingHouseFurniture && !missingTutorialCondo && !missingStarterPresets)
             {
                 if (!automatic) Debug.Log("CEVR: all eligible Rigidbodies already have simple earthquake settings.");
                 return;
@@ -430,6 +431,7 @@ namespace ChulaEarthquakeVR.Editor
                 int count = AddMissingHouseChairComponents(chairs);
                 count += AddOtherHouseFurnitureSettings(otherHouseFurniture);
                 count += SceneFurnitureEarthquakeCoverage.Apply(scene);
+                count += EarthquakeStarterPresets.ApplyOnce(scene);
                 foreach (Rigidbody body in candidates)
                 {
                     if (body == null || !IsEligible(body)) continue;

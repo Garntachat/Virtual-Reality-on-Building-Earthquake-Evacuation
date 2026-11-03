@@ -27,6 +27,11 @@ namespace ChulaEarthquakeVR
         [Tooltip("Overhead loose items can move up/down; cabinets generally shake sideways.")]
         [SerializeField] private bool includeVertical;
 
+        // Saved alongside House furniture. Values remain user-owned after the
+        // first suggested preset has been considered in Edit mode.
+        [SerializeField, HideInInspector] private bool starterPresetProcessed;
+        public bool StarterPresetProcessed => starterPresetProcessed;
+
         public float Mass => mass;
         public float LinearDamping => linearDamping;
         public float AngularDamping => angularDamping;

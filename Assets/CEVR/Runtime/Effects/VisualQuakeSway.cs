@@ -8,6 +8,8 @@ namespace ChulaEarthquakeVR
     public sealed class VisualQuakeSway : MonoBehaviour
     {
         [SerializeField, Range(0f, 3f)] private float visualStrength = 1f;
+        [Tooltip("Visual-only damping; higher values follow the shared earthquake more slowly.")]
+        [SerializeField, Range(0f, 8f)] private float visualDamping = 1.2f;
         private GroundMotionPlayer motion;
         private Vector3 rest;
         private Quaternion rotation;
@@ -32,7 +34,7 @@ namespace ChulaEarthquakeVR
             Vector3 target = rest + new Vector3(local.x, 0f, local.z) * (0.025f * visualStrength);
             Quaternion targetRotation = rotation *
                 Quaternion.Euler(local.z * visualStrength * 2f, 0f, -local.x * visualStrength * 2f);
-            float blend = Mathf.Clamp01(Time.deltaTime * 14f);
+            float blend = Mathf.Clamp01(Time.deltaTime * 14f / (1f + visualDamping));
             transform.localPosition = Vector3.Lerp(transform.localPosition, target, blend);
             transform.localRotation = Quaternion.Slerp(transform.localRotation, targetRotation, blend);
         }

@@ -105,6 +105,8 @@ namespace ChulaEarthquakeVR.Editor
                 new GUIContent("Visual Shake Strength", "0 = no movement, 1 = normal sway, 2 = double."));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("responseMode"),
                 new GUIContent("Visual Sway Type", "Only affects decoration, not Rigidbody physics."));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("visualDamping"),
+                new GUIContent("Visual Damping", "Higher = slower/smoother sway. Visual only; not Rigidbody damping."));
             EditorGUILayout.HelpBox(
                 "This is a static decoration without a Rigidbody, so it has no " +
                 "Mass or Damping. To simulate physical falling, add a Collider, " +

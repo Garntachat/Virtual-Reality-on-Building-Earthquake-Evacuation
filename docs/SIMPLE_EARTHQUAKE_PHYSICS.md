@@ -27,6 +27,49 @@ The shared runtime binder now connects **saved per-item visual responses** even 
 
 **Manual validation after updating**: Stop Play, open Tutorial and run its coverage check; then open Condo and run the check there. Save both scenes. Set one chair's Mass and Damping, and change one lamp's Visual Shake Strength. Run each scenario twice and check that objects do not duplicate and the same edits remain after stopping Play. For hazard props, check that `Is Kinematic` is true before release—Mass will affect them after the hazard director releases them.
 
+## Starter presets for Tutorial, House, and Condo (November 2026)
+
+These are **estimated game-physics starting points**, based on the names and approximate kinds of objects in the project. They are **not measured product weights** or validated engineering earthquake responses. Adjust them in the Inspector based on how your actual Unity model behaves.
+
+| Object type (examples) | Initial Mass (kg) | Linear Damping | Angular Damping | Force (N) | Torque (N m) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Dining/movable chair, in all three scenes | 6.5 | 1.20 | 1.80 | 22 | 6 |
+| Refrigerator / heavy fridge (House) | 65 | 0.80 | 1.20 | 100 | 45 |
+| Wardrobe (House) | 42 | 0.80 | 1.00 | 100 | 45 |
+| Tall unsecured cabinet (Tutorial/Condo) | 38 | 0.80 | 1.10 | 95 | 40 |
+| Falling books / loose ceiling hazard | 2.2 | 0.30 | 0.50 | 7 | 2 |
+| Hanging lamp / physical light | 3 | 0.70 | 1.20 | 7 | 2.5 |
+| Protective pillow (Tutorial/House/Condo) | 0.75 | 1.20 | 1.10 | 3.5 | 1 |
+| Loose vase / pot | 1.1 | 0.45 | 0.65 | 6 | 1.8 |
+| Small circuit module / safety canister | 1.2 | 0.65 | 0.90 | 5 | 2 |
+| Dynamic screen/monitor | 5 | 0.80 | 1.00 | 12 | 3 |
+| Truly movable table/desk (not cover table) | 28 | 1.50 | 2.00 | 45 | 12 |
+
+Unity's **Linear Damping and Angular Damping** are damping coefficients used by the physics engine, not kilograms or percentages. Mass affects acceleration from a given ForceMode.Force. Static walls, floors, anchored cover tables and other non-Rigidbody furniture **cannot have meaningful physics Mass/Damping**: they use an individual **Visual Shake Strength** and **Visual Damping** instead. Fixed cover surfaces default to a visual strength of zero for safety; never add a dynamic Rigidbody to the cover table merely to display a Mass field.
+
+### How the one-time presets protect your edits
+
+- The scene editor runs the preset step **only in Edit mode**, after it creates/recognizes the saved furniture.
+- Existing objects are changed **only when Mass, Damping, Shake Strength, Force and Torque still match a known CEVR generator/Unity default**. If any of these was customized, the entire physics object is left unchanged.
+- An internal saved marker prevents the process from applying defaults a second time. Once you manually change a value, later scene openings and Play/Stop cycles do not reset it.
+- Existing fixed visual items retain their saved Shake Strength and Sway Type; only their new Visual Damping is initialized if still at the original zero.
+- The updated gameplay still uses the **same saved Rigidbody during Play** (House proxy-driven cabinets/falling props use their saved visible-root settings to initialize their one gameplay Rigidbody). Kinematic hazard bodies respond only after the gameplay releases them.
+
+**How to see everything:** Open any of the three scenes outside Play, then run **CEVR > Earthquake > Review saved Mass and Damping (current scene)**. It lists each physical body's saved Mass, Linear/Angular Damping, Force, Torque and Shake Strength in the Unity Console, plus separate visual-only objects. You can also run **CEVR > Earthquake > Apply suggested starter presets (preserve edits)** if you want to rerun the safe one-time initializer. It will not overwrite objects already marked as processed.
+
+Unity's **Game tab** shows the live result while **Play mode** is running. They are not two different physics modes. Edit Inspector values **outside** Play and save the scene before running a test. Changing values while Play is active is normally temporary and reverts when you stop.
+
+### Real Unity verification (required)
+
+1. Save/commit your local Unity work before pulling code, and open **Tutorial**, **House** and **Condo** separately in Edit mode after updating. Let their component preparation finish and save all three scenes.
+2. For each scene, run **Review saved Mass and Damping**. Confirm each intended physical object appears (including chairs, cabinet and loose hazards), and fixed art appears under visual-only. Any custom value you already set should remain exactly the same.
+3. In House, additionally run **Check all House furniture earthquake controls**. In Tutorial and Condo, run **Check Tutorial or Condo furniture controls**; review warnings in the Console.
+4. Pick one chair and compare Mass **6.5 kg** against **13 kg**, keeping Force and Damping unchanged; the heavier object should generally accelerate less. Then compare Linear Damping **1.2** against **3.0** to see more drag. Stop Play between tests; edit and save outside Play.
+5. Verify falling objects release and collide, the chair can still be grabbed, and the cover zone/crawl action and evacuation remain functional. Repeat two Play cycles; check that your latest saved values persist, furniture is not regenerated and no duplicate quake components appear.
+6. Commit the updated `.unity` files and any generated `TutorialBake_*` or `CondoBake_*` assets and their `.meta` files.
+
+**Verification limit:** the GitHub Actions workflow runs Python structural checks, not the Unity compiler or Unity physics. The included Unity EditMode NUnit tests still need execution inside Unity Test Runner on your Mac. Passing CI alone does not certify the actual earthquake response or collider placement.
+
 ## One Rigidbody, one shaker
 
 Select a chair, cabinet, vase or other physical object in the **Hierarchy in Edit mode**, not during Play. It should have Unity's normal `Rigidbody` and a small `Inertial Rigidbody` component. The latter now shows the real Rigidbody properties at the top:
