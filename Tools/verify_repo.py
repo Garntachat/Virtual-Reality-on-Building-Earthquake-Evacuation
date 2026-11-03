@@ -162,7 +162,7 @@ def check_meta_files(errors: list[str]) -> None:
     for path in assets.rglob("*"):
         if path.name.endswith(".meta"):
             content = path.read_text(encoding="utf-8", errors="replace")
-            guid_match = re.search(r"(?m)^guid:[ \\t]*([^\\r\\n]+)", content)
+            guid_match = re.search(r"(?m)^guid:[ \t]*([^\r\n]+)", content)
             guid = guid_match.group(1).strip() if guid_match else ""
             if re.fullmatch(r"[0-9a-fA-F]{32}", guid) is None:
                 fail(errors, f"invalid Unity GUID in {path.relative_to(ROOT)}: {guid!r} (expected 32 hex digits)")
