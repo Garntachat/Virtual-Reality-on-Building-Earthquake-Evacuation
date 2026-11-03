@@ -424,7 +424,7 @@ def check_saved_furniture_earthquake_settings(errors: list[str]) -> None:
         "AddMissingHouseChairComponents(", "AddOtherHouseFurnitureSettings(",
         "HouseProxyEarthquakeSettings", "DecorativeQuakeResponse",
         "FindOtherHouseFurniture(", "Selection.selectionChanged",
-        "NeedsSmallPropVisualSettings(", "Check all House furniture earthquake controls",
+        "SceneFurnitureEarthquakeCoverage.NeedsSetup(scene)", "Check all House furniture earthquake controls",
     ):
         if fragment not in editor:
             fail(errors, "saved House object controls missing: " + fragment)
