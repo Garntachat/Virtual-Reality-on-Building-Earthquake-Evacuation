@@ -184,7 +184,8 @@ namespace ChulaEarthquakeVR.Editor
             queued = false;
             if (EditorApplication.isPlayingOrWillChangePlaymode || Application.isBatchMode) return;
             string name = SceneManager.GetActiveScene().name;
-            if (name == "House" || name == "New_House") Apply(true);
+            if (name == "House" || name == "New_House" || name == "Condo" ||
+                name == "CEVR_ChulaEngineering_Tutorial") Apply(true);
         }
 
         private static System.Collections.Generic.List<Transform> FindHouseChairRoots(Scene scene)
@@ -354,6 +355,53 @@ namespace ChulaEarthquakeVR.Editor
             return added;
         }
 
+        private static bool NeedsSmallPropVisualSettings(Scene scene)
+        {
+            if (scene.name != "Condo" && scene.name != "CEVR_ChulaEngineering_Tutorial")
+                return false;
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                foreach (WearableShoes shoes in root.GetComponentsInChildren<WearableShoes>(true))
+                    if (shoes.GetComponent<Rigidbody>() == null &&
+                        shoes.GetComponent<DecorativeQuakeResponse>() == null)
+                        return true;
+                foreach (Transform item in root.GetComponentsInChildren<Transform>(true))
+                    if (scene.name == "Condo" && item.name == "Condo Sturdy Table" &&
+                        item.GetComponent<Rigidbody>() == null &&
+                        item.GetComponent<DecorativeQuakeResponse>() == null)
+                        return true;
+            }
+            return false;
+        }
+
+        private static int AddSmallPropVisualSettings(Scene scene)
+        {
+            if (scene.name != "Condo" && scene.name != "CEVR_ChulaEngineering_Tutorial")
+                return 0;
+            int added = 0;
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                foreach (WearableShoes shoes in root.GetComponentsInChildren<WearableShoes>(true))
+                {
+                    if (shoes.GetComponent<Rigidbody>() != null ||
+                        shoes.GetComponent<DecorativeQuakeResponse>() != null) continue;
+                    Undo.AddComponent<DecorativeQuakeResponse>(shoes.gameObject)
+                        .Configure(null, DecorativeQuakeMode.Loose, 0.4f);
+                    added++;
+                }
+                foreach (Transform item in root.GetComponentsInChildren<Transform>(true))
+                {
+                    if (scene.name != "Condo" || item.name != "Condo Sturdy Table" ||
+                        item.GetComponent<Rigidbody>() != null ||
+                        item.GetComponent<DecorativeQuakeResponse>() != null) continue;
+                    Undo.AddComponent<DecorativeQuakeResponse>(item.gameObject)
+                        .Configure(null, DecorativeQuakeMode.Heavy, 0f);
+                    added++;
+                }
+            }
+            return added;
+        }
+
         private static bool IsEligible(Rigidbody body)
         {
             if (body == null || body.GetComponent<InertialRigidbody>() != null) return false;
@@ -406,7 +454,9 @@ namespace ChulaEarthquakeVR.Editor
             foreach (GameObject root in scene.GetRootGameObjects())
                 foreach (Rigidbody body in root.GetComponentsInChildren<Rigidbody>(true))
                     if (IsEligible(body)) candidates.Add(body);
-            if (candidates.Count == 0 && !missingChairPhysics && !missingHouseFurniture)
+            bool missingSmallProps = NeedsSmallPropVisualSettings(scene);
+            if (candidates.Count == 0 && !missingChairPhysics &&
+                !missingHouseFurniture && !missingSmallProps)
             {
                 if (!automatic) Debug.Log("CEVR: all eligible Rigidbodies already have simple earthquake settings.");
                 return;
@@ -424,6 +474,7 @@ namespace ChulaEarthquakeVR.Editor
 
                 int count = AddMissingHouseChairComponents(chairs);
                 count += AddOtherHouseFurnitureSettings(otherHouseFurniture);
+                count += AddSmallPropVisualSettings(scene);
                 foreach (Rigidbody body in candidates)
                 {
                     if (body == null || !IsEligible(body)) continue;
