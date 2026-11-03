@@ -52,6 +52,10 @@ namespace ChulaEarthquakeVR
             GameObject table = new GameObject("Condo Sturdy Table");
             table.transform.SetParent(transform, false);
             table.transform.localPosition = new Vector3(-1f, 0f, -6f);
+            // Anchored protection table is visual-only: it must never fall away
+            // from its crawl/cover trigger. The strength remains editable.
+            table.AddComponent<DecorativeQuakeResponse>()
+                .Configure(null, DecorativeQuakeMode.Heavy, 0f);
             Part("Table Top", table.transform, new Vector3(0f, 0.79f, 0f),
                 new Vector3(1.95f, 0.15f, 1.25f), dark);
             foreach (float x in new[] { -0.82f, 0.82f })
@@ -84,10 +88,14 @@ namespace ChulaEarthquakeVR
             shoes1.GetComponent<BoxCollider>().size = new Vector3(0.85f, 0.28f, 0.7f);
             shoes1.transform.SetParent(transform, false);
             shoes1.transform.localPosition = new Vector3(-0.8f, 0.09f, -9.2f);
+            shoes1.AddComponent<DecorativeQuakeResponse>()
+                .Configure(null, DecorativeQuakeMode.Loose, 0.4f);
             GameObject shoes2 = new GameObject("Condo Safety Shoes P2", typeof(BoxCollider), typeof(WearableShoes));
             shoes2.GetComponent<BoxCollider>().size = new Vector3(0.85f, 0.28f, 0.7f);
             shoes2.transform.SetParent(transform, false);
             shoes2.transform.localPosition = new Vector3(0.1f, 0.09f, -9.2f);
+            shoes2.AddComponent<DecorativeQuakeResponse>()
+                .Configure(null, DecorativeQuakeMode.Loose, 0.4f);
 
             GameObject pillow = Part("Condo Protective Pillow", transform,
                 new Vector3(-1f, 0.92f, -6f), new Vector3(0.64f, 0.20f, 0.5f), pink);
