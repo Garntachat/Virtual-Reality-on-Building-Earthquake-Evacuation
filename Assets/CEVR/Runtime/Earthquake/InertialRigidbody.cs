@@ -79,6 +79,14 @@ namespace ChulaEarthquakeVR
             body.AddTorque(torque, ForceMode.Force);
         }
 
+        // Only called from the saved House proxy-settings bridge. No additional
+        // force source or Rigidbody is created.
+        public void ConfigureForces(float newtons, float torque)
+        {
+            forceNewtons = Mathf.Max(0f, newtons);
+            torqueNewtonMeters = Mathf.Max(0f, torque);
+        }
+
         public void Configure(GroundMotionPlayer source, float scale = 1f, bool vertical = true)
         {
             motionSource = source;
