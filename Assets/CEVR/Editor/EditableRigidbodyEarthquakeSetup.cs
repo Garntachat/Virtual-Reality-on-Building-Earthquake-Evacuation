@@ -211,9 +211,11 @@ namespace ChulaEarthquakeVR.Editor
             // Do NOT turn building structure, camera, door, window or pet
             // controllers into physical furniture. They have their own behavior.
             string name = item.name.ToLowerInvariant();
+            bool hangingFixture = name.Contains("lamp") || name.Contains("light");
             return name == "houselayout_cat" || name.Contains("window") ||
                 name.Contains("door") || name.Contains("wall") ||
-                name.Contains("floor") || name.Contains("ceiling") ||
+                (name.Contains("floor") && !hangingFixture) ||
+                (name.Contains("ceiling") && !hangingFixture) ||
                 name.Contains("ground") || name.Contains("camera") ||
                 name.Contains("player") || name.Contains("assembly") ||
                 name.Contains("safetyzone") || name.Contains("foundation");
