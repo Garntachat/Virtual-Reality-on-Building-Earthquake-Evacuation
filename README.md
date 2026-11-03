@@ -35,7 +35,9 @@ CEVR is a Unity prototype for studying human decisions during a simulated earthq
 
 Follow [Unity Setup](docs/UNITY_SETUP.md) from the beginning if this is the first time opening the project. Complete [XR Setup](docs/XR_SETUP.md) before using a headset.
 
-For a persistent up-to-date scene, stop Play mode and run `Tools > CEVR > 1. Build Chula Engineering Tutorial Stage`, then run the scene validator. Runtime repair exists so the committed scene remains immediately playable after pulling code updates.
+**Editing the Tutorial furniture:** open `Assets/CEVR/Generated/Scenes/CEVR_ChulaEngineering_Tutorial.unity` in Edit mode. On first opening, CEVR automatically bakes and saves its Play-mode furniture, props, lighting and decoration as editable Unity scene objects. Look under `Tutorial Editable Furniture`, `DynamicProps` and `CEVR_FinalVisualPolish`, edit the **root** GameObjects and save. This first bake also creates a scene backup. Commit the updated `.unity` file and `Assets/CEVR/Generated/TutorialBake_*` assets with `.meta` files so collaborators can see your changes. Read [Edit Tutorial](docs/EDIT_TUTORIAL.md) for verification.
+
+**Do not run** `Tools > CEVR > 1. Build Chula Engineering Tutorial Stage` after editing the scene: that generator **replaces** the Tutorial and discards your edits. Use `CEVR > Tutorial > Check saved editable furniture` to inspect the layout.
 
 ## Repository structure
 

@@ -61,8 +61,8 @@ namespace ChulaEarthquakeVR
             PhysicsObjectsBound = BindPhysicsObjects();
             DecorativeObjectsBound = BindDecorativeObjects();
             Debug.Log($"CEVR earthquake response connected {PhysicsObjectsBound} physics object(s) and " +
-                      $"{DecorativeObjectsBound} decorative object(s) on training floor {trainingFloorLevel}. " +
-                      "The player camera and XR rig remain unshaken.");
+                      $"{DecorativeObjectsBound} decorative object(s). " +
+                      "Per-object settings are preserved; the player camera and XR rig remain unshaken.");
         }
 
         private int BindPhysicsObjects()
@@ -77,8 +77,9 @@ namespace ChulaEarthquakeVR
                 if (inertial == null)
                 {
                     inertial = body.gameObject.AddComponent<InertialRigidbody>();
-                    inertial.Configure(motion, ResponseScale(body), IncludeVertical(body));
+                    inertial.Configure(motion, 1f, IncludeVertical(body));
                 }
+                else inertial.ConnectMotionIfMissing(motion);
 
                 body.interpolation = RigidbodyInterpolation.Interpolate;
                 if (!body.isKinematic)
@@ -93,6 +94,8 @@ namespace ChulaEarthquakeVR
                     body.GetComponent<FurnitureImpactAudio>() == null)
                     body.gameObject.AddComponent<FurnitureImpactAudio>();
 
+                // Tall unanchored furniture can tip, but the resulting component
+                // remains visible and adjustable in the saved scene Inspector.
                 TryAddToppleResponse(body);
                 bound++;
             }
@@ -110,14 +113,17 @@ namespace ChulaEarthquakeVR
                 if (root != null) roots.Add(root);
             }
 
-            float floorScale = TrainingFloorGain(1.35f);
             int bound = 0;
             foreach (Transform root in roots)
             {
                 DecorativeQuakeResponse response = root.GetComponent<DecorativeQuakeResponse>();
-                if (response == null) response = root.gameObject.AddComponent<DecorativeQuakeResponse>();
-                Bounds bounds = CalculateBounds(root.gameObject);
-                response.Configure(motion, Classify(root.name, bounds), floorScale);
+                if (response == null)
+                {
+                    response = root.gameObject.AddComponent<DecorativeQuakeResponse>();
+                    response.Configure(motion, Classify(root.name, CalculateBounds(root.gameObject)), 1f);
+                }
+                else response.ConnectMotionIfMissing(motion);
+                // Never reset a saved object's shake strength or sway type at Play.
                 bound++;
             }
             return bound;
@@ -164,33 +170,19 @@ namespace ChulaEarthquakeVR
 
         private void TryAddToppleResponse(Rigidbody body)
         {
-            if (body.isKinematic || body.GetComponent<ToppleableFurniture>() != null ||
+            // Existing and hand-authored toppling settings are never overwritten.
+            // The automatic fallback applies only to the tutorial preview.
+            if (motion == null || !motion.IsUsingPreview ||
+                body.isKinematic || body.GetComponent<ToppleableFurniture>() != null ||
                 body.GetComponent<MovableFurniture>() != null ||
                 body.GetComponent<ConfigurableJoint>() != null) return;
 
             Bounds bounds = CalculateBounds(body.gameObject);
             float footprint = Mathf.Max(0.05f, Mathf.Max(bounds.size.x, bounds.size.z));
-            float slenderness = bounds.size.y / footprint;
-            if (slenderness < 1.35f || bounds.size.y < 1.1f) return;
+            if (bounds.size.y < 1.1f || bounds.size.y / footprint < 1.35f) return;
 
-            float height = Mathf.Clamp(bounds.size.y * 0.35f, 0.45f, 1.8f);
-            float scale = Mathf.Lerp(1.05f, 1.55f, Mathf.Clamp01((slenderness - 1.35f) / 1.8f));
-            body.gameObject.AddComponent<ToppleableFurniture>().Configure(motion, scale, height);
-        }
-
-        private float ResponseScale(Rigidbody body)
-        {
-            float massResponse = body.mass <= 1.5f ? 1.18f :
-                body.mass <= 10f ? 1f :
-                body.mass <= 40f ? 0.90f : 0.82f;
-            return massResponse * TrainingFloorGain(1.28f);
-        }
-
-        private float TrainingFloorGain(float maximumGain)
-        {
-            if (motion == null || !motion.IsUsingPreview) return 1f;
-            float normalizedFloor = Mathf.Clamp01((trainingFloorLevel - 1f) / 49f);
-            return Mathf.Lerp(1f, maximumGain, Mathf.Sqrt(normalizedFloor));
+            body.gameObject.AddComponent<ToppleableFurniture>()
+                .Configure(motion, 1f, Mathf.Max(0.45f, bounds.size.y * 0.35f));
         }
 
         private static bool IncludeVertical(Rigidbody body)

@@ -21,7 +21,16 @@ namespace ChulaEarthquakeVR
     {
         [SerializeField] private GroundMotionPlayer motion;
         [SerializeField] private DecorativeQuakeMode responseMode = DecorativeQuakeMode.Loose;
-        [SerializeField, Range(0.5f, 2f)] private float responseScale = 1f;
+        [Header("Simple earthquake settings (visual only)")]
+        [Tooltip("0 = perfectly still; 1 = normal sway; 2 = twice the sway. These props are not physical rigidbodies.")]
+        [SerializeField, Range(0f, 3f)] private float responseScale = 1f;
+
+        public float ShakeStrength => responseScale;
+
+        public void ConnectMotionIfMissing(GroundMotionPlayer source)
+        {
+            if (motion == null) motion = source;
+        }
 
         private Vector3 restLocalPosition;
         private Quaternion restLocalRotation;
@@ -41,7 +50,7 @@ namespace ChulaEarthquakeVR
         {
             motion = source;
             responseMode = mode;
-            responseScale = Mathf.Clamp(scale, 0.5f, 2f);
+            responseScale = Mathf.Clamp(scale, 0f, 3f);
             CaptureRestPose();
         }
 

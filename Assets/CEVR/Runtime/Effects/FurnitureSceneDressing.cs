@@ -14,6 +14,10 @@ namespace ChulaEarthquakeVR
         {
             if (savedInEditor) return;
             BuildDressing();
+            // Templates are only construction helpers. Keep the actual visible
+            // furniture instances, not unused hidden duplicates in the Hierarchy.
+            foreach (GameObject template in templates.Values) DisposeGenerated(template);
+            templates.Clear();
             savedInEditor = true;
         }
         [Serializable] private class ModelData { public float[] vertices; public PartData[] parts; }
@@ -103,7 +107,7 @@ namespace ChulaEarthquakeVR
                 sourceBounds.size.x < 0.001f || sourceBounds.size.y < 0.001f || sourceBounds.size.z < 0.001f)
             {
                 Debug.LogWarning("CEVR team furniture has no usable visible bounds: " + name + ". Keeping fallback visual.");
-                Destroy(model);
+                DisposeGenerated(model);
                 return null;
             }
 
@@ -114,7 +118,7 @@ namespace ChulaEarthquakeVR
             model.transform.rotation = rotation;
             if (!TryGetVisibleBounds(model, out Bounds placedBounds))
             {
-                Destroy(model);
+                DisposeGenerated(model);
                 return null;
             }
             model.transform.position += bottomCenter - new Vector3(placedBounds.center.x, placedBounds.min.y, placedBounds.center.z);
@@ -425,9 +429,17 @@ namespace ChulaEarthquakeVR
             Decor("books", new Vector3(1.5f, 0.46f, 3.6f), new Vector3(0.35f, 0.15f, 0.3f));
         }
 
+        private static void DisposeGenerated(UnityEngine.Object item)
+        {
+            if (item == null) return;
+            if (Application.isPlaying) Destroy(item);
+            else DestroyImmediate(item);
+        }
+
         private void OnDestroy()
         {
-            foreach (UnityEngine.Object item in owned) if (item != null) Destroy(item);
+            foreach (UnityEngine.Object item in owned) DisposeGenerated(item);
+            owned.Clear();
         }
     }
 }
