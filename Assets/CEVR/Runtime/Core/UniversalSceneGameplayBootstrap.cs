@@ -209,6 +209,11 @@ namespace ChulaEarthquakeVR
             HazardDirector hazards = systems.AddComponent<HazardDirector>();
 
             layout.ConnectForPlay(motion, logger);
+            foreach (MovableFurniture chair in layout.GetComponentsInChildren<MovableFurniture>(true))
+                TryAddXrGrabInteractable(chair.gameObject);
+            foreach (ProtectivePillow pillow in layout.GetComponentsInChildren<ProtectivePillow>(true))
+                TryAddXrGrabInteractable(pillow.gameObject);
+            AttachWindowCracking(motion, logger);
             hazards.Configure(layout.StagedHazards);
             EnsurePlayerFeatures(player, camera);
             EnsureMultiplayer(camera, player.transform);
