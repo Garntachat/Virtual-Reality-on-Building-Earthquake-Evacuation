@@ -10,6 +10,7 @@ namespace ChulaEarthquakeVR
     {
         private enum HousePhase { Preparation, Earthquake, Evacuation, Success, Failure }
 
+        [SerializeField] private string locationLabel = "HOUSE";
         [SerializeField] private float preparationSeconds = 30f;
         [SerializeField] private float earthquakeSeconds = 20f;
         [SerializeField] private float evacuationSeconds = 60f;
@@ -37,11 +38,16 @@ namespace ChulaEarthquakeVR
             logger = sessionLogger;
         }
 
+        public void SetLocationLabel(string label)
+        {
+            locationLabel = string.IsNullOrWhiteSpace(label) ? "HOUSE" : label.ToUpperInvariant();
+        }
+
         private void Start()
         {
             if (motion == null || hazards == null || health == null || player == null || assemblyPoint == null)
             {
-                Debug.LogError("House scenario wiring is incomplete.", this);
+                Debug.LogError(locationLabel + " scenario wiring is incomplete.", this);
                 enabled = false;
                 return;
             }
@@ -50,8 +56,9 @@ namespace ChulaEarthquakeVR
             hazards.ResetHazards();
             try
             {
-                logger?.BeginSession("HOUSE-TUTORIAL", "CEVR_HOUSE_TUTORIAL_V1", StudyMode.Training);
-                logger?.LogEvent("house_scenario_started");
+                logger?.BeginSession(locationLabel + "-TUTORIAL",
+                    "CEVR_" + locationLabel + "_TUTORIAL_V1", StudyMode.Training);
+                logger?.LogEvent(locationLabel.ToLowerInvariant() + "_scenario_started");
             }
             catch (Exception exception)
             {
@@ -108,7 +115,7 @@ namespace ChulaEarthquakeVR
                 {
                     phase = HousePhase.Success;
                     GameplayAudioDirector.PlayCue(GameplayAudioCue.Success, 0.32f);
-                    logger?.LogEvent("house_tutorial_success",
+                    logger?.LogEvent(locationLabel.ToLowerInvariant() + "_tutorial_success",
                         $"{{\"healthRemaining\":{health.CurrentHealth.ToString("0.##", CultureInfo.InvariantCulture)}}}");
                     logger?.EndSession();
                     routine = null;
@@ -146,7 +153,7 @@ namespace ChulaEarthquakeVR
             hazards?.StopHazards();
             phase = HousePhase.Failure;
             GameplayAudioDirector.PlayCue(GameplayAudioCue.Failure, 0.30f);
-            logger?.LogEvent("house_tutorial_failure", $"{{\"reason\":\"{reason}\"}}");
+            logger?.LogEvent(locationLabel.ToLowerInvariant() + "_tutorial_failure", $"{{\"reason\":\"{reason}\"}}");
             logger?.EndSession();
         }
 
@@ -171,7 +178,7 @@ namespace ChulaEarthquakeVR
             switch (phase)
             {
                 case HousePhase.Preparation:
-                    heading = $"HOUSE PREPARATION  •  EARTHQUAKE IN {remaining:0.0}s";
+                    heading = $"{locationLabel} PREPARATION  •  EARTHQUAKE IN {remaining:0.0}s";
                     objective = "Wear the shoes, move furniture, and locate the pillow and safe cover.";
                     break;
                 case HousePhase.Earthquake:
@@ -185,7 +192,7 @@ namespace ChulaEarthquakeVR
                     objective = "Move to the green outdoor assembly marker.";
                     break;
                 case HousePhase.Success:
-                    heading = "HOUSE TUTORIAL COMPLETE";
+                    heading = locationLabel + " TUTORIAL COMPLETE";
                     objective = "You reached the assembly point after the shaking stopped.";
                     break;
                 default:

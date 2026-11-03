@@ -4,6 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace ChulaEarthquakeVR.Editor
 {
@@ -26,6 +27,9 @@ namespace ChulaEarthquakeVR.Editor
                 controller = new GameObject("Main Menu Controller").AddComponent<MainMenuController>();
             if (controller.editableCanvas != null)
             {
+                EnsureCondoButton(controller.editableCanvas.transform, controller);
+                EditorSceneManager.MarkSceneDirty(scene);
+                EditorSceneManager.SaveScene(scene);
                 Selection.activeGameObject = controller.editableCanvas.gameObject;
                 return;
             }
@@ -44,9 +48,10 @@ namespace ChulaEarthquakeVR.Editor
             panel.GetComponent<Image>().color = new Color(0.04f, 0.07f, 0.10f, 0.98f);
             Label(root.transform, "Title", "EARTHQUAKE TRAINING", 55, 55, 570, 55, 30);
             Label(root.transform, "Description", "Choose a scene. Take cover during shaking, then evacuate.", 55, 120, 570, 65, 20);
-            AddButton(root.transform, "Play Tutorial", 200, controller.PlayTutorial);
-            AddButton(root.transform, "Play House", 280, controller.PlayHouse);
-            Label(root.transform, "Appearance Heading", "STUDENT OUTFIT", 55, 370, 570, 35, 20);
+            AddButton(root.transform, "Play Tutorial", 185, controller.PlayTutorial);
+            AddButton(root.transform, "Play House", 250, controller.PlayHouse);
+            AddButton(root.transform, "Play Condo", 315, controller.PlayCondo);
+            Label(root.transform, "Appearance Heading", "STUDENT OUTFIT", 55, 390, 570, 35, 20);
             // Use Unity's native dropdown template, preserving its navigation and option hierarchy.
             Selection.activeGameObject = root;
             EditorApplication.ExecuteMenuItem("GameObject/UI/Legacy/Dropdown");
@@ -55,15 +60,15 @@ namespace ChulaEarthquakeVR.Editor
             {
                 dropdown.name = "Student Outfit";
                 dropdown.transform.SetParent(root.transform, false);
-                Place(dropdown.gameObject, 55, 415, 570, 50);
+                Place(dropdown.gameObject, 55, 425, 570, 50);
                 dropdown.ClearOptions();
                 dropdown.AddOptions(new System.Collections.Generic.List<string>(StudentAppearance.Names));
                 dropdown.value = StudentAppearance.Selected;
                 UnityEventTools.AddPersistentListener(dropdown.onValueChanged, controller.SelectAppearance);
                 controller.appearanceDropdown = dropdown;
             }
-            AddButton(root.transform, "Exit", 510, controller.QuitMenu);
-            controller.statusLabel = Label(root.transform, "Status", "Choose a scene to begin.", 55, 600, 570, 60, 18);
+            AddButton(root.transform, "Exit", 505, controller.QuitMenu);
+            controller.statusLabel = Label(root.transform, "Status", "Choose a scene to begin.", 55, 585, 570, 60, 18);
             if (Object.FindFirstObjectByType<EventSystem>() == null)
                 new GameObject("EventSystem", typeof(EventSystem));
             var events = Object.FindFirstObjectByType<EventSystem>();
@@ -79,6 +84,54 @@ namespace ChulaEarthquakeVR.Editor
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             Selection.activeGameObject = root;
+        }
+
+        // Also upgrades a previously saved editable Canvas the next time it opens.
+        // The small IMGUI fallback already contains Play Condo without any bake.
+        internal static void UpgradeOpenMenu()
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (scene.path != ScenePath || EditorApplication.isPlayingOrWillChangePlaymode) return;
+            var controller = Object.FindFirstObjectByType<MainMenuController>();
+            if (controller == null || controller.editableCanvas == null ||
+                controller.editableCanvas.transform.Find("Play Condo") != null) return;
+            EnsureCondoButton(controller.editableCanvas.transform, controller);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log("CEVR Main Menu: added Play Condo to the existing editable UI.");
+        }
+
+        private static void EnsureCondoButton(Transform canvas, MainMenuController controller)
+        {
+            if (canvas.Find("Play Condo") != null) return;
+            // Preserve existing custom labels, colors, and click handlers.
+            // Move only the known default menu elements enough to fit a third button.
+            Transform title = canvas.Find("Appearance Heading");
+            Transform dropdown = canvas.Find("Student Outfit");
+            Transform exit = canvas.Find("Exit");
+            Transform status = canvas.Find("Status");
+            if (title != null) MoveToY(title, 405);
+            if (dropdown != null) MoveToY(dropdown, 445);
+            if (exit != null) MoveToY(exit, 530);
+            if (status != null) MoveToY(status, 600);
+
+            AddButton(canvas, "Play Condo", 340, controller.PlayCondo);
+            Transform newButton = canvas.Find("Play Condo");
+            Transform house = canvas.Find("Play House");
+            if (newButton != null && house != null)
+            {
+                Image source = house.GetComponent<Image>();
+                Image target = newButton.GetComponent<Image>();
+                if (source != null && target != null) target.color = source.color;
+            }
+        }
+
+        private static void MoveToY(Transform item, float y)
+        {
+            RectTransform rect = item as RectTransform;
+            if (rect == null) return;
+            Vector2 point = rect.anchoredPosition;
+            rect.anchoredPosition = new Vector2(point.x, -y);
         }
 
         private static void Place(GameObject obj, float x, float y, float width, float height)
@@ -114,4 +167,36 @@ namespace ChulaEarthquakeVR.Editor
             text.alignment = TextAnchor.MiddleCenter;
         }
     }
+
+    [InitializeOnLoad]
+    internal static class CondoMenuSceneUpgrade
+    {
+        private static bool pending;
+
+        static CondoMenuSceneUpgrade()
+        {
+            EditorSceneManager.sceneOpened -= OnOpened;
+            EditorSceneManager.sceneOpened += OnOpened;
+            QueueCheck();
+        }
+
+        private static void OnOpened(Scene scene, OpenSceneMode mode) => QueueCheck();
+
+        private static void QueueCheck()
+        {
+            if (pending) return;
+            pending = true;
+            EditorApplication.update += Check;
+        }
+
+        private static void Check()
+        {
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating) return;
+            EditorApplication.update -= Check;
+            pending = false;
+            if (!Application.isBatchMode)
+                EditableMainMenu.UpgradeOpenMenu();
+        }
+    }
+
 }

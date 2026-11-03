@@ -25,15 +25,19 @@ namespace ChulaEarthquakeVR
         {
             if (scene.name == MainMenuController.MenuScene) return;
             string sceneName = scene.name.ToLowerInvariant();
-            if (!sceneName.Contains("cevr") && !sceneName.Contains("tutorial") && !sceneName.Contains("house")) return;
+            bool houseScene = scene.name == MainMenuController.HouseScene;
+            bool condoScene = scene.name == MainMenuController.CondoScene;
+            if (!sceneName.Contains("cevr") && !sceneName.Contains("tutorial") &&
+                !houseScene && !condoScene) return;
             if (GameObject.Find(RootName) != null) return;
             var root = new GameObject(RootName);
-            root.AddComponent<UniversalSceneGameplayBootstrap>().Install(sceneName.Contains("house"));
+            root.AddComponent<UniversalSceneGameplayBootstrap>().Install(houseScene, condoScene);
         }
 
-        private void Install(bool houseScene)
+        private void Install(bool houseScene, bool condoScene)
         {
             if (houseScene) InstallHouseScenario();
+            else if (condoScene) InstallCondoScenario();
             else
             {
                 InstallTutorialFeatures();
@@ -162,6 +166,62 @@ namespace ChulaEarthquakeVR
             HouseScenarioController scenario = systems.AddComponent<HouseScenarioController>();
             scenario.Configure(motion, hazardDirector, health, player.transform, assembly, logger);
             Debug.Log("CEVR installed the complete house tutorial gameplay without modifying the house mesh.");
+        }
+
+        private void InstallCondoScenario()
+        {
+            Camera camera = FindFirstObjectByType<Camera>();
+            if (camera == null)
+            {
+                Debug.LogError("CEVR Condo requires its saved Main Camera.");
+                return;
+            }
+
+            CondoGameplayLayout layout = FindFirstObjectByType<CondoGameplayLayout>();
+            if (layout == null)
+            {
+                // Fallback when Condo has not yet been opened in the Unity Editor.
+                // The same layout builder is used by the one-time editor bake.
+                GameObject authored = new GameObject("Condo Gameplay");
+                layout = authored.AddComponent<CondoGameplayLayout>();
+                layout.Build(
+                    MaterialFor("Condo Furniture Dark", new Color(0.13f, 0.18f, 0.22f)),
+                    MaterialFor("Condo Furniture Pink", new Color(0.88f, 0.08f, 0.40f)),
+                    MaterialFor("Condo Safety Green", new Color(0.05f, 0.66f, 0.30f)),
+                    MaterialFor("Condo Hazard Amber", new Color(1f, 0.55f, 0.04f)));
+            }
+            if (!layout.IsPrepared || layout.AssemblyPoint == null)
+            {
+                Debug.LogError("CEVR Condo saved gameplay layout is incomplete. " +
+                               "Open the scene in Edit mode and use CEVR > Condo > Prepare editable gameplay.");
+                return;
+            }
+
+            GameObject player = PrepareHousePlayer(camera);
+            player.transform.position = layout.PlayerSpawn;
+            player.transform.rotation = Quaternion.identity;
+            PlayerHealth health = player.GetComponent<PlayerHealth>();
+
+            GameObject systems = new GameObject("Condo Gameplay Systems");
+            systems.transform.SetParent(transform, false);
+            GroundMotionPlayer motion = systems.AddComponent<GroundMotionPlayer>();
+            SessionLogger logger = systems.AddComponent<SessionLogger>();
+            HazardDirector hazards = systems.AddComponent<HazardDirector>();
+
+            layout.ConnectForPlay(motion, logger);
+            foreach (MovableFurniture chair in layout.GetComponentsInChildren<MovableFurniture>(true))
+                TryAddXrGrabInteractable(chair.gameObject);
+            foreach (ProtectivePillow pillow in layout.GetComponentsInChildren<ProtectivePillow>(true))
+                TryAddXrGrabInteractable(pillow.gameObject);
+            AttachWindowCracking(motion, logger);
+            hazards.Configure(layout.StagedHazards);
+            EnsurePlayerFeatures(player, camera);
+            EnsureMultiplayer(camera, player.transform);
+
+            HouseScenarioController scenario = systems.AddComponent<HouseScenarioController>();
+            scenario.SetLocationLabel("CONDO");
+            scenario.Configure(motion, hazards, health, player.transform, layout.AssemblyPoint, logger);
+            Debug.Log("CEVR Condo: House-style tutorial gameplay connected to saved Condo furniture; existing condo geometry preserved.");
         }
 
         private void InstallSavedHouseExtras(
