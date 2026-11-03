@@ -498,6 +498,44 @@ def check_tutorial_condo_furniture_earthquake_coverage(errors: list[str]) -> Non
         fail(errors, "missing Tutorial/Condo per-object quake regression tests")
 
 
+def check_one_time_earthquake_presets(errors: list[str]) -> None:
+    """Presets run in the editor, never replacing custom mass during Play."""
+    editor = (ROOT / "Assets/CEVR/Editor/EarthquakeStarterPresets.cs").read_text(encoding="utf-8")
+    setup = (ROOT / "Assets/CEVR/Editor/EditableRigidbodyEarthquakeSetup.cs").read_text(encoding="utf-8")
+    tutorial = (ROOT / "Assets/CEVR/Editor/TutorialSceneBake.cs").read_text(encoding="utf-8")
+    condo = (ROOT / "Assets/CEVR/Editor/CondoGameplayBake.cs").read_text(encoding="utf-8")
+    inertial = (ROOT / "Assets/CEVR/Runtime/Earthquake/InertialRigidbody.cs").read_text(encoding="utf-8")
+    proxy = (ROOT / "Assets/CEVR/Runtime/Earthquake/HouseProxyEarthquakeSettings.cs").read_text(encoding="utf-8")
+    decor = (ROOT / "Assets/CEVR/Runtime/Effects/DecorativeQuakeResponse.cs").read_text(encoding="utf-8")
+    visual = (ROOT / "Assets/CEVR/Runtime/Effects/VisualQuakeSway.cs").read_text(encoding="utf-8")
+    for token in (
+        "FactoryBody(", "PreparePhysical(", "PrepareHouseProxy(",
+        "PrepareDecoration(", "StarterPresetProcessed",
+        "ApplyOnce(Scene scene)", "Review saved Mass and Damping",
+        "Apply suggested starter presets", "EditorApplication.isPlayingOrWillChangePlaymode",
+    ):
+        if token not in editor:
+            fail(errors, "three-scene starter preset safety contract missing: " + token)
+    for token in ("EarthquakeStarterPresets.HasPending(scene)",
+                  "EarthquakeStarterPresets.ApplyOnce(scene)"):
+        if token not in setup:
+            fail(errors, "saved scene auto-setup must initialize presets once: " + token)
+    for path, source in (("Tutorial", tutorial), ("Condo", condo)):
+        if "EarthquakeStarterPresets.ApplyOnce(scene)" not in source:
+            fail(errors, path + " one-time scene bake must include starter physics values")
+    for path, source in (("inertial", inertial), ("House proxy", proxy), ("decoration", decor)):
+        if "starterPresetProcessed" not in source:
+            fail(errors, path + " must serialize the one-time preset marker")
+    if "ForceMode.Force" not in inertial or "ForceMode.Acceleration" in inertial:
+        fail(errors, "Rigidbody shaking must use mass-sensitive ForceMode.Force")
+    for token in ("visualDamping", "1f + visualDamping"):
+        if token not in decor or token not in visual:
+            fail(errors, "fixed scene art must expose actual visual damping: " + token)
+    test = ROOT / "Assets/CEVR/Tests/EditMode/EarthquakeStarterPresetTests.cs"
+    if not test.is_file():
+        fail(errors, "missing three-scene starter preset NUnit regression tests")
+
+
 def check_team_furniture(errors: list[str]) -> None:
     folder = ROOT / "Assets/CEVR/Resources/PlengFurniture"
     models = (
@@ -636,6 +674,7 @@ def main() -> int:
     check_cross_scene_feature_contract(errors)
     check_saved_furniture_earthquake_settings(errors)
     check_tutorial_condo_furniture_earthquake_coverage(errors)
+    check_one_time_earthquake_presets(errors)
     check_team_furniture(errors)
     check_house_layout_analyzer(errors)
     check_main_menu(errors)
