@@ -80,10 +80,12 @@ namespace ChulaEarthquakeVR
             Chair("Condo Chair - Spare", "condo-chair-spare",
                 new Vector3(1.75f, 0f, -9.1f), pink, dark);
 
-            GameObject shoes1 = new GameObject("Condo Safety Shoes P1", typeof(WearableShoes));
+            GameObject shoes1 = new GameObject("Condo Safety Shoes P1", typeof(BoxCollider), typeof(WearableShoes));
+            shoes1.GetComponent<BoxCollider>().size = new Vector3(0.85f, 0.28f, 0.7f);
             shoes1.transform.SetParent(transform, false);
             shoes1.transform.localPosition = new Vector3(-0.8f, 0.09f, -9.2f);
-            GameObject shoes2 = new GameObject("Condo Safety Shoes P2", typeof(WearableShoes));
+            GameObject shoes2 = new GameObject("Condo Safety Shoes P2", typeof(BoxCollider), typeof(WearableShoes));
+            shoes2.GetComponent<BoxCollider>().size = new Vector3(0.85f, 0.28f, 0.7f);
             shoes2.transform.SetParent(transform, false);
             shoes2.transform.localPosition = new Vector3(0.1f, 0.09f, -9.2f);
 
