@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace ChulaEarthquakeVR.Editor
 {
-    // These editors change no runtime physics. They just put the useful settings
-    // in one obvious place on EACH saved scene object.
+    // Same settings users already understand from Unity's native Rigidbody Inspector.
+    // Editing here changes the actual Rigidbody; there is no hidden override at Play.
     [CustomEditor(typeof(InertialRigidbody))]
     public sealed class PhysicsEarthquakeInspector : UnityEditor.Editor
     {
@@ -14,32 +14,50 @@ namespace ChulaEarthquakeVR.Editor
             Rigidbody body = item.GetComponent<Rigidbody>();
             serializedObject.Update();
 
-            EditorGUILayout.LabelField("Earthquake - Physical Object", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Simple Earthquake - Physical Object", EditorStyles.boldLabel);
             if (body != null)
             {
                 EditorGUI.BeginChangeCheck();
                 float mass = EditorGUILayout.FloatField(
-                    new GUIContent("Mass (kg)", "Real Unity Rigidbody mass, used for impacts and momentum."),
+                    new GUIContent("Mass (kg)", "Higher mass means less acceleration for the same force."),
                     body.mass);
+                float linearDamping = EditorGUILayout.FloatField(
+                    new GUIContent("Linear Damping", "Slows sideways movement."),
+                    body.linearDamping);
+                float angularDamping = EditorGUILayout.FloatField(
+                    new GUIContent("Angular Damping", "Slows rotation and toppling."),
+                    body.angularDamping);
                 if (EditorGUI.EndChangeCheck())
                 {
-                    Undo.RecordObject(body, "Change furniture mass");
+                    Undo.RecordObject(body, "Edit simple earthquake Rigidbody");
                     body.mass = Mathf.Max(0.01f, mass);
+                    body.linearDamping = Mathf.Max(0f, linearDamping);
+                    body.angularDamping = Mathf.Max(0f, angularDamping);
                     EditorUtility.SetDirty(body);
                 }
             }
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("responseScale"),
-                new GUIContent("Shake Strength", "0 = still; 1 = normal; 2 = strong; 3 = very strong."));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("includeVertical"),
-                new GUIContent("Vertical Shake"));
+
             EditorGUILayout.Space(4f);
-            EditorGUILayout.HelpBox(
-                "The same earthquake signal drives every item. Mass changes collisions and " +
-                "momentum; Shake Strength changes shaking. A kinematic Rigidbody will not be " +
-                "pushed by physics. Edit values outside Play mode and save the scene.", MessageType.Info);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("forceNewtons"),
+                new GUIContent("Force (N)", "Linear force applied with Rigidbody.AddForce using ForceMode.Force."));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("torqueNewtonMeters"),
+                new GUIContent("Torque (N m)", "Rotation applied with Rigidbody.AddTorque using ForceMode.Force."));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("responseScale"),
+                new GUIContent("Shake Strength", "0 = off, 1 = normal, 2 = double force."));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("includeVertical"),
+                new GUIContent("Allow Vertical Shake"));
+            EditorGUILayout.Space(4f);
+
+            if (body != null && body.isKinematic)
+                EditorGUILayout.HelpBox("Kinematic is enabled: the object is held by gameplay and will not shake until it is released.", MessageType.Warning);
+            else
+                EditorGUILayout.HelpBox(
+                    "One shared earthquake wave + one force/torque per object. " +
+                    "Edit outside Play mode and save. Unity's actual Rigidbody Mass, " +
+                    "Linear Damping and Angular Damping control the response.", MessageType.Info);
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("motionSource"),
-                new GUIContent("Earthquake Source (advanced)"));
+                new GUIContent("Shared Earthquake Source (advanced)"));
             serializedObject.ApplyModifiedProperties();
         }
     }
@@ -50,18 +68,18 @@ namespace ChulaEarthquakeVR.Editor
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
-            EditorGUILayout.LabelField("Earthquake - Visual Decoration", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Simple Earthquake - Visual Only", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("responseScale"),
-                new GUIContent("Shake Strength", "0 = still; 1 = normal; 2 = strong; 3 = very strong."));
+                new GUIContent("Visual Shake Strength", "0 = no movement, 1 = normal sway, 2 = double."));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("responseMode"),
-                new GUIContent("How It Moves", "Loose, rocking, hanging, mounted or heavy."));
+                new GUIContent("Visual Sway Type", "Only affects decoration, not Rigidbody physics."));
             EditorGUILayout.HelpBox(
-                "Visual sway only: no Rigidbody, mass or collisions. " +
-                "For real physical movement, the object needs a Rigidbody and collider " +
-                "with an InertialRigidbody instead. Static walls and floors stay fixed.",
+                "This is a static decoration without a Rigidbody, so it has no " +
+                "Mass or Damping. To simulate physical falling, add a Collider, " +
+                "Rigidbody and InertialRigidbody instead. Do not put physics on walls/floors.",
                 MessageType.Info);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("motion"),
-                new GUIContent("Earthquake Source (advanced)"));
+                new GUIContent("Shared Earthquake Source (advanced)"));
             serializedObject.ApplyModifiedProperties();
         }
     }

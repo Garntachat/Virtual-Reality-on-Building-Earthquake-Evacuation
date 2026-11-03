@@ -60,9 +60,9 @@ namespace ChulaEarthquakeVR
             if (motion == null) return;
             PhysicsObjectsBound = BindPhysicsObjects();
             DecorativeObjectsBound = BindDecorativeObjects();
-            Debug.Log($"CEVR earthquake response connected {PhysicsObjectsBound} physics object(s) and " +
-                      $"{DecorativeObjectsBound} decorative object(s). " +
-                      "Per-object settings are preserved; the player camera and XR rig remain unshaken.");
+            Debug.Log($"CEVR SIMPLE Rigidbody earthquake: {PhysicsObjectsBound} physics object(s), " +
+                      $"{DecorativeObjectsBound} visual-only decoration(s). " +
+                      "Mass, Linear/Angular Damping and per-object Force/Torque remain editable.");
         }
 
         private int BindPhysicsObjects()
@@ -81,14 +81,8 @@ namespace ChulaEarthquakeVR
                 }
                 else inertial.ConnectMotionIfMissing(motion);
 
-                body.interpolation = RigidbodyInterpolation.Interpolate;
-                if (!body.isKinematic)
-                {
-                    body.collisionDetectionMode = body.mass <= 5f
-                        ? CollisionDetectionMode.ContinuousDynamic
-                        : CollisionDetectionMode.Continuous;
-                    body.sleepThreshold = Mathf.Min(body.sleepThreshold, 0.005f);
-                }
+                // Never override the designer's Rigidbody Mass, Damping,
+                // Interpolation, Constraints, or Collision Detection settings.
 
                 if (body.GetComponentInChildren<Collider>() != null &&
                     body.GetComponent<FurnitureImpactAudio>() == null)

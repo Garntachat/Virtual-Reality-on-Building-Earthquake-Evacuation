@@ -6,6 +6,8 @@ CEVR is a Unity prototype for studying human decisions during a simulated earthq
 
 > Status: CEVR 0.5.0 cross-scene gameplay candidate. The repository preserves the new hand-built house scene and adds reusable gameplay to both the engineering tutorial and house: deterministic shaking, falling furniture, four grabbable chairs per scenario, wearable shoes, protective pillow cover, visual window cracking, desktop third-person view, local split-screen multiplayer, crawl-under-table interaction, health, and evacuation outcomes. Unity compilation, OpenXR validation, headset performance, ethics approval, and human-participant pilot testing remain mandatory machine-side gates.
 
+**Simple Rigidbody shaking:** Physical furniture now uses one predictable ForceMode.Force + torque response to the shared earthquake signal. Unity Mass, Linear/Angular Damping, Force (N), Torque (N m) and per-item Shake Strength are editable on each saved Rigidbody. Open House or New_House in Edit mode once to attach controls to existing furniture. See [Simple Earthquake Physics](docs/SIMPLE_EARTHQUAKE_PHYSICS.md) for the quick tuning and gameplay test steps.
+
 ## Implemented gameplay
 
 1. A six-second orientation phase introduces the room and controls.

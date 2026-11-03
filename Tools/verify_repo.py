@@ -167,8 +167,12 @@ def check_csharp_policies(errors: list[str]) -> None:
     earthquake_files = list((ROOT / "Assets/CEVR/Runtime/Earthquake").glob("*.cs"))
     for path in earthquake_files:
         text = path.read_text(encoding="utf-8")
-        if "Camera.main.transform" in text or re.search(r"\bAddTorque\s*\(", text):
-            fail(errors, f"camera motion or ad-hoc torque found in earthquake system: {path.relative_to(ROOT)}")
+        # Torque is allowed only in the single, inspector-controlled Rigidbody
+        # force component. Other scripts must not stack extra rotations.
+        if "Camera.main.transform" in text or (
+            path.name != "InertialRigidbody.cs" and re.search(r"\bAddTorque\s*\(", text)
+        ):
+            fail(errors, f"camera motion or secondary torque found in earthquake system: {path.relative_to(ROOT)}")
         if "Random.Range" in text:
             fail(errors, f"non-deterministic Random.Range found in earthquake system: {path.relative_to(ROOT)}")
     all_cs = list((ROOT / "Assets/CEVR").rglob("*.cs"))
@@ -353,11 +357,11 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
     feature_contracts = {
         "Assets/CEVR/Editor/EditableSceneMaterialRepair.cs": ("EditorSceneManager.sceneOpened", "EditorApplication.hierarchyChanged", "Repair Pink Materials In Open Scenes", "NeedsRepair", "MarkSceneDirty"),
         "Assets/CEVR/Runtime/Earthquake/EarthquakeSceneResponseInstaller.cs": ("BindPhysicsObjects", "BindDecorativeObjects", "InertialRigidbody", "TryAddToppleResponse", "GetComponentInParent<PlayerHealth>()", "IsUsingPreview"),
-        "Assets/CEVR/Runtime/Effects/DecorativeQuakeResponse.cs": ("CurrentFloorAccelerationMs2", "PresentationIntensity", "DecorativeQuakeMode.Hanging", "StablePhase", "OnDisable"),
+        "Assets/CEVR/Runtime/Effects/DecorativeQuakeResponse.cs": ("CurrentFloorAccelerationMs2", "DecorativeQuakeMode.Hanging", "responseScale", "OnDisable"),
         "Assets/CEVR/Runtime/Effects/BreakableWindow.cs": ("NormalizedIntensity", "window_cracked"),
         "Assets/CEVR/Runtime/Effects/WindowView.cs": ("ApplyTransparentGlass", "BuildExteriorView", "ExteriorView"),
         "Assets/CEVR/Runtime/Hazards/FallingHazard.cs": ("CheckSweptPlayerContact", "Physics.OverlapBox", "ApplyDamage"),
-        "Assets/CEVR/Runtime/Hazards/ToppleableFurniture.cs": ("AddForceAtPosition", "IsPlaying"),
+        "Assets/CEVR/Runtime/Hazards/ToppleableFurniture.cs": ("UpperForceScale", "ForceHeight", "AnchoredToStructure"),
         "Assets/CEVR/Runtime/Audio/GameplayAudioDirector.cs": ("PresentationIntensity", "CEVR_Rumble", "CEVR_Footstep", "CEVR_WindowCrack", "GameplayAudioCue.Success"),
         "Assets/CEVR/Runtime/Audio/FurnitureImpactAudio.cs": ("FurnitureScrape", "FurnitureImpact", "OnCollisionEnter"),
         "Assets/CEVR/Runtime/Player/WearableShoes.cs": ("EnsureAuthoredVisual()", "CEVR_LowPolySafetyShoe", "Equip(", "footwear_equipped"),
@@ -376,6 +380,22 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
         for fragment in fragments:
             if fragment not in text:
                 fail(errors, f"feature contract {relative} is missing: {fragment}")
+
+    # The physics contract is intentionally simple and mechanically verifiable:
+    # no second force system and no runtime rewrites of editable Rigidbody values.
+    inertial = (ROOT / "Assets/CEVR/Runtime/Earthquake/InertialRigidbody.cs").read_text(encoding="utf-8")
+    toppling = (ROOT / "Assets/CEVR/Runtime/Hazards/ToppleableFurniture.cs").read_text(encoding="utf-8")
+    installer = (ROOT / "Assets/CEVR/Runtime/Earthquake/EarthquakeSceneResponseInstaller.cs").read_text(encoding="utf-8")
+    for fragment in ("ForceMode.Force", "AddForce(", "AddTorque(", "AddForceAtPosition(", "body.isKinematic", "responseScale"):
+        if fragment not in inertial:
+            fail(errors, f"simple Rigidbody earthquake missing: {fragment}")
+    if "ForceMode.Acceleration" in inertial or "AddForceAtPosition(" in toppling:
+        fail(errors, "earthquake physics must not stack the old inertial/toppling accelerations")
+    for fragment in ("body.interpolation =", "body.collisionDetectionMode =", "body.sleepThreshold ="):
+        if fragment in installer:
+            fail(errors, f"runtime earthquake binder must preserve Rigidbody Inspector setting: {fragment}")
+    if not (ROOT / "Assets/CEVR/Editor/EditableRigidbodyEarthquakeSetup.cs").is_file():
+        fail(errors, "missing simple earthquake Editor setup for saved House objects")
 
     health = (ROOT / "Assets/CEVR/Runtime/Player/PlayerHealth.cs").read_text(encoding="utf-8")
     if "HashSet<string> protectionSources" not in health:
