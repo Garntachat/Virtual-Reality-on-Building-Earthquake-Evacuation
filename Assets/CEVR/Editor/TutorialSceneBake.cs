@@ -157,6 +157,7 @@ namespace ChulaEarthquakeVR.Editor
                 // Save an editable per-object quake response for EVERY piece of
                 // furnished tutorial decor, not only chairs and loose hazards.
                 SceneFurnitureEarthquakeCoverage.Apply(scene);
+                EarthquakeStarterPresets.ApplyOnce(scene);
                 ValidateCreatedFurniture(furniture);
 
                 EditorUtility.DisplayProgressBar("CEVR editable tutorial", "Saving generated meshes and materials", 0.65f);
