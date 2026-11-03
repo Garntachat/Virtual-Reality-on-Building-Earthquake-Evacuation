@@ -9,7 +9,7 @@ namespace ChulaEarthquakeVR
     {
         private readonly List<Material> materials = new List<Material>();
         private Renderer glassRenderer;
-        private bool built;
+        [SerializeField] private bool built;
 
         private void Start() => EnsureBuilt();
 

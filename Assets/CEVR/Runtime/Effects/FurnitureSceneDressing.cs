@@ -8,6 +8,14 @@ namespace ChulaEarthquakeVR
 {
     public sealed class FurnitureSceneDressing : MonoBehaviour
     {
+        [SerializeField] private bool savedInEditor;
+        public bool SavedInEditor => savedInEditor;
+        public void BakeForEditing()
+        {
+            if (savedInEditor) return;
+            BuildDressing();
+            savedInEditor = true;
+        }
         [Serializable] private class ModelData { public float[] vertices; public PartData[] parts; }
         [Serializable] private class PartData { public float[] color; public int[] triangles; }
         private readonly List<UnityEngine.Object> owned = new List<UnityEngine.Object>();
@@ -234,6 +242,11 @@ namespace ChulaEarthquakeVR
         }
 
         private void Start()
+        {
+            if (!savedInEditor) BuildDressing();
+        }
+
+        private void BuildDressing()
         {
             bool house = SceneManager.GetActiveScene().name.ToLowerInvariant().Contains("house");
             foreach (MovableFurniture chair in FindObjectsByType<MovableFurniture>(FindObjectsSortMode.None))

@@ -12,6 +12,12 @@ namespace ChulaEarthquakeVR
             GeneratedStageInfo stageInfo = UnityEngine.Object.FindFirstObjectByType<GeneratedStageInfo>();
             bool legacyScene = stageInfo == null || !stageInfo.IsCurrent;
             var repairs = new List<string>();
+            var dressing = UnityEngine.Object.FindFirstObjectByType<FurnitureSceneDressing>();
+            if (dressing != null && dressing.SavedInEditor)
+            {
+                EnsureDesktopGrabInteractor(repairs);
+                return repairs.Count > 0;
+            }
             RepairLegacyText(repairs);
             RepairHud(repairs, legacyScene);
             EnsureDesktopGrabInteractor(repairs);

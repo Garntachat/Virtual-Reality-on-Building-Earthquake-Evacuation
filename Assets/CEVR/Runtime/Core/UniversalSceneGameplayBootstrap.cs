@@ -37,7 +37,8 @@ namespace ChulaEarthquakeVR
             else
             {
                 InstallTutorialFeatures();
-                gameObject.AddComponent<FurnitureSceneDressing>();
+                if (FindFirstObjectByType<FurnitureSceneDressing>() == null)
+                    gameObject.AddComponent<FurnitureSceneDressing>();
             }
             gameObject.AddComponent<SimpleSceneGuide>();
             if (GetComponent<GameplayAudioDirector>() == null) gameObject.AddComponent<GameplayAudioDirector>();
@@ -60,6 +61,14 @@ namespace ChulaEarthquakeVR
             SessionLogger logger = FindFirstObjectByType<SessionLogger>();
             if (rig != null && camera != null) EnsurePlayerFeatures(rig.gameObject, camera);
 
+            PrepareTutorialProps();
+            EnsureMultiplayer(camera, rig == null ? health?.transform : rig.transform);
+        }
+
+        public void PrepareTutorialProps()
+        {
+            GroundMotionPlayer motion = FindFirstObjectByType<GroundMotionPlayer>();
+            SessionLogger logger = FindFirstObjectByType<SessionLogger>();
             EnsureShoes("WearableSafetyShoes_P1", "protective-shoes-p1", new Vector3(0.8f, 0.09f, 2.45f), logger);
             EnsureShoes("WearableSafetyShoes_P2", "protective-shoes-p2", new Vector3(1.35f, 0.09f, 2.45f), logger);
             EnsurePillow(new Vector3(1.25f, 1.12f, 0.72f), motion, logger);
@@ -67,7 +76,6 @@ namespace ChulaEarthquakeVR
             GameObject cabinet = GameObject.Find("UnsecuredTallCabinet");
             if (cabinet != null && cabinet.GetComponent<ToppleableFurniture>() == null)
                 cabinet.AddComponent<ToppleableFurniture>().Configure(motion, 1.25f, 1.2f);
-            EnsureMultiplayer(camera, rig == null ? health?.transform : rig.transform);
         }
 
         private void InstallHouseScenario()
