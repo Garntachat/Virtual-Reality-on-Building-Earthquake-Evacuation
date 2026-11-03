@@ -141,6 +141,11 @@ namespace ChulaEarthquakeVR
         {
             if (renderer == null || renderer.gameObject.scene != gameObject.scene) return false;
             if (renderer.GetComponentInParent<Rigidbody>() != null) return false;
+            // Saved House fridge/wardrobe/overhead props follow the ONE
+            // Rigidbody on their gameplay proxy. Never add a second visual
+            // sway to the already-following rendered object.
+            if (renderer.GetComponentInParent<HouseProxyEarthquakeSettings>() != null ||
+                renderer.GetComponentInParent<HouseVisualRuntimeFollower>() != null) return false;
             if (renderer.GetComponentInParent<PlayerHealth>() != null) return false;
             if (renderer.GetComponentInParent<Camera>() != null) return false;
             if (renderer.GetComponentInParent<Canvas>() != null) return false;
