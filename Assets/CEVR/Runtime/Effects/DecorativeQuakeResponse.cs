@@ -16,6 +16,14 @@ namespace ChulaEarthquakeVR
         [Tooltip("0 = still, 1 = normal sway, 2 = double. Decorative objects have no Mass or Damping.")]
         [SerializeField, Range(0f, 3f)] private float responseScale = 1f;
 
+        [Header("Visual response (not Rigidbody physics)")]
+        [Tooltip("Higher values settle into the motion more gradually. This is visual damping, not physical mass.")]
+        [SerializeField, Range(0f, 8f)] private float visualDamping = 0f;
+
+        [SerializeField, HideInInspector] private bool starterPresetProcessed;
+        public float VisualDamping => visualDamping;
+        public bool StarterPresetProcessed => starterPresetProcessed;
+
         private Vector3 restPosition;
         private Quaternion restRotation;
         private bool captured;
@@ -67,7 +75,7 @@ namespace ChulaEarthquakeVR
             Vector3 offset = new Vector3(localWave.x, 0f, localWave.z) * (0.025f * sway);
             Quaternion tilt = Quaternion.Euler(localWave.z * 5f * sway, 0f,
                 -localWave.x * 5f * sway);
-            float blend = Mathf.Clamp01(Time.deltaTime * 14f);
+            float blend = Mathf.Clamp01(Time.deltaTime * 14f / (1f + visualDamping));
             transform.localPosition = Vector3.Lerp(transform.localPosition, restPosition + offset, blend);
             transform.localRotation = Quaternion.Slerp(transform.localRotation, restRotation * tilt, blend);
         }
@@ -87,7 +95,7 @@ namespace ChulaEarthquakeVR
         private void ReturnToRest()
         {
             if (!captured) return;
-            float blend = Mathf.Clamp01(Time.deltaTime * 14f);
+            float blend = Mathf.Clamp01(Time.deltaTime * 14f / (1f + visualDamping));
             transform.localPosition = Vector3.Lerp(transform.localPosition, restPosition, blend);
             transform.localRotation = Quaternion.Slerp(transform.localRotation, restRotation, blend);
         }
