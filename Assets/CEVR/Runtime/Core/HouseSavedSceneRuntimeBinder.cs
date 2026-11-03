@@ -129,16 +129,16 @@ namespace ChulaEarthquakeVR
 
             BindCenterPhysicsVisual(savedRoot, gameplayRoot,
                 new[] { "HouseLayout_Fridge", "EDITOR_Fridge" },
-                "HouseTallCabinet_Left");
+                "HouseTallCabinet_Left", motion);
             BindCenterPhysicsVisual(savedRoot, gameplayRoot,
                 new[] { "HouseLayout_Wandrobe", "EDITOR_Wandrobe" },
-                "HouseBookcase_Right");
+                "HouseBookcase_Right", motion);
 
             for (int i = 1; i <= HouseSceneLayout.OverheadHazards.Length; i++)
             {
                 BindCenterPhysicsVisual(savedRoot, gameplayRoot,
                     new[] { "HouseLayout_HazardBooks_" + i },
-                    "HouseFallingObject_" + i);
+                    "HouseFallingObject_" + i, motion);
             }
 
             BuildRuntimeStaticCollider(gameplayRoot, savedRoot,
@@ -437,7 +437,8 @@ namespace ChulaEarthquakeVR
             Transform savedRoot,
             Transform gameplayRoot,
             string[] visualNames,
-            string proxyName)
+            string proxyName,
+            GroundMotionPlayer motion)
         {
             Transform visual = FindFurniture(savedRoot, visualNames);
             GameObject proxy = FindRuntimeObject(gameplayRoot, proxyName);
@@ -458,6 +459,11 @@ namespace ChulaEarthquakeVR
             {
                 proxy.transform.SetPositionAndRotation(visual.position, visual.rotation);
             }
+
+            HouseProxyEarthquakeSettings settings =
+                visual.GetComponent<HouseProxyEarthquakeSettings>();
+            if (settings != null)
+                settings.ApplyToExistingProxy(proxy, motion);
 
             AttachRuntimeFollower(visual, proxy);
         }
