@@ -10,6 +10,7 @@ namespace ChulaEarthquakeVR
         public const string MenuScene = "CEVR_MainMenu";
         public const string TutorialScene = "CEVR_ChulaEngineering_Tutorial";
         public const string HouseScene = "House";
+        public const string CondoScene = "Condo";
         private bool loading;
         public Canvas editableCanvas;
         public UnityEngine.UI.Text statusLabel;
@@ -17,6 +18,7 @@ namespace ChulaEarthquakeVR
 
         public void PlayTutorial() => BeginLoad(TutorialScene);
         public void PlayHouse() => BeginLoad(HouseScene);
+        public void PlayCondo() => BeginLoad(CondoScene);
         public void QuitMenu() => ExitGame();
         public void SelectAppearance(int index)
         {
@@ -165,19 +167,20 @@ namespace ChulaEarthquakeVR
             GUI.Label(new Rect(55, 112, 570, 62),
                 "Explore. Take cover during shaking. Evacuate when it stops.\nChoose your student outfit and training scene.", body);
             GUI.enabled = !loading;
-            if (GUI.Button(new Rect(55, 195, 570, 62), "PLAY TUTORIAL", button)) BeginLoad(TutorialScene);
-            if (GUI.Button(new Rect(55, 272, 570, 62), "PLAY HOUSE", button)) BeginLoad(HouseScene);
-            GUI.Label(new Rect(55, 365, 570, 30), "STUDENT APPEARANCE", body);
-            int selected = GUI.SelectionGrid(new Rect(55, 403, 570, 100), StudentAppearance.Selected,
+            if (GUI.Button(new Rect(55, 190, 570, 58), "PLAY TUTORIAL", button)) BeginLoad(TutorialScene);
+            if (GUI.Button(new Rect(55, 256, 570, 58), "PLAY HOUSE", button)) BeginLoad(HouseScene);
+            if (GUI.Button(new Rect(55, 322, 570, 58), "PLAY CONDO", button)) BeginLoad(CondoScene);
+            GUI.Label(new Rect(55, 395, 570, 30), "STUDENT APPEARANCE", body);
+            int selected = GUI.SelectionGrid(new Rect(55, 430, 570, 82), StudentAppearance.Selected,
                 StudentAppearance.Names, 1, button);
             if (selected != StudentAppearance.Selected)
             {
                 StudentAppearance.Select(selected);
                 RefreshPreview();
             }
-            if (GUI.Button(new Rect(55, 525, 570, 48), "EXIT", button)) ExitGame();
+            if (GUI.Button(new Rect(55, 526, 570, 46), "EXIT", button)) ExitGame();
             GUI.enabled = true;
-            GUI.Label(new Rect(55, 590, 570, 72), message, body);
+            GUI.Label(new Rect(55, 588, 570, 72), message, body);
             GUI.Label(new Rect(725, 630, 340, 64), "Your selected outfit carries into both scenes.\nDesktop controls: WASD / E / Z / T", body);
             GUI.matrix = previous;
         }
@@ -191,7 +194,7 @@ namespace ChulaEarthquakeVR
                 return;
             }
             loading = true;
-            message = "Loading " + (scene == HouseScene ? "House" : "Tutorial") + "...";
+            message = "Loading " + (scene == HouseScene ? "House" : scene == CondoScene ? "Condo" : "Tutorial") + "...";
             StartCoroutine(FadeMusicAndLoad(scene));
         }
 
