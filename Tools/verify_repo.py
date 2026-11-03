@@ -304,7 +304,9 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
         return
     required = (
         "RuntimeInitializeOnLoadMethod",
-        'sceneName.Contains("house")',
+        "scene.name == MainMenuController.HouseScene",
+        "scene.name == MainMenuController.CondoScene",
+        "InstallCondoScenario()",
         "InstallTutorialFeatures()",
         "InstallHouseScenario()",
         'CreateChair("HouseChair_CoverObstacle"',
@@ -334,6 +336,19 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
         fail(errors, "the hand-built House.unity scene is missing or unexpectedly replaced")
     if "Assets/CEVR/Generated/Scenes/House.unity" not in settings:
         fail(errors, "House.unity must be enabled in EditorBuildSettings")
+    if "Assets/CEVR/Generated/Scenes/Condo.unity" not in settings:
+        fail(errors, "Condo.unity must be enabled in EditorBuildSettings")
+    for relative in (
+        "Assets/CEVR/Runtime/Core/CondoGameplayLayout.cs",
+        "Assets/CEVR/Editor/CondoGameplayBake.cs",
+        "Assets/CEVR/Tests/EditMode/CondoGameplayTests.cs",
+    ):
+        if not (ROOT / relative).is_file():
+            fail(errors, f"required Condo gameplay component missing: {relative}")
+    menu = (ROOT / "Assets/CEVR/Runtime/UI/MainMenuController.cs").read_text(encoding="utf-8")
+    if "PlayCondo()" not in menu or "CondoScene = \"Condo\"" not in menu:
+        fail(errors, "Main Menu must offer a playable Condo scene")
+
 
     feature_contracts = {
         "Assets/CEVR/Editor/EditableSceneMaterialRepair.cs": ("EditorSceneManager.sceneOpened", "EditorApplication.hierarchyChanged", "Repair Pink Materials In Open Scenes", "NeedsRepair", "MarkSceneDirty"),
@@ -349,7 +364,7 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
         "Assets/CEVR/Runtime/Player/ProtectivePillow.cs": ("SetProtection", "pillow_cover_started"),
         "Assets/CEVR/Runtime/Player/ThirdPersonViewController.cs": ("tKey.wasPressedThisFrame", "SphereCast"),
         "Assets/CEVR/Runtime/Player/LocalMultiplayerManager.cs": ("f2Key.wasPressedThisFrame", "LocalPlayer2", "Configure(secondCamera, true)"),
-        "Assets/CEVR/Runtime/Core/HouseScenarioController.cs": ("preparationSeconds = 30f", "house_tutorial_success"),
+        "Assets/CEVR/Runtime/Core/HouseScenarioController.cs": ("preparationSeconds = 30f", "SetLocationLabel", "locationLabel.ToLowerInvariant() + \"_tutorial_success\""),
         "Assets/CEVR/Runtime/Core/HouseSceneLayout.cs": ("FloorY = 1.0f", "WindowCenter", "DiningTable", "WardrobeCenter", "FridgeCenter", "OverheadHazards"),
     }
     for relative, fragments in feature_contracts.items():
