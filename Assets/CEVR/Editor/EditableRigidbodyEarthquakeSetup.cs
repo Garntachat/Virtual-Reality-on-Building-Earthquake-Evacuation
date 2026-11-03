@@ -42,16 +42,16 @@ namespace ChulaEarthquakeVR.Editor
         [MenuItem("CEVR/Earthquake/Add simple physics settings to scene")]
         private static void ApplyMenu() => Apply(false);
 
-        [MenuItem("CEVR/Earthquake/Select chair physics when clicking a chair part")]
+        [MenuItem("CEVR/Earthquake/Select furniture earthquake controls from mesh parts")]
         private static void ToggleChairSelection()
         {
             EditorPrefs.SetBool(SelectPhysicsKey, !EditorPrefs.GetBool(SelectPhysicsKey, true));
         }
 
-        [MenuItem("CEVR/Earthquake/Select chair physics when clicking a chair part", true)]
+        [MenuItem("CEVR/Earthquake/Select furniture earthquake controls from mesh parts", true)]
         private static bool ValidateChairSelection()
         {
-            Menu.SetChecked("CEVR/Earthquake/Select chair physics when clicking a chair part",
+            Menu.SetChecked("CEVR/Earthquake/Select furniture earthquake controls from mesh parts",
                 EditorPrefs.GetBool(SelectPhysicsKey, true));
             return true;
         }
@@ -69,13 +69,14 @@ namespace ChulaEarthquakeVR.Editor
             if (running || EditorApplication.isPlayingOrWillChangePlaymode ||
                 !EditorPrefs.GetBool(SelectPhysicsKey, true)) return;
             GameObject selected = Selection.activeGameObject;
-            if (selected == null || !selected.scene.IsValid() ||
-                selected.scene.name != "House") return;
+            if (selected == null || !selected.scene.IsValid()) return;
 
             for (Transform candidate = selected.transform.parent; candidate != null;
                  candidate = candidate.parent)
             {
-                if (!IsHouseChair(candidate) || candidate.GetComponent<Rigidbody>() == null) continue;
+                if (candidate.GetComponent<InertialRigidbody>() == null &&
+                    candidate.GetComponent<HouseProxyEarthquakeSettings>() == null &&
+                    candidate.GetComponent<DecorativeQuakeResponse>() == null) continue;
                 GameObject physicsRoot = candidate.gameObject;
                 EditorApplication.delayCall += () =>
                 {
@@ -109,6 +110,42 @@ namespace ChulaEarthquakeVR.Editor
                 ready + "/4 named House chairs have saved Rigidbody, InertialRigidbody and BoxCollider. " +
                 (ready == 4 ? "Click a chair Seat and the Inspector will open its physics root." :
                     "Run Add simple physics settings to scene to repair missing components."),
+                "OK");
+        }
+
+        [MenuItem("CEVR/Earthquake/Check all House furniture earthquake controls")]
+        private static void CheckAllHouseFurniture()
+        {
+            Scene scene = SceneManager.GetActiveScene();
+            if (scene.name != "House")
+            {
+                EditorUtility.DisplayDialog("House scene required", "Open House.unity in Edit mode.", "OK");
+                return;
+            }
+            int ready = 0, expected = 0;
+            foreach (Transform chair in FindHouseChairRoots(scene))
+            {
+                expected++;
+                if (chair.GetComponent<Rigidbody>() != null &&
+                    chair.GetComponent<InertialRigidbody>() != null &&
+                    chair.GetComponent<BoxCollider>() != null) ready++;
+                else Debug.LogError("CEVR missing House chair physics: " + chair.name, chair);
+            }
+            foreach (Transform item in FindOtherHouseFurniture(scene))
+            {
+                expected++;
+                bool present = IsHouseProxy(item)
+                    ? item.GetComponent<HouseProxyEarthquakeSettings>() != null
+                    : item.GetComponent<DecorativeQuakeResponse>() != null ||
+                      item.GetComponent<InertialRigidbody>() != null;
+                if (present) ready++;
+                else Debug.LogError("CEVR missing House furniture earthquake settings: " + item.name, item);
+            }
+            EditorUtility.DisplayDialog("House earthquake controls",
+                ready + "/" + expected + " furniture roots have visible earthquake controls. " +
+                "Doors, windows and the animated cat remain under their own gameplay systems. " +
+                (ready == expected ? "Click any furniture part to edit its parent settings."
+                    : "Run Add simple physics settings to scene and check again."),
                 "OK");
         }
 
@@ -159,6 +196,83 @@ namespace ChulaEarthquakeVR.Editor
             foreach (Transform candidate in furniture.GetComponentsInChildren<Transform>(true))
                 if (IsHouseChair(candidate)) chairs.Add(candidate);
             return chairs;
+        }
+
+        private static bool IsHouseProxy(Transform item)
+        {
+            return item.name == "HouseLayout_Fridge" ||
+                item.name == "HouseLayout_Wandrobe" ||
+                item.name.StartsWith("HouseLayout_HazardBooks_", StringComparison.Ordinal);
+        }
+
+        private static bool IsFixedHouseStructure(Transform item)
+        {
+            // These objects have dedicated gameplay or building behavior.
+            return item.name == "HouseLayout_Cat" ||
+                item.name == "HouseLayout_FrontDoor" ||
+                item.name == "HouseLayout_Window";
+        }
+
+        private static System.Collections.Generic.List<Transform> FindOtherHouseFurniture(Scene scene)
+        {
+            var items = new System.Collections.Generic.List<Transform>();
+            if (scene.name != "House") return items;
+            Transform root = HouseSavedSceneRuntimeBinder.FindSavedFurnitureRoot(scene);
+            if (root == null) return items;
+            foreach (Transform item in root)
+            {
+                if (!item.name.StartsWith("HouseLayout_", StringComparison.Ordinal) ||
+                    IsHouseChair(item) || IsFixedHouseStructure(item)) continue;
+                items.Add(item);
+            }
+            return items;
+        }
+
+        private static bool IsFixedDecoration(string name)
+        {
+            return name.IndexOf("rug", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                name.IndexOf("table", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                name.IndexOf("sofa", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                name.IndexOf("bed", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                name.IndexOf("kitchen", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                name.IndexOf("cabinet", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                name.IndexOf("bookcase", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                name.IndexOf("sink", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                name.IndexOf("stove", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static int AddOtherHouseFurnitureSettings(
+            System.Collections.Generic.List<Transform> items)
+        {
+            int added = 0;
+            foreach (Transform item in items)
+            {
+                if (item == null) continue;
+                if (IsHouseProxy(item))
+                {
+                    if (item.GetComponent<HouseProxyEarthquakeSettings>() != null) continue;
+                    var proxySettings = Undo.AddComponent<HouseProxyEarthquakeSettings>(item.gameObject);
+                    proxySettings.SetDefaultsForNewComponent(
+                        item.name.StartsWith("HouseLayout_HazardBooks_", StringComparison.Ordinal));
+                    added++;
+                }
+                else if (item.GetComponent<Rigidbody>() == null &&
+                         item.GetComponent<DecorativeQuakeResponse>() == null)
+                {
+                    // Static interior decor moves only visually. It never gets a
+                    // fake Rigidbody or competes with an authored floor collider.
+                    DecorativeQuakeMode mode = item.name.IndexOf("lamp", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                               item.name.IndexOf("light", StringComparison.OrdinalIgnoreCase) >= 0
+                        ? DecorativeQuakeMode.Hanging
+                        : IsFixedDecoration(item.name) ? DecorativeQuakeMode.Heavy
+                        : DecorativeQuakeMode.Loose;
+                    float strength = IsFixedDecoration(item.name) ? 0f : 1f;
+                    Undo.AddComponent<DecorativeQuakeResponse>(item.gameObject)
+                        .Configure(null, mode, strength);
+                    added++;
+                }
+            }
+            return added;
         }
 
         private static bool TryLocalFurnitureBounds(Transform root, out Bounds local)
@@ -266,11 +380,24 @@ namespace ChulaEarthquakeVR.Editor
                     break;
                 }
             }
+            var otherHouseFurniture = FindOtherHouseFurniture(scene);
+            bool missingHouseFurniture = false;
+            foreach (Transform item in otherHouseFurniture)
+            {
+                if (IsHouseProxy(item)
+                    ? item.GetComponent<HouseProxyEarthquakeSettings>() == null
+                    : item.GetComponent<DecorativeQuakeResponse>() == null &&
+                      item.GetComponent<InertialRigidbody>() == null)
+                {
+                    missingHouseFurniture = true;
+                    break;
+                }
+            }
             var candidates = new System.Collections.Generic.List<Rigidbody>();
             foreach (GameObject root in scene.GetRootGameObjects())
                 foreach (Rigidbody body in root.GetComponentsInChildren<Rigidbody>(true))
                     if (IsEligible(body)) candidates.Add(body);
-            if (candidates.Count == 0 && !missingChairPhysics)
+            if (candidates.Count == 0 && !missingChairPhysics && !missingHouseFurniture)
             {
                 if (!automatic) Debug.Log("CEVR: all eligible Rigidbodies already have simple earthquake settings.");
                 return;
@@ -287,6 +414,7 @@ namespace ChulaEarthquakeVR.Editor
                     throw new InvalidOperationException("Could not back up the current scene.");
 
                 int count = AddMissingHouseChairComponents(chairs);
+                count += AddOtherHouseFurnitureSettings(otherHouseFurniture);
                 foreach (Rigidbody body in candidates)
                 {
                     if (body == null || !IsEligible(body)) continue;
