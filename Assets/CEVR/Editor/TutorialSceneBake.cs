@@ -132,6 +132,23 @@ namespace ChulaEarthquakeVR.Editor
 
                 var furniture = new GameObject("Tutorial Editable Furniture").AddComponent<FurnitureSceneDressing>();
                 furniture.BakeForEditing();
+
+                // Bind every physics prop and non-physics furniture decoration NOW,
+                // in Edit mode. This exposes each item's individual settings before Play.
+                GameObject temporaryInstaller = new GameObject("CEVR_TemporaryEarthquakeBinder");
+                try
+                {
+                    EarthquakeSceneResponseInstaller installer =
+                        temporaryInstaller.AddComponent<EarthquakeSceneResponseInstaller>();
+                    installer.Configure(UnityEngine.Object.FindFirstObjectByType<GroundMotionPlayer>(), 3);
+                    installer.BindSceneResponses();
+                    if (installer.PhysicsObjectsBound < 4 || installer.DecorativeObjectsBound < 1)
+                        throw new InvalidOperationException("Could not attach earthquake settings to the furniture.");
+                }
+                finally
+                {
+                    UnityEngine.Object.DestroyImmediate(temporaryInstaller);
+                }
                 ValidateCreatedFurniture(furniture);
 
                 EditorUtility.DisplayProgressBar("CEVR editable tutorial", "Saving generated meshes and materials", 0.65f);
@@ -202,6 +219,7 @@ namespace ChulaEarthquakeVR.Editor
                 GameObject obj = GameObject.Find(name);
                 if (obj == null || obj.GetComponent<MovableFurniture>() == null ||
                     obj.GetComponent<Rigidbody>() == null ||
+                    obj.GetComponent<InertialRigidbody>() == null ||
                     obj.GetComponentsInChildren<Renderer>(true).Length == 0)
                     throw new InvalidOperationException("Cannot save: missing chair or gameplay parts: " + name);
             }
