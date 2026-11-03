@@ -25,6 +25,11 @@ public class EarthquakeFurnitureController : MonoBehaviour
     {
         // Never stack a separate shaker on top of the normal CEVR earthquake.
         if (!isEarthquakeActive || hasSharedMotion) return;
+        if (FindFirstObjectByType<ChulaEarthquakeVR.GroundMotionPlayer>() != null)
+        {
+            hasSharedMotion = true;
+            return;
+        }
 
         // Simple repeatable sine-wave fallback. No randomness and no per-object
         // secret multipliers. In normal Tutorial/House scenes this is not used.
