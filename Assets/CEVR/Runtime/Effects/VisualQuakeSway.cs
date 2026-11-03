@@ -11,12 +11,14 @@ namespace ChulaEarthquakeVR
         private GroundMotionPlayer motion;
         private Vector3 rest;
         private Quaternion rotation;
+        private bool captured;
 
         private void Start()
         {
             motion = FindFirstObjectByType<GroundMotionPlayer>();
             rest = transform.localPosition;
             rotation = transform.localRotation;
+            captured = true;
         }
 
         private void LateUpdate()
@@ -37,6 +39,7 @@ namespace ChulaEarthquakeVR
 
         private void OnDisable()
         {
+            if (!captured) return;
             transform.localPosition = rest;
             transform.localRotation = rotation;
         }
