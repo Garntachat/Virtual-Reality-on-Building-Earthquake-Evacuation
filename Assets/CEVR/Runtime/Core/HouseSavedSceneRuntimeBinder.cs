@@ -129,16 +129,16 @@ namespace ChulaEarthquakeVR
 
             BindCenterPhysicsVisual(savedRoot, gameplayRoot,
                 new[] { "HouseLayout_Fridge", "EDITOR_Fridge" },
-                "HouseTallCabinet_Left");
+                "HouseTallCabinet_Left", motion);
             BindCenterPhysicsVisual(savedRoot, gameplayRoot,
                 new[] { "HouseLayout_Wandrobe", "EDITOR_Wandrobe" },
-                "HouseBookcase_Right");
+                "HouseBookcase_Right", motion);
 
             for (int i = 1; i <= HouseSceneLayout.OverheadHazards.Length; i++)
             {
                 BindCenterPhysicsVisual(savedRoot, gameplayRoot,
                     new[] { "HouseLayout_HazardBooks_" + i },
-                    "HouseFallingObject_" + i);
+                    "HouseFallingObject_" + i, motion);
             }
 
             BuildRuntimeStaticCollider(gameplayRoot, savedRoot,
@@ -322,34 +322,48 @@ namespace ChulaEarthquakeVR
             if (TryLocalVisibleBounds(visual, out Bounds local))
             {
                 BoxCollider hitBox = visual.GetComponent<BoxCollider>();
-                if (hitBox == null) hitBox = visual.gameObject.AddComponent<BoxCollider>();
+                if (hitBox == null)
+                {
+                    // Only new hitboxes get defaults. Respect manually edited bounds.
+                    hitBox = visual.gameObject.AddComponent<BoxCollider>();
+                    hitBox.center = local.center;
+                    hitBox.size = new Vector3(
+                        Mathf.Max(0.30f, local.size.x),
+                        Mathf.Max(0.55f, local.size.y),
+                        Mathf.Max(0.30f, local.size.z));
+                }
                 hitBox.enabled = true;
-                hitBox.center = local.center;
-                hitBox.size = new Vector3(
-                    Mathf.Max(0.30f, local.size.x),
-                    Mathf.Max(0.55f, local.size.y),
-                    Mathf.Max(0.30f, local.size.z));
             }
 
             Rigidbody body = visual.GetComponent<Rigidbody>();
-            if (body == null) body = visual.gameObject.AddComponent<Rigidbody>();
-            body.mass = 7.5f;
-            body.useGravity = false;
-            body.isKinematic = false;
-            body.interpolation = RigidbodyInterpolation.Interpolate;
-            body.collisionDetectionMode = CollisionDetectionMode.Continuous;
-            body.constraints =
-                RigidbodyConstraints.FreezePositionY |
-                RigidbodyConstraints.FreezeRotationX |
-                RigidbodyConstraints.FreezeRotationZ;
+            if (body == null)
+            {
+                // Backward compatibility for House scenes not opened in Edit mode.
+                body = visual.gameObject.AddComponent<Rigidbody>();
+                body.mass = 7.5f;
+                body.linearDamping = 2.5f;
+                body.angularDamping = 4f;
+                body.useGravity = false;
+                body.interpolation = RigidbodyInterpolation.Interpolate;
+                body.collisionDetectionMode = CollisionDetectionMode.Continuous;
+                body.constraints =
+                    RigidbodyConstraints.FreezePositionY |
+                    RigidbodyConstraints.FreezeRotationX |
+                    RigidbodyConstraints.FreezeRotationZ;
+            }
+            // An existing scene Rigidbody is authored by the designer. Never
+            // reset its Mass, Damping, Constraints, Gravity or Collision settings.
 
             MovableFurniture movable = visual.GetComponent<MovableFurniture>();
             if (movable == null) movable = visual.gameObject.AddComponent<MovableFurniture>();
             movable.Configure(furnitureId, logger, motion);
 
             InertialRigidbody inertial = visual.GetComponent<InertialRigidbody>();
-            if (inertial == null) inertial = visual.gameObject.AddComponent<InertialRigidbody>();
-            inertial.Configure(motion, 0.65f, false);
+            if (inertial == null)
+                visual.gameObject.AddComponent<InertialRigidbody>()
+                    .Configure(motion, 0.65f, false);
+            else
+                inertial.ConnectMotionIfMissing(motion);
 
             TryAddXrGrabInteractable(visual.gameObject);
         }
@@ -423,7 +437,8 @@ namespace ChulaEarthquakeVR
             Transform savedRoot,
             Transform gameplayRoot,
             string[] visualNames,
-            string proxyName)
+            string proxyName,
+            GroundMotionPlayer motion)
         {
             Transform visual = FindFurniture(savedRoot, visualNames);
             GameObject proxy = FindRuntimeObject(gameplayRoot, proxyName);
@@ -444,6 +459,11 @@ namespace ChulaEarthquakeVR
             {
                 proxy.transform.SetPositionAndRotation(visual.position, visual.rotation);
             }
+
+            HouseProxyEarthquakeSettings settings =
+                visual.GetComponent<HouseProxyEarthquakeSettings>();
+            if (settings != null)
+                settings.ApplyToExistingProxy(proxy, motion);
 
             AttachRuntimeFollower(visual, proxy);
         }

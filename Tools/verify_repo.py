@@ -413,6 +413,53 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
             fail(errors, f"local multiplayer interaction ownership is missing: {fragment}")
 
 
+def check_saved_furniture_earthquake_settings(errors: list[str]) -> None:
+    """Guard against regressing to a runtime-only, non-editable House setup."""
+    editor = (ROOT / "Assets/CEVR/Editor/EditableRigidbodyEarthquakeSetup.cs").read_text(encoding="utf-8")
+    binder = (ROOT / "Assets/CEVR/Runtime/Core/HouseSavedSceneRuntimeBinder.cs").read_text(encoding="utf-8")
+    proxy = (ROOT / "Assets/CEVR/Runtime/Earthquake/HouseProxyEarthquakeSettings.cs").read_text(encoding="utf-8")
+    inspector = (ROOT / "Assets/CEVR/Editor/SimpleEarthquakeInspectors.cs").read_text(encoding="utf-8")
+    installer = (ROOT / "Assets/CEVR/Runtime/Earthquake/EarthquakeSceneResponseInstaller.cs").read_text(encoding="utf-8")
+    for fragment in (
+        "AddMissingHouseChairComponents(", "AddOtherHouseFurnitureSettings(",
+        "HouseProxyEarthquakeSettings", "DecorativeQuakeResponse",
+        "FindOtherHouseFurniture(", "Selection.selectionChanged",
+        "NeedsSmallPropVisualSettings(", "Check all House furniture earthquake controls",
+    ):
+        if fragment not in editor:
+            fail(errors, "saved House object controls missing: " + fragment)
+    for fragment in (
+        "settings.ApplyToExistingProxy(proxy, motion)",
+        "else\n                inertial.ConnectMotionIfMissing(motion)",
+        "if (body == null)",
+    ):
+        if fragment not in binder:
+            fail(errors, "House runtime must preserve saved object settings: " + fragment)
+    for fragment in (
+        "body.mass = ", "body.linearDamping = ", "body.angularDamping = ",
+        "physics.ConfigureForces(", "physics.Configure(motion,",
+    ):
+        if fragment not in proxy:
+            fail(errors, "House proxy must apply the saved native physics values: " + fragment)
+    if "HouseProxyEarthquakeInspector" not in inspector:
+        fail(errors, "saved House proxy objects need a simple Mass/Damping Inspector")
+    if "GetComponentInParent<HouseProxyEarthquakeSettings>()" not in installer:
+        fail(errors, "House saved physics proxies must not receive a competing decorative sway")
+    for test in (
+        "HouseChairPhysicsPreservationTests.cs",
+        "HouseProxyEarthquakeSettingsTests.cs",
+    ):
+        if not (ROOT / "Assets/CEVR/Tests/EditMode" / test).is_file():
+            fail(errors, "missing House quake regression test: " + test)
+    house = (ROOT / "Assets/CEVR/Generated/Scenes/House.unity").read_text(encoding="utf-8")
+    for name in ("HouseLayout_DiningChair_Left", "HouseLayout_DiningChair_Right",
+                 "HouseLayout_DiningChair_Spare", "HouseLayout_DiningChair_CoverObstacle",
+                 "HouseLayout_Fridge", "HouseLayout_Wandrobe",
+                 "HouseLayout_HazardBooks_1", "HouseLayout_HazardBooks_4"):
+        if "m_Name: " + name not in house:
+            fail(errors, "saved House furniture scene is missing a key editor root: " + name)
+
+
 def check_team_furniture(errors: list[str]) -> None:
     folder = ROOT / "Assets/CEVR/Resources/PlengFurniture"
     models = (
@@ -549,6 +596,7 @@ def main() -> int:
     check_crawl_contract(errors)
     check_visual_polish_contract(errors)
     check_cross_scene_feature_contract(errors)
+    check_saved_furniture_earthquake_settings(errors)
     check_team_furniture(errors)
     check_house_layout_analyzer(errors)
     check_main_menu(errors)

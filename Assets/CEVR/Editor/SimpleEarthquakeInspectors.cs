@@ -62,6 +62,38 @@ namespace ChulaEarthquakeVR.Editor
         }
     }
 
+    [CustomEditor(typeof(HouseProxyEarthquakeSettings))]
+    public sealed class HouseProxyEarthquakeInspector : UnityEditor.Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            serializedObject.Update();
+            EditorGUILayout.LabelField("Simple Earthquake - Moving House Furniture", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(
+                "This furniture has a detailed saved mesh and ONE invisible gameplay " +
+                "Rigidbody used for safe falling collisions. These saved values are " +
+                "applied directly to that Rigidbody during Play. No second shaker.",
+                MessageType.Info);
+
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("mass"),
+                new GUIContent("Mass (kg)"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("linearDamping"),
+                new GUIContent("Linear Damping"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("angularDamping"),
+                new GUIContent("Angular Damping"));
+            EditorGUILayout.Space(4f);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("forceNewtons"),
+                new GUIContent("Force (N)"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("torqueNewtonMeters"),
+                new GUIContent("Torque (N m)"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("shakeStrength"),
+                new GUIContent("Shake Strength"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("includeVertical"),
+                new GUIContent("Allow Vertical Shake"));
+            serializedObject.ApplyModifiedProperties();
+        }
+    }
+
     [CustomEditor(typeof(DecorativeQuakeResponse))]
     public sealed class DecorativeEarthquakeInspector : UnityEditor.Editor
     {
