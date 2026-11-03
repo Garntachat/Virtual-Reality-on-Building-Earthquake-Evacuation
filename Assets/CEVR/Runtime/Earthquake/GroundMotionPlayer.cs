@@ -112,16 +112,15 @@ namespace ChulaEarthquakeVR
             if (quakeProfile != null) return quakeProfile.Evaluate(time);
             float duration = Mathf.Max(1f, previewDurationSeconds);
             float envelope = PreviewEnvelope(time, duration);
-            float seedOffset = previewSeed * 0.001f;
-            float xNoise = Mathf.PerlinNoise(time * 1.7f, seedOffset) * 2f - 1f;
-            float zNoise = Mathf.PerlinNoise(time * 1.3f, seedOffset + 17.3f) * 2f - 1f;
-            float yNoise = Mathf.PerlinNoise(time * 2.1f, seedOffset + 31.7f) * 2f - 1f;
-            float omegaT = 2f * Mathf.PI * previewFrequencyHz * time;
+            // One simple, repeatable wave for every item. No random per-item forces.
+            // The seed only selects the starting phase for reproducible training runs.
+            float phase = (Mathf.Abs(previewSeed % 360)) * Mathf.Deg2Rad;
+            float angle = 2f * Mathf.PI * previewFrequencyHz * time;
             float peakMs2 = previewPeakG * Physics.gravity.magnitude;
             return new Vector3(
-                Mathf.Sin(omegaT) * (0.65f + 0.35f * xNoise),
-                0.20f * Mathf.Sin(omegaT * 1.9f) * yNoise,
-                Mathf.Cos(omegaT * 0.83f) * (0.65f + 0.35f * zNoise)) * peakMs2 * envelope;
+                Mathf.Sin(angle + phase),
+                0.12f * Mathf.Sin(angle * 1.7f + phase),
+                Mathf.Cos(angle * 0.83f + phase)) * peakMs2 * envelope;
         }
     }
 }
