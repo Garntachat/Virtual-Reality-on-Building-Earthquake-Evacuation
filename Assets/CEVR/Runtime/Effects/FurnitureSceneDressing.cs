@@ -14,6 +14,10 @@ namespace ChulaEarthquakeVR
         {
             if (savedInEditor) return;
             BuildDressing();
+            // Templates are only construction helpers. Keep the actual visible
+            // furniture instances, not unused hidden duplicates in the Hierarchy.
+            foreach (GameObject template in templates.Values) DisposeGenerated(template);
+            templates.Clear();
             savedInEditor = true;
         }
         [Serializable] private class ModelData { public float[] vertices; public PartData[] parts; }
