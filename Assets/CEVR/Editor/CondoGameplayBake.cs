@@ -113,6 +113,10 @@ namespace ChulaEarthquakeVR.Editor
                 if (!layout.IsPrepared)
                     throw new InvalidOperationException("Condo gameplay objects were not created.");
 
+                // The one-time Condo bake includes ALL furniture physics/visual
+                // Inspector settings before the scene and assets are saved.
+                SceneFurnitureEarthquakeCoverage.Apply(scene);
+
                 // Match the detailed Play-mode safety-shoe meshes before saving.
                 foreach (WearableShoes shoe in root.GetComponentsInChildren<WearableShoes>(true))
                     shoe.PrepareEditableVisual();

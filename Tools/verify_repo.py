@@ -424,7 +424,7 @@ def check_saved_furniture_earthquake_settings(errors: list[str]) -> None:
         "AddMissingHouseChairComponents(", "AddOtherHouseFurnitureSettings(",
         "HouseProxyEarthquakeSettings", "DecorativeQuakeResponse",
         "FindOtherHouseFurniture(", "Selection.selectionChanged",
-        "NeedsSmallPropVisualSettings(", "Check all House furniture earthquake controls",
+        "SceneFurnitureEarthquakeCoverage.NeedsSetup(scene)", "Check all House furniture earthquake controls",
     ):
         if fragment not in editor:
             fail(errors, "saved House object controls missing: " + fragment)
@@ -458,6 +458,44 @@ def check_saved_furniture_earthquake_settings(errors: list[str]) -> None:
                  "HouseLayout_HazardBooks_1", "HouseLayout_HazardBooks_4"):
         if "m_Name: " + name not in house:
             fail(errors, "saved House furniture scene is missing a key editor root: " + name)
+
+
+def check_tutorial_condo_furniture_earthquake_coverage(errors: list[str]) -> None:
+    """Every saved furniture root gets one safe, editable response."""
+    editor = (ROOT / "Assets/CEVR/Editor/SceneFurnitureEarthquakeCoverage.cs").read_text(encoding="utf-8")
+    shared = (ROOT / "Assets/CEVR/Editor/EditableRigidbodyEarthquakeSetup.cs").read_text(encoding="utf-8")
+    tutorial = (ROOT / "Assets/CEVR/Editor/TutorialSceneBake.cs").read_text(encoding="utf-8")
+    condo = (ROOT / "Assets/CEVR/Editor/CondoGameplayBake.cs").read_text(encoding="utf-8")
+    installer = (ROOT / "Assets/CEVR/Runtime/Earthquake/EarthquakeSceneResponseInstaller.cs").read_text(encoding="utf-8")
+    for fragment in (
+        "HasPreparedFurniture(", "NeedsSetup(", "Candidates(",
+        "Undo.AddComponent<InertialRigidbody>",
+        "Undo.AddComponent<DecorativeQuakeResponse>",
+        "Check Tutorial or Condo furniture controls",
+        "GetComponent<Rigidbody>()", "GetComponent<WearableShoes>()",
+        "SturdyCoverTableTop", "LabBenchTop",
+        "TeamFurniture_", "Kenney_", "Condo Gameplay",
+    ):
+        if fragment not in editor:
+            fail(errors, "Tutorial/Condo furniture response setup missing: " + fragment)
+    if "new GameObject(" in editor or "DestroyImmediate(" in editor or "localPosition =" in editor:
+        fail(errors, "furniture coverage must not create/move/delete any scene furniture")
+    if "SceneFurnitureEarthquakeCoverage.NeedsSetup(scene)" not in shared or (
+        "SceneFurnitureEarthquakeCoverage.Apply(scene)" not in shared
+    ):
+        fail(errors, "already-baked Tutorial/Condo scenes must retrofit their saved furniture")
+    if "SceneFurnitureEarthquakeCoverage.Apply(scene)" not in tutorial or (
+        "SceneFurnitureEarthquakeCoverage.Apply(scene)" not in condo
+    ):
+        fail(errors, "first-time Tutorial/Condo bake must save every item's quake controls")
+    for fragment in (
+        "IsGroupingRoot(current)", "Tutorial Editable Furniture", "Condo Gameplay",
+        "FindObjectsByType<DecorativeQuakeResponse>", "response.ConnectMotionIfMissing(motion)",
+    ):
+        if fragment not in installer:
+            fail(errors, "runtime must honor separate saved furniture roots: " + fragment)
+    if not (ROOT / "Assets/CEVR/Tests/EditMode/TutorialCondoResponseRootTests.cs").is_file():
+        fail(errors, "missing Tutorial/Condo per-object quake regression tests")
 
 
 def check_team_furniture(errors: list[str]) -> None:
@@ -597,6 +635,7 @@ def main() -> int:
     check_visual_polish_contract(errors)
     check_cross_scene_feature_contract(errors)
     check_saved_furniture_earthquake_settings(errors)
+    check_tutorial_condo_furniture_earthquake_coverage(errors)
     check_team_furniture(errors)
     check_house_layout_analyzer(errors)
     check_main_menu(errors)

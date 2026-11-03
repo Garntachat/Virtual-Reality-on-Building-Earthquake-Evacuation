@@ -1,7 +1,7 @@
 {
   "name": "CEVR.Tests",
   "rootNamespace": "ChulaEarthquakeVR.Tests",
-  "references": ["CEVR.Runtime"],
+  "references": ["CEVR.Runtime", "CEVR.Editor"],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
