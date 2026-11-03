@@ -8,13 +8,24 @@ namespace ChulaEarthquakeVR
     public sealed class InertialRigidbody : MonoBehaviour
     {
         [SerializeField] private GroundMotionPlayer motionSource;
-        [SerializeField, Min(0f)] private float responseScale = 1f;
+        [Header("Simple earthquake settings (per item)")]
+        [Tooltip("0 = no shaking; 1 = normal; 2 = twice as much. Does not change the global earthquake.")]
+        [SerializeField, Range(0f, 3f)] private float responseScale = 1f;
+        [Tooltip("Off = horizontal shaking only. Keep off for chairs and heavy furniture.")]
         [SerializeField] private bool includeVertical = true;
         private Rigidbody body;
+
+        public float ShakeStrength => responseScale;
+
+        public void ConnectMotionIfMissing(GroundMotionPlayer source)
+        {
+            if (motionSource == null) motionSource = source;
+        }
 
         private void Awake()
         {
             body = GetComponent<Rigidbody>();
+            if (motionSource == null) motionSource = FindFirstObjectByType<GroundMotionPlayer>();
             body.interpolation = RigidbodyInterpolation.Interpolate;
         }
 
@@ -29,7 +40,7 @@ namespace ChulaEarthquakeVR
         public void Configure(GroundMotionPlayer source, float scale = 1f, bool vertical = true)
         {
             motionSource = source;
-            responseScale = Mathf.Max(0f, scale);
+            responseScale = Mathf.Clamp(scale, 0f, 3f);
             includeVertical = vertical;
         }
     }
