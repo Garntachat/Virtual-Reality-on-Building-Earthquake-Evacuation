@@ -8,8 +8,6 @@ CEVR is a Unity prototype for studying human decisions during a simulated earthq
 
 **Simple Rigidbody shaking:** Physical furniture now uses one predictable ForceMode.Force + torque response to the shared earthquake signal. Unity Mass, Linear/Angular Damping, Force (N), Torque (N m) and per-item Shake Strength are editable on each saved Rigidbody. Open House or New_House in Edit mode once to attach controls to existing furniture. See [Simple Earthquake Physics](docs/SIMPLE_EARTHQUAKE_PHYSICS.md) for the quick tuning and gameplay test steps.
 
-**Playable House scene updated:** **Play House** now opens the editable `New_House.unity` (35 scene-saved Rigidbodies), not the archived `House.unity`. The old House asset is kept as a backup and is disabled in Build Settings. Open `New_House.unity` in Edit mode to change Mass/Damping; the gameplay installer supplies its missing camera in Play. See [Use editable New House](docs/PLAY_HOUSE_NEW_SCENE.md) for verification and limitations.
-
 ## Implemented gameplay
 
 1. A six-second orientation phase introduces the room and controls.
