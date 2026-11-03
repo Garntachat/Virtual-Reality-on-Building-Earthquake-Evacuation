@@ -99,13 +99,9 @@ namespace ChulaEarthquakeVR.Editor
                 }
             }
 
-            if (automatic && scene.isDirty)
-            {
-                Debug.LogWarning("CEVR: Tutorial has unsaved changes. Skipping automatic bake to protect your edits. Save, then use CEVR > Tutorial > Make furniture editable (one time).");
-                return;
-            }
-            if (!automatic && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
-
+            // Scene-opening material repair often marks the scene dirty.
+            // Back up the actual in-memory scene below instead of skipping the
+            // first bake; the backup preserves unsaved artist edits too.
             isBaking = true;
             string backup = "";
             try
@@ -114,8 +110,8 @@ namespace ChulaEarthquakeVR.Editor
                 string stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
                 backup = AssetDatabase.GenerateUniqueAssetPath(
                     ScenePath.Replace(".unity", "_BeforeEditableBake_" + stamp + ".unity"));
-                if (!AssetDatabase.CopyAsset(ScenePath, backup))
-                    throw new InvalidOperationException("Unable to back up the tutorial scene. No changes were made.");
+                if (!EditorSceneManager.SaveScene(scene, backup, true))
+                    throw new InvalidOperationException("Unable to back up the complete in-memory tutorial scene. No changes were made.");
 
                 string folder = AssetDatabase.GenerateUniqueAssetPath(
                     GeneratedRoot + "/TutorialBake_" + stamp);
@@ -129,6 +125,9 @@ namespace ChulaEarthquakeVR.Editor
                 // Keep runtime-only controllers separate; only their physical props belong in the scene.
                 var props = new GameObject("Tutorial Editable Props");
                 props.AddComponent<UniversalSceneGameplayBootstrap>().PrepareTutorialProps();
+                foreach (WearableShoes shoes in
+                    UnityEngine.Object.FindObjectsByType<WearableShoes>(FindObjectsSortMode.None))
+                    shoes.PrepareEditableVisual();
 
                 var furniture = new GameObject("Tutorial Editable Furniture").AddComponent<FurnitureSceneDressing>();
                 furniture.BakeForEditing();
@@ -169,6 +168,12 @@ namespace ChulaEarthquakeVR.Editor
                             skinned.sharedMesh = Persist(skinned.sharedMesh, folder, persisted);
                     }
                 }
+
+                // The temporary prop builder only exists to populate the scene.
+                // Remove its script to keep the editor hierarchy straightforward.
+                UniversalSceneGameplayBootstrap temporaryPropBuilder =
+                    props.GetComponent<UniversalSceneGameplayBootstrap>();
+                if (temporaryPropBuilder != null) UnityEngine.Object.DestroyImmediate(temporaryPropBuilder);
 
                 AssetDatabase.SaveAssets();
                 EditorSceneManager.MarkSceneDirty(scene);
