@@ -1,73 +1,41 @@
 using UnityEngine;
-using System.Collections.Generic;
 
+// Retained for older team scenes that already reference this script.
+// The Tutorial uses GroundMotionPlayer + one editable InertialRigidbody per item.
+[DisallowMultipleComponent]
 public class EarthquakeFurnitureController : MonoBehaviour
 {
-    [Header("Earthquake Settings")]
-    public bool isEarthquakeActive = false;
-    public float baseForce = 15f;    // Base shaking force
-    public float baseTorque = 5f;    // Base rotational force
+    [Header("Legacy scene fallback (no GroundMotionPlayer)")]
+    [Tooltip("Only used by old standalone scenes. Modern CEVR scenes use their shared ground motion.")]
+    public bool isEarthquakeActive;
 
-    [Header("Building Level Settings")]
-    [Tooltip("Current floor number (1 = ground floor)")]
-    public int floorLevel = 1;
+    [Min(0f)] public float baseForce = 15f;
+    [Min(0f)] public float baseTorque = 5f;
 
-    [Tooltip("Shaking-force increase per floor")]
-    public float perFloorMultiplier = 0.5f;
+    private Rigidbody[] furnitureBodies;
+    private bool hasSharedMotion;
 
-    // Collect all furniture rigidbodies in the room
-    private List<Rigidbody> furnitureBodies = new List<Rigidbody>();
-
-    void Start()
+    private void Awake()
     {
-        // Find rigidbodies below this room's furniture root
-        Rigidbody[] rbs = GetComponentsInChildren<Rigidbody>();
-        foreach (Rigidbody rb in rbs)
-        {
-            // Ignore kinematic objects such as fixed windows
-            if (!rb.isKinematic)
-            {
-                furnitureBodies.Add(rb);
-            }
-        }
+        hasSharedMotion = FindFirstObjectByType<ChulaEarthquakeVR.GroundMotionPlayer>() != null;
+        furnitureBodies = GetComponentsInChildren<Rigidbody>(true);
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        if (isEarthquakeActive)
+        // Never stack a separate shaker on top of the normal CEVR earthquake.
+        if (!isEarthquakeActive || hasSharedMotion) return;
+
+        // Simple repeatable sine-wave fallback. No randomness and no per-object
+        // secret multipliers. In normal Tutorial/House scenes this is not used.
+        float phase = Time.fixedTime * Mathf.PI * 4f;
+        Vector3 direction = new Vector3(Mathf.Sin(phase), 0f, Mathf.Cos(phase));
+        foreach (Rigidbody body in furnitureBodies)
         {
-            ApplyEarthquakeForce();
-        }
-    }
-
-    private void ApplyEarthquakeForce()
-    {
-        // Scale the force by floor level
-        // Floor 1 uses baseline force
-        // Floor 3 uses twice the baseline force with multiplier 0.5
-        float currentFloorMultiplier = 1f + ((floorLevel - 1) * perFloorMultiplier);
-
-        float actualForce = baseForce * currentFloorMultiplier;
-        float actualTorque = baseTorque * currentFloorMultiplier;
-
-        foreach (Rigidbody rb in furnitureBodies)
-        {
-            // Generate a random horizontal force with a small vertical component
-            Vector3 randomDirection = new Vector3(
-                Random.Range(-1f, 1f),
-                Random.Range(0f, 0.2f),
-                Random.Range(-1f, 1f)
-            ).normalized;
-
-            Vector3 randomTorqueDir = new Vector3(
-                Random.Range(-1f, 1f),
-                Random.Range(-1f, 1f),
-                Random.Range(-1f, 1f)
-            ).normalized;
-
-            // Apply an acceleration force independent of mass
-            rb.AddForce(randomDirection * actualForce, ForceMode.Acceleration);
-            rb.AddTorque(randomTorqueDir * actualTorque, ForceMode.Acceleration);
+            if (body == null || body.isKinematic ||
+                body.GetComponent<ChulaEarthquakeVR.InertialRigidbody>() != null) continue;
+            body.AddForce(direction * baseForce, ForceMode.Force);
+            body.AddTorque(new Vector3(direction.z, 0f, -direction.x) * baseTorque, ForceMode.Force);
         }
     }
 }
