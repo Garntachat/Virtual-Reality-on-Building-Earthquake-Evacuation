@@ -167,8 +167,12 @@ def check_csharp_policies(errors: list[str]) -> None:
     earthquake_files = list((ROOT / "Assets/CEVR/Runtime/Earthquake").glob("*.cs"))
     for path in earthquake_files:
         text = path.read_text(encoding="utf-8")
-        if "Camera.main.transform" in text or re.search(r"\bAddTorque\s*\(", text):
-            fail(errors, f"camera motion or ad-hoc torque found in earthquake system: {path.relative_to(ROOT)}")
+        # Torque is allowed only in the single, inspector-controlled Rigidbody
+        # force component. Other scripts must not stack extra rotations.
+        if "Camera.main.transform" in text or (
+            path.name != "InertialRigidbody.cs" and re.search(r"\bAddTorque\s*\(", text)
+        ):
+            fail(errors, f"camera motion or secondary torque found in earthquake system: {path.relative_to(ROOT)}")
         if "Random.Range" in text:
             fail(errors, f"non-deterministic Random.Range found in earthquake system: {path.relative_to(ROOT)}")
     all_cs = list((ROOT / "Assets/CEVR").rglob("*.cs"))
