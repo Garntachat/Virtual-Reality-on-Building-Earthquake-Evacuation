@@ -207,10 +207,15 @@ namespace ChulaEarthquakeVR.Editor
 
         private static bool IsFixedHouseStructure(Transform item)
         {
-            // These objects have dedicated gameplay or building behavior.
-            return item.name == "HouseLayout_Cat" ||
-                item.name == "HouseLayout_FrontDoor" ||
-                item.name == "HouseLayout_Window";
+            // Do NOT turn building structure, camera, door, window or pet
+            // controllers into physical furniture. They have their own behavior.
+            string name = item.name.ToLowerInvariant();
+            return name == "houselayout_cat" || name.Contains("window") ||
+                name.Contains("door") || name.Contains("wall") ||
+                name.Contains("floor") || name.Contains("ceiling") ||
+                name.Contains("ground") || name.Contains("camera") ||
+                name.Contains("player") || name.Contains("assembly") ||
+                name.Contains("safetyzone") || name.Contains("foundation");
         }
 
         private static System.Collections.Generic.List<Transform> FindOtherHouseFurniture(Scene scene)
@@ -221,8 +226,12 @@ namespace ChulaEarthquakeVR.Editor
             if (root == null) return items;
             foreach (Transform item in root)
             {
-                if (!item.name.StartsWith("HouseLayout_", StringComparison.Ordinal) ||
-                    IsHouseChair(item) || IsFixedHouseStructure(item)) continue;
+                if (IsHouseChair(item) || IsFixedHouseStructure(item)) continue;
+                // HouseLayout_* is the original scene convention, but also
+                // include user-added custom furniture under HouseFurniture.
+                if (!item.name.StartsWith("HouseLayout_", StringComparison.Ordinal) &&
+                    item.GetComponentInChildren<Renderer>(true) == null &&
+                    item.GetComponent<Rigidbody>() == null) continue;
                 items.Add(item);
             }
             return items;
