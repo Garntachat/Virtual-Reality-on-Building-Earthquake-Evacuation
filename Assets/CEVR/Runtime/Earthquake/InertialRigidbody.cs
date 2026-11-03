@@ -23,6 +23,11 @@ namespace ChulaEarthquakeVR
         [SerializeField] private bool includeVertical = true;
 
         // Previous scenes already serialize responseScale / includeVertical; keep them intact.
+        // Internal one-time marker: future Play sessions must never replace
+        // a user's saved Mass, Damping, Force or Torque settings.
+        [SerializeField, HideInInspector] private bool starterPresetProcessed;
+
+        public bool StarterPresetProcessed => starterPresetProcessed;
         private Rigidbody body;
         private ToppleableFurniture topple;
 
