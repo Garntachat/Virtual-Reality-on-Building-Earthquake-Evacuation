@@ -20,7 +20,10 @@ namespace ChulaEarthquakeVR
             cover = zone == null ? null : zone.transform;
             ExitAssemblyZone assembly = FindFirstObjectByType<ExitAssemblyZone>();
             GameObject houseExit = GameObject.Find("HouseAssemblyPoint");
-            exit = assembly != null ? assembly.transform : houseExit == null ? null : houseExit.transform;
+            CondoGameplayLayout condo = FindFirstObjectByType<CondoGameplayLayout>();
+            exit = assembly != null ? assembly.transform :
+                condo != null && condo.AssemblyPoint != null ? condo.AssemblyPoint :
+                houseExit == null ? null : houseExit.transform;
         }
         private void OnGUI()
         {
