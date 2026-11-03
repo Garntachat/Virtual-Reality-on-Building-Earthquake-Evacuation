@@ -11,12 +11,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/CEVR/Generated/Scenes/CEVR_ChulaEngineering_Tutorial.unity
     guid: e6f9372c24f254c7293b29475ad85ac5
-  - enabled: 0
+  - enabled: 1
     path: Assets/CEVR/Generated/Scenes/House.unity
     guid: 2b8bc09b8438c0144a052521dc922980
-  - enabled: 1
-    path: Assets/CEVR/Generated/Scenes/New_House.unity
-    guid: 4f7ebbfba6c071d41aac74cf055ca47e
   - enabled: 1
     path: Assets/CEVR/Generated/Scenes/Condo.unity
     guid: def0d16dd3ec7a94ea57e72b20216b2a
