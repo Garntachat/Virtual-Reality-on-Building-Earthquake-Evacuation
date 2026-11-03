@@ -11,6 +11,22 @@ namespace ChulaEarthquakeVR
         public const string TutorialScene = "CEVR_ChulaEngineering_Tutorial";
         public const string HouseScene = "House";
         private bool loading;
+        public Canvas editableCanvas;
+        public UnityEngine.UI.Text statusLabel;
+        public UnityEngine.UI.Dropdown appearanceDropdown;
+
+        public void PlayTutorial() => BeginLoad(TutorialScene);
+        public void PlayHouse() => BeginLoad(HouseScene);
+        public void QuitMenu() => ExitGame();
+        public void SelectAppearance(int index)
+        {
+            StudentAppearance.Select(index);
+            RefreshPreview();
+        }
+        private void Update()
+        {
+            if (statusLabel != null) statusLabel.text = message;
+        }
         private string message = "Choose a scene to begin.";
         private Transform previewRoot;
         private GUIStyle heading, body, button;
@@ -19,6 +35,8 @@ namespace ChulaEarthquakeVR
 
         private void Awake()
         {
+            if (appearanceDropdown != null)
+                appearanceDropdown.SetValueWithoutNotify(StudentAppearance.Selected);
             Time.timeScale = 1f;
             AudioListener.pause = false;
             Cursor.lockState = CursorLockMode.None;
@@ -131,6 +149,7 @@ namespace ChulaEarthquakeVR
 
         private void OnGUI()
         {
+            if (editableCanvas != null) return;
             if (heading == null)
             {
                 heading = new GUIStyle(GUI.skin.label) { fontSize = 28, fontStyle = FontStyle.Bold };
