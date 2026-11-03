@@ -58,6 +58,16 @@ namespace ChulaEarthquakeVR
         public void BindSceneResponses()
         {
             if (motion == null) return;
+
+            // Artist-authored furniture may not match the legacy name keywords.
+            // Connect ALL saved visual response components before discovering
+            // new decor; never reset the values saved in the Inspector.
+            foreach (DecorativeQuakeResponse response in
+                FindObjectsByType<DecorativeQuakeResponse>(
+                    FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (response.gameObject.scene == gameObject.scene)
+                    response.ConnectMotionIfMissing(motion);
+
             PhysicsObjectsBound = BindPhysicsObjects();
             DecorativeObjectsBound = BindDecorativeObjects();
             Debug.Log($"CEVR SIMPLE Rigidbody earthquake: {PhysicsObjectsBound} physics object(s), " +
@@ -160,11 +170,30 @@ namespace ChulaEarthquakeVR
             while (current != null)
             {
                 if (current.GetComponent<Rigidbody>() != null) return null;
+                if (current.GetComponent<VisualQuakeSway>() != null) return null;
+                if (IsGroupingRoot(current)) break;
+                // Prefer the nearest authored object, not an outer group.
+                if (current.GetComponent<DecorativeQuakeResponse>() != null) return current;
                 if (HasResponseKeyword(current.name)) candidate = current;
-                if (current.parent == null || current.parent.GetComponent<GroundMotionPlayer>() != null) break;
+                if (current.parent == null ||
+                    current.parent.GetComponent<GroundMotionPlayer>() != null) break;
                 current = current.parent;
             }
             return candidate;
+        }
+
+        private static bool IsGroupingRoot(Transform candidate)
+        {
+            string name = candidate.name;
+            return name == "Tutorial Editable Furniture" ||
+                name == "Tutorial Editable Props" ||
+                name == "Condo Gameplay" ||
+                name == "DynamicProps" ||
+                name == "CEVR_FinalVisualPolish" ||
+                name == "TutorialObjects" ||
+                name == "Environment_ChulaEngineeringInspired" ||
+                candidate.GetComponent<FurnitureSceneDressing>() != null ||
+                candidate.GetComponent<CondoGameplayLayout>() != null;
         }
 
         private void TryAddToppleResponse(Rigidbody body)
