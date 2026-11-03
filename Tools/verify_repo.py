@@ -353,8 +353,9 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
             fail(errors, f"cross-scene gameplay installer is missing: {fragment}")
     if not house_scene.is_file() or house_scene.stat().st_size < 1_000_000:
         fail(errors, "the hand-built House.unity scene is missing or unexpectedly replaced")
-    if "Assets/CEVR/Generated/Scenes/House.unity" not in settings:
-        fail(errors, "House.unity must be enabled in EditorBuildSettings")
+    if ("path: Assets/CEVR/Generated/Scenes/New_House.unity" not in settings or
+        "guid: 4f7ebbfba6c071d41aac74cf055ca47e" not in settings):
+        fail(errors, "New_House.unity must be available in EditorBuildSettings")
     if "Assets/CEVR/Generated/Scenes/Condo.unity" not in settings:
         fail(errors, "Condo.unity must be enabled in EditorBuildSettings")
     for relative in (
@@ -628,15 +629,20 @@ def check_house_layout_analyzer(errors: list[str]) -> None:
 
 def check_main_menu(errors: list[str]) -> None:
     scene_dir = "Assets/CEVR/Generated/Scenes/"
-    expected = ["CEVR_MainMenu", "CEVR_ChulaEngineering_Tutorial", "House"]
+    expected = ["CEVR_MainMenu", "CEVR_ChulaEngineering_Tutorial", "New_House"]
     settings = (ROOT / "ProjectSettings/EditorBuildSettings.asset").read_text()
     paths = re.findall(r"- enabled: 1\s+path: (.+)", settings)
     if paths[:3] != [scene_dir + name + ".unity" for name in expected]:
-        fail(errors, "main menu must be first, followed by enabled Tutorial and House scenes")
+        fail(errors, "main menu must be first, followed by enabled Tutorial and New_House scenes")
     for name in expected:
         scene = ROOT / (scene_dir + name + ".unity")
         if not scene.is_file():
             fail(errors, "missing menu destination: " + name)
+    # Keep the old House scene as an unmodified backup while the menu
+    # loads the physically editable New_House scene.
+    legacy_house = ROOT / (scene_dir + "House.unity")
+    if not legacy_house.is_file() or legacy_house.stat().st_size < 1_000_000:
+        fail(errors, "original House scene backup must remain available")
     menu_path = ROOT / "Assets/CEVR/Runtime/UI/MainMenuController.cs"
     appearance_path = ROOT / "Assets/CEVR/Runtime/Player/StudentAppearance.cs"
     for path in (menu_path, appearance_path):
@@ -644,12 +650,22 @@ def check_main_menu(errors: list[str]) -> None:
             fail(errors, "missing menu implementation: " + str(path))
             return
     menu = menu_path.read_text()
+    if 'HouseScene = "New_House"' not in menu or "PlayHouse() => BeginLoad(HouseScene)" not in menu:
+        fail(errors, "Play House must load editable New_House, not old House")
     for token in ("LoadSceneAsync", "CanStreamedLevelBeLoaded", "if (loading) return", "Application.Quit", "isPlaying = false", "StudentAppearance.Select"):
         if token not in menu:
             fail(errors, "menu contract missing: " + token)
     bootstrap = (ROOT / "Assets/CEVR/Runtime/Core/UniversalSceneGameplayBootstrap.cs").read_text()
     if "if (scene.name == MainMenuController.MenuScene) return;" not in bootstrap:
         fail(errors, "menu must not install earthquake gameplay")
+    if '"New House Gameplay Camera"' not in bootstrap or 'view.AddComponent<Camera>()' not in bootstrap:
+        fail(errors, "New_House needs a playable camera fallback")
+    new_house = (ROOT / "Assets/CEVR/Generated/Scenes/New_House.unity").read_text(encoding="utf-8")
+    if new_house.count("Rigidbody:") < 30:
+        fail(errors, "New_House should preserve its editable source Rigidbodies")
+    if "EarthquakeFurnitureController" not in (ROOT / "Assets/CEVR/Runtime/EarthquakeFurnitureController.cs").read_text(encoding="utf-8"):
+        fail(errors, "New_House legacy controller missing")
+
 
 
 def check_git_hygiene(errors: list[str]) -> None:
