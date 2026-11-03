@@ -29,7 +29,11 @@ namespace ChulaEarthquakeVR
             Vector3 acceleration = motion.CurrentFloorAccelerationMs2;
             acceleration.y = 0f;
             Vector3 applicationPoint = body.worldCenterOfMass + Vector3.up * forceHeight;
-            body.AddForceAtPosition(-acceleration * upperForceScale, applicationPoint, ForceMode.Acceleration);
+            // The same easy-to-edit Shake Strength slider controls swaying AND tipping.
+            InertialRigidbody settings = GetComponent<InertialRigidbody>();
+            float itemStrength = settings == null ? 1f : settings.ShakeStrength;
+            body.AddForceAtPosition(-acceleration * upperForceScale * itemStrength,
+                applicationPoint, ForceMode.Acceleration);
         }
 
         public void Configure(GroundMotionPlayer source, float scale, float height)
