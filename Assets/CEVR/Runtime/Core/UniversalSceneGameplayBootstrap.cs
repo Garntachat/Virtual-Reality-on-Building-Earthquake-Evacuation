@@ -572,7 +572,11 @@ namespace ChulaEarthquakeVR
         private void OnDestroy()
         {
             foreach (Material material in materials)
-                if (material != null) Destroy(material);
+            {
+                if (material == null) continue;
+                if (Application.isPlaying) Destroy(material);
+                else DestroyImmediate(material);
+            }
             materials.Clear();
         }
     }
