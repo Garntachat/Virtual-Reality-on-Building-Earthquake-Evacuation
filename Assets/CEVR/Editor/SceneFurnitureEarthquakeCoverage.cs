@@ -173,8 +173,7 @@ namespace ChulaEarthquakeVR.Editor
                 t.GetComponentInParent<Canvas>() != null) return false;
             if (t.GetComponent<HouseProxyEarthquakeSettings>() != null) return false;
 
-            bool hasVisual = t.GetComponent<Renderer>() != null ||
-                t.GetComponentInChildren<Renderer>(true) != null;
+            bool hasVisual = HasEnabledRenderer(t);
             if (t.GetComponent<Rigidbody>() != null && (hasVisual ||
                 t.GetComponent<FallingHazard>() != null ||
                 t.GetComponent<MovableFurniture>() != null ||
@@ -212,6 +211,18 @@ namespace ChulaEarthquakeVR.Editor
             if (ParentNamed(t, "CEVR_FinalVisualPolish"))
                 return HasFurnitureWord(name) && !IsVisualSafetyMarker(name);
             return HasFurnitureWord(name) && !IsVisualSafetyMarker(name);
+        }
+
+        private static bool HasEnabledRenderer(Transform item)
+        {
+            // Hidden fallback meshes and disabled construction parts are not
+            // separate furniture items. Only the visible authored replacement
+            // should get a setting.
+            foreach (Renderer renderer in item.GetComponentsInChildren<Renderer>(true))
+                if (renderer != null && renderer.enabled &&
+                    renderer.gameObject.activeInHierarchy)
+                    return true;
+            return false;
         }
 
         private static bool IsExcluded(Transform item)
