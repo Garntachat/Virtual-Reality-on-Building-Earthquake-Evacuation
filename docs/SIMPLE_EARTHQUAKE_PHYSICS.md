@@ -28,6 +28,8 @@ For example, with **15 N Force** and **Shake Strength 1**, an object of mass **5
 
 **Tutorial and Condo:** Their editable-scene tools already add this component to generated furniture. For any additional manually created Rigidbody objects, run **CEVR > Earthquake > Add simple physics settings to scene** (outside Play mode). This command is safe to repeat; it skips objects that already have the component and does not reset Inspector values.
 
+**Testing any scene directly:** Unity's normal Play button opens the Main Menu, so use **CEVR > Earthquake > Test current scene (not Main Menu)** to start from the open House or New_House scene. When you stop Play, the normal Main Menu startup is restored.
+
 **New_House standalone:** The older `EarthquakeFurnitureController` can still be tested by checking `Is Earthquake Active` during Play mode when no shared `GroundMotionPlayer` exists. It now uses a smooth repeatable wave with `Base Force` and `Base Torque` instead of random impulses, and also respects the per-object `Inertial Rigidbody` settings. Do not turn it on alongside the scenario quake; it automatically avoids stacking forces if a shared source exists.
 
 **Decorations without a Rigidbody:** Lamps, monitors, and other static scene art can use a simple `Visual Shake Strength` to sway visually. They do **not** have Mass or Damping, and should not be made dynamic unless the object has appropriate Colliders. **Walls, floors, cameras, the player and safety-zone triggers remain fixed.**
@@ -36,7 +38,7 @@ For example, with **15 N Force** and **Shake Strength 1**, an object of mass **5
 
 1. Open the real House or New_House scene in Edit mode. Select the **root** of the chair with a Rigidbody. Note its Mass and Damping and find the `Inertial Rigidbody` fields (or apply the menu command).
 2. Set Mass to 5, Linear Damping to 1, Angular Damping to 0.5, Force to 15 and Shake Strength to 1. Save.
-3. Play the scenario, or for a standalone New_House turn on the old scene's `Is Earthquake Active` checkbox. The chair should move and respond naturally to collisions.
+3. Play the scenario, or for standalone New_House use **CEVR > Earthquake > Test current scene (not Main Menu)** and turn on the old scene's `Is Earthquake Active` checkbox. The chair should move and respond naturally to collisions.
 4. Stop Play; in Edit mode increase Mass to 15 and Linear Damping to 4. Save, then Play again. The same force should result in less translational motion. Repeat with Force = 30 or Shake Strength = 2 for a stronger response.
 5. Test a moving chair (E grab, Z crawl), dropping a pillow, falling hazards, health/cover logic and leaving after the quake stops. Confirm no duplicate furniture and that Inspectors retain the saved values after two Play runs.
 6. Commit your modified `.unity` file and accompanying `.meta` files so collaborators receive the same settings.
