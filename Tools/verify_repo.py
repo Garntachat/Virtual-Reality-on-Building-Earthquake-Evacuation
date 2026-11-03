@@ -155,8 +155,23 @@ def check_meta_files(errors: list[str]) -> None:
     if not assets.is_dir():
         fail(errors, "Assets directory is missing")
         return
+    # Check both directions. Unity's asset importer requires a UNIQUE 32-character
+    # hexadecimal guid. Existence-only checks missed a malformed .meta and
+    # caused the project to enter Safe Mode when opened on macOS.
+    seen_guids: dict[str, Path] = {}
     for path in assets.rglob("*"):
         if path.name.endswith(".meta"):
+            content = path.read_text(encoding="utf-8", errors="replace")
+            guid_match = re.search(r"(?m)^guid:[ \\t]*([^\\r\\n]+)", content)
+            guid = guid_match.group(1).strip() if guid_match else ""
+            if re.fullmatch(r"[0-9a-fA-F]{32}", guid) is None:
+                fail(errors, f"invalid Unity GUID in {path.relative_to(ROOT)}: {guid!r} (expected 32 hex digits)")
+                continue
+            key = guid.lower()
+            if key in seen_guids:
+                fail(errors, f"duplicate Unity GUID {guid} in {seen_guids[key].relative_to(ROOT)} and {path.relative_to(ROOT)}")
+            else:
+                seen_guids[key] = path
             continue
         meta = path.with_name(path.name + ".meta")
         if not meta.is_file():
