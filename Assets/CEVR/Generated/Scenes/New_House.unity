@@ -119,6 +119,24 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &6269985
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 0
+  starterPresetProcessed: 1
 --- !u!54 &20590373
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -127,9 +145,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1174492166}
   serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 2.2
+  m_LinearDamping: 0.3
+  m_AngularDamping: 0.5
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -146,6 +164,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &46817088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 7
+  torqueNewtonMeters: 2.5
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!54 &213956620
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -181,9 +217,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1174492170}
   serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 2
+  m_LinearDamping: 0.7
+  m_AngularDamping: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -200,6 +236,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &241129916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492180}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 0
+  starterPresetProcessed: 1
 --- !u!54 &255540161
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -262,9 +316,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1174492168}
   serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 2.2
+  m_LinearDamping: 0.3
+  m_AngularDamping: 0.5
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -289,9 +343,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1174492164}
   serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 3
+  m_LinearDamping: 0.7
+  m_AngularDamping: 1.2
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -308,6 +362,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &422746222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492189}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 0
+  starterPresetProcessed: 1
 --- !u!54 &462511696
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -343,9 +415,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1174492171}
   serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 1.1
+  m_LinearDamping: 0.45
+  m_AngularDamping: 0.65
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -567,6 +639,24 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!114 &580227949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492170}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 8
+  torqueNewtonMeters: 2.5
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!54 &636308174
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -575,9 +665,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1174492165}
   serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 2.2
+  m_LinearDamping: 0.3
+  m_AngularDamping: 0.5
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -594,6 +684,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &651769306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 7
+  torqueNewtonMeters: 2
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!54 &734735861
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -621,6 +729,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &736061538
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492181}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 0
+  starterPresetProcessed: 1
 --- !u!54 &764495398
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -702,6 +828,42 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1033390589
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492187}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 1
+  starterPresetProcessed: 1
+--- !u!114 &1079757683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!43 &1114664073
 Mesh:
   m_ObjectHideFlags: 0
@@ -12807,111 +12969,213 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8686749159445766787, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1174492203}
+    - targetCorrespondingSourceObject: {fileID: 8686749159445766787, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1174492207}
     - targetCorrespondingSourceObject: {fileID: 1402021440466594146, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1174492202}
+    - targetCorrespondingSourceObject: {fileID: 1402021440466594146, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1174492206}
     - targetCorrespondingSourceObject: {fileID: 2798126822694191130, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1174492201}
     - targetCorrespondingSourceObject: {fileID: 7254597353766354731, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1174492200}
+    - targetCorrespondingSourceObject: {fileID: 7254597353766354731, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1174492205}
     - targetCorrespondingSourceObject: {fileID: 6917300340609879763, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1174492199}
+    - targetCorrespondingSourceObject: {fileID: 6917300340609879763, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1174492204}
     - targetCorrespondingSourceObject: {fileID: 4020318272462808822, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1602648866}
+    - targetCorrespondingSourceObject: {fileID: 4020318272462808822, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1602648867}
     - targetCorrespondingSourceObject: {fileID: 1224477018097603239, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1791937062}
+    - targetCorrespondingSourceObject: {fileID: 1224477018097603239, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1791937063}
     - targetCorrespondingSourceObject: {fileID: 1439710737466490474, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2067560655}
+    - targetCorrespondingSourceObject: {fileID: 1439710737466490474, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2067560656}
     - targetCorrespondingSourceObject: {fileID: 1358060542725419647, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1547949116}
+    - targetCorrespondingSourceObject: {fileID: 1358060542725419647, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1547949117}
     - targetCorrespondingSourceObject: {fileID: 340845822154328476, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 955363724}
+    - targetCorrespondingSourceObject: {fileID: 340845822154328476, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 422746222}
     - targetCorrespondingSourceObject: {fileID: 6464163408009502991, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 462511696}
+    - targetCorrespondingSourceObject: {fileID: 6464163408009502991, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1241408843}
     - targetCorrespondingSourceObject: {fileID: 3440864906110062023, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 564186900}
+    - targetCorrespondingSourceObject: {fileID: 3440864906110062023, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1033390589}
     - targetCorrespondingSourceObject: {fileID: 8276140759520200658, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1400304650}
+    - targetCorrespondingSourceObject: {fileID: 8276140759520200658, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1400304651}
     - targetCorrespondingSourceObject: {fileID: 5746638905242147488, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1526671233}
+    - targetCorrespondingSourceObject: {fileID: 5746638905242147488, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1526671234}
     - targetCorrespondingSourceObject: {fileID: 5904682166822388916, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2105081470}
+    - targetCorrespondingSourceObject: {fileID: 5904682166822388916, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2105081471}
     - targetCorrespondingSourceObject: {fileID: 2090317101497665069, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 734735861}
     - targetCorrespondingSourceObject: {fileID: 2544790618446538268, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 213956620}
+    - targetCorrespondingSourceObject: {fileID: 2544790618446538268, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1079757683}
     - targetCorrespondingSourceObject: {fileID: 2536966911615560442, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 764495398}
+    - targetCorrespondingSourceObject: {fileID: 2536966911615560442, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 736061538}
     - targetCorrespondingSourceObject: {fileID: 8055173588694842602, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 255540161}
+    - targetCorrespondingSourceObject: {fileID: 8055173588694842602, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 241129916}
     - targetCorrespondingSourceObject: {fileID: 5252099234873307887, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1420714057}
+    - targetCorrespondingSourceObject: {fileID: 5252099234873307887, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1420714058}
     - targetCorrespondingSourceObject: {fileID: 6330288412579287869, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1701348099}
+    - targetCorrespondingSourceObject: {fileID: 6330288412579287869, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1701348100}
     - targetCorrespondingSourceObject: {fileID: 1583775606104413369, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1555023076}
+    - targetCorrespondingSourceObject: {fileID: 1583775606104413369, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1555023077}
     - targetCorrespondingSourceObject: {fileID: 2417826577137209688, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1261576082}
+    - targetCorrespondingSourceObject: {fileID: 2417826577137209688, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1261576083}
     - targetCorrespondingSourceObject: {fileID: 1403154229622838328, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 309616767}
+    - targetCorrespondingSourceObject: {fileID: 1403154229622838328, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6269985}
     - targetCorrespondingSourceObject: {fileID: 1284797269114979220, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2087236288}
+    - targetCorrespondingSourceObject: {fileID: 1284797269114979220, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2087236289}
     - targetCorrespondingSourceObject: {fileID: 2761463813512470938, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2001471704}
+    - targetCorrespondingSourceObject: {fileID: 2761463813512470938, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2001471705}
     - targetCorrespondingSourceObject: {fileID: 556413682392421915, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 919464513}
+    - targetCorrespondingSourceObject: {fileID: 556413682392421915, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1575403827}
     - targetCorrespondingSourceObject: {fileID: 3476387323028881143, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 474892189}
+    - targetCorrespondingSourceObject: {fileID: 3476387323028881143, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1301091584}
     - targetCorrespondingSourceObject: {fileID: 5735623877277801431, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 225500154}
+    - targetCorrespondingSourceObject: {fileID: 5735623877277801431, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 580227949}
     - targetCorrespondingSourceObject: {fileID: 1384580727172135040, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1566807156}
+    - targetCorrespondingSourceObject: {fileID: 1384580727172135040, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1566807157}
     - targetCorrespondingSourceObject: {fileID: 1069932759768334049, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 311891922}
+    - targetCorrespondingSourceObject: {fileID: 1069932759768334049, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1928716844}
     - targetCorrespondingSourceObject: {fileID: 1474425959496944880, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1920756347}
+    - targetCorrespondingSourceObject: {fileID: 1474425959496944880, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1920756348}
     - targetCorrespondingSourceObject: {fileID: 5643930164134857460, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 20590373}
+    - targetCorrespondingSourceObject: {fileID: 5643930164134857460, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1682871988}
     - targetCorrespondingSourceObject: {fileID: 8952414358164390738, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 636308174}
+    - targetCorrespondingSourceObject: {fileID: 8952414358164390738, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 651769306}
     - targetCorrespondingSourceObject: {fileID: 8835578678478471882, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 416225422}
+    - targetCorrespondingSourceObject: {fileID: 8835578678478471882, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 46817088}
     - targetCorrespondingSourceObject: {fileID: 3767220658881940918, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1584769049}
+    - targetCorrespondingSourceObject: {fileID: 3767220658881940918, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1584769050}
   m_SourcePrefab: {fileID: 100100000, guid: 22eeda14daca4d349b7dcde93527c0f9, type: 3}
 --- !u!1 &1174492163 stripped
 GameObject:
@@ -13218,6 +13482,96 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1174492204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 0.65
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 1
+  starterPresetProcessed: 1
+--- !u!114 &1174492205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 0
+  starterPresetProcessed: 1
+--- !u!114 &1174492206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 1
+  starterPresetProcessed: 1
+--- !u!114 &1174492207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 0
+  starterPresetProcessed: 1
+--- !u!114 &1241408843
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!54 &1261576082
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -13245,6 +13599,42 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1261576083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 1
+  starterPresetProcessed: 1
+--- !u!114 &1301091584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492171}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 6
+  torqueNewtonMeters: 1.8
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!54 &1400304650
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -13272,6 +13662,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1400304651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 0
+  starterPresetProcessed: 1
 --- !u!54 &1420714057
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -13299,6 +13707,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1420714058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 0
+  starterPresetProcessed: 1
 --- !u!54 &1526671233
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -13326,6 +13752,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1526671234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 0
+  starterPresetProcessed: 1
 --- !u!1 &1540586966
 GameObject:
   m_ObjectHideFlags: 0
@@ -13431,9 +13875,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1174492190}
   serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 1.1
+  m_LinearDamping: 0.45
+  m_AngularDamping: 0.65
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -13450,6 +13894,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1547949117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 6
+  torqueNewtonMeters: 1.8
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!54 &1555023076
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -13477,6 +13939,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1555023077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 0
+  starterPresetProcessed: 1
 --- !u!54 &1566807156
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -13485,9 +13965,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1174492169}
   serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 2
+  m_LinearDamping: 0.7
+  m_AngularDamping: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -13504,6 +13984,42 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1566807157
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 8
+  torqueNewtonMeters: 2.5
+  includeVertical: 1
+  starterPresetProcessed: 1
+--- !u!114 &1575403827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492172}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!54 &1584769049
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -13512,9 +14028,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1174492163}
   serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 3
+  m_LinearDamping: 0.7
+  m_AngularDamping: 1.2
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -13531,6 +14047,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1584769050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 7
+  torqueNewtonMeters: 2.5
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!54 &1602648866
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -13558,6 +14092,42 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1602648867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 0.65
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 1
+  starterPresetProcessed: 1
+--- !u!114 &1682871988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 7
+  torqueNewtonMeters: 2
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!54 &1701348099
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -13585,6 +14155,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1701348100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492178}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 0
+  starterPresetProcessed: 1
 --- !u!54 &1791937062
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -13612,6 +14200,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1791937063
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492192}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 0.65
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!43 &1861789206
 Mesh:
   m_ObjectHideFlags: 0
@@ -13976,9 +14582,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1174492167}
   serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 2.2
+  m_LinearDamping: 0.3
+  m_AngularDamping: 0.5
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -13995,6 +14601,42 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1920756348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 7
+  torqueNewtonMeters: 2
+  includeVertical: 1
+  starterPresetProcessed: 1
+--- !u!114 &1928716844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 7
+  torqueNewtonMeters: 2
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!54 &2001471704
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -14003,9 +14645,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1174492173}
   serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 2.2
+  m_LinearDamping: 0.3
+  m_AngularDamping: 0.5
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -14022,6 +14664,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &2001471705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 7
+  torqueNewtonMeters: 2
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!54 &2067560655
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -14049,6 +14709,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &2067560656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 0.65
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!54 &2087236288
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -14076,6 +14754,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &2087236289
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492174}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 0
+  starterPresetProcessed: 1
 --- !u!54 &2105081470
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -14103,6 +14799,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &2105081471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174492184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 1
+  starterPresetProcessed: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
