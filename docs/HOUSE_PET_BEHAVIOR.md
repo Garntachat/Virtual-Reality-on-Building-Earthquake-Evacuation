@@ -1,5 +1,11 @@
 # House pet roaming and earthquake reaction
 
+## November 8 follow-up
+
+Idle is now the default (Enable Roaming is optional). The House scene-load hook attaches the controller directly to the authored HouseLayout_Cat even if the furniture bootstrap skips it. The HouseScenarioController earthquake phase drives barking, with GroundMotionPlayer as fallback. A public-domain Labrador recording is included at Resources/PetAudio/DogBark.ogg; license/source is beside it. Each bark tilts the head group and chest, then restores their rest rotations. Console prints `CEVR House pet ready` and whether recorded audio loaded. No scene regeneration is required. The roaming/synthesized-bark description below describes the earlier implementation; synthesized sound is now only a missing-asset fallback.
+
+Runtime validation remains outstanding: confirm the readiness log, listen near the pet during the earthquake phase, observe the head lift, and confirm no barking before the quake. The Game-view Mute Audio toggle and computer volume must allow playback.
+
 Only HouseSavedCatController changed. The historical class/mesh names say Cat; the existing pet model and House scene are preserved.
 
 - Replaces the seven-point one-metre loop with reachable first-floor grid routes and randomized destinations, preferring destinations at least three metres away.

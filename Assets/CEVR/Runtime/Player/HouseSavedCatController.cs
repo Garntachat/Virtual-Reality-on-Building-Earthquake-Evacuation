@@ -14,6 +14,28 @@ namespace ChulaEarthquakeVR
         [SerializeField] private Vector2 minimum = new Vector2(-4.4f, -6.6f);
         [SerializeField] private Vector2 maximum = new Vector2(6.4f, 6.6f);
         [SerializeField] private AudioClip barkClip;
+        [SerializeField] private bool enableRoaming = false;
+        private HouseScenarioController houseScenario;
+        private Transform barkHead;
+        private Transform chest;
+        private Quaternion headRest, chestRest;
+        private float barkTime = -10f;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void RegisterPet()
+        {
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= AttachPet;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += AttachPet;
+        }
+        private static void AttachPet(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+        {
+            if (scene.name != MainMenuController.HouseScene) return;
+            foreach (GameObject root in scene.GetRootGameObjects())
+                foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+                    if (child.name == "HouseLayout_Cat" && child.gameObject.activeInHierarchy &&
+                        child.GetComponent<HouseSavedCatController>() == null)
+                        child.gameObject.AddComponent<HouseSavedCatController>();
+        }
         private readonly Queue<Vector3> route = new Queue<Vector3>();
         private GroundMotionPlayer motion;
         private AudioSource voice;
@@ -78,16 +100,35 @@ namespace ChulaEarthquakeVR
             for (int i = 0; i < legs.Length; i++)
                 legRest[i] = legs[i] == null ? Quaternion.identity : legs[i].localRotation;
 
-            PickNextTarget();
+            if (enableRoaming) PickNextTarget();
             motion = FindFirstObjectByType<GroundMotionPlayer>();
+            houseScenario = FindFirstObjectByType<HouseScenarioController>();
             voice = gameObject.AddComponent<AudioSource>();
             voice.playOnAwake = false;
-            voice.spatialBlend = 1f;
+            voice.spatialBlend = 0.65f;
             voice.minDistance = 2f;
-            voice.maxDistance = 18f;
+            voice.maxDistance = 30f;
             voice.rolloffMode = AudioRolloffMode.Linear;
-            voice.volume = 0.65f;
+            voice.volume = 0.9f;
+            if (barkClip == null) barkClip = Resources.Load<AudioClip>("PetAudio/DogBark");
             if (barkClip == null) generatedBark = MakeBark();
+            Transform head = FindChild("Cat_Head");
+            if (head != null)
+            {
+                barkHead = new GameObject("Pet Bark Head Pivot").transform;
+                barkHead.SetParent(transform, false);
+                barkHead.position = head.position - transform.up * 0.08f;
+                var parts = new List<Transform>();
+                foreach (Transform part in transform)
+                    if (part.name.StartsWith("Cat_Head") || part.name.StartsWith("Cat_Ear") ||
+                        part.name.StartsWith("Cat_Eye") || part.name.StartsWith("Cat_Muzzle") || part.name == "Cat_Nose")
+                        parts.Add(part);
+                foreach (Transform part in parts) part.SetParent(barkHead, true);
+                headRest = barkHead.localRotation;
+            }
+            chest = FindChild("Cat_Chest");
+            if (chest != null) chestRest = chest.localRotation;
+            Debug.Log("CEVR House pet ready: idle + earthquake bark; recorded audio=" + (barkClip != null), this);
         }
 
         private void Awake() => Configure();
@@ -96,18 +137,20 @@ namespace ChulaEarthquakeVR
         {
             if (!configured) Configure();
             if (body == null) return;
-            if (motion == null && Time.time >= retryAt)
+            if ((motion == null || houseScenario == null) && Time.time >= retryAt)
             {
                 motion = FindFirstObjectByType<GroundMotionPlayer>();
+                houseScenario = FindFirstObjectByType<HouseScenarioController>();
                 retryAt = Time.time + 1f;
             }
-            bool shaking = motion != null && motion.IsPlaying;
+            bool shaking = houseScenario != null ? houseScenario.IsQuaking : motion != null && motion.IsPlaying;
             if (shaking)
             {
                 if (!wasShaking || Time.time >= nextBark)
                 {
                     voice.pitch = Random.Range(0.92f, 1.08f);
                     voice.PlayOneShot(barkClip != null ? barkClip : generatedBark);
+                    barkTime = Time.time;
                     nextBark = Time.time + Random.Range(3f, 6f);
                 }
                 wasShaking = true;
@@ -122,6 +165,7 @@ namespace ChulaEarthquakeVR
                 waitUntil = Time.time + Random.Range(2f, 4f);
             }
             if (Time.time < waitUntil) { Animate(false); return; }
+            if (!enableRoaming) { Animate(false); return; }
 
             Vector3 position = body.position;
             Vector3 flat = target - position;
@@ -284,6 +328,10 @@ namespace ChulaEarthquakeVR
 
         private void Animate(bool walking)
         {
+            float age = Time.time - barkTime;
+            float reaction = age >= 0f && age < 0.55f ? Mathf.Sin(age / 0.55f * Mathf.PI) : 0f;
+            if (barkHead != null) barkHead.localRotation = headRest * Quaternion.Euler(-22f * reaction, 0f, 0f);
+            if (chest != null) chest.localRotation = chestRest * Quaternion.Euler(-8f * reaction, 0f, 0f);
             float gait = walking ? Mathf.Sin(Time.time * 10f) * 20f : 0f;
             for (int i = 0; i < legs.Length; i++)
             {
