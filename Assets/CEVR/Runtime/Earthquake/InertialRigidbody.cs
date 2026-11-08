@@ -37,6 +37,13 @@ namespace ChulaEarthquakeVR
         private GroundMotionPlayer subscribedMotion;
         private bool manualInteractionActive;
 
+        // House-only safety: heavy furniture stays at its saved position;
+        // small, loose furniture is allowed to fall and settle under gravity.
+        private bool anchoredHouseFurniture;
+        private bool looseHouseFurniture;
+        private Vector3 houseAnchorPosition;
+        private Quaternion houseAnchorRotation;
+
         public float ShakeStrength => responseScale;
         public float ForceNewtons => forceNewtons;
         public float TorqueNewtonMeters => torqueNewtonMeters;
@@ -58,6 +65,7 @@ namespace ChulaEarthquakeVR
         {
             body = GetComponent<Rigidbody>();
             topple = GetComponent<ToppleableFurniture>();
+            ConfigureHouseFurniturePhysics();
             if (motionSource == null) motionSource = FindFirstObjectByType<GroundMotionPlayer>();
             // Saved quake-activated furniture must not fall or settle during the
             // preparation countdown. FallingHazard bodies are staged separately.
@@ -66,6 +74,80 @@ namespace ChulaEarthquakeVR
                 body.isKinematic = true;
             // DO NOT overwrite Rigidbody mass, linear/angular damping, constraints,
             // collision mode or interpolation. All remain editable in the Inspector.
+        }
+
+        private void ConfigureHouseFurniturePhysics()
+        {
+            if (body == null || gameObject.scene.name != "House") return;
+
+            string itemName = name.ToLowerInvariant();
+            bool looseItem = itemName.Contains("chair") ||
+                             itemName.Contains("hazard") ||
+                             itemName.Contains("falling") ||
+                             itemName.Contains("pillow") ||
+                             itemName.Contains("cushion") ||
+                             itemName.Contains("vase") ||
+                             itemName.Contains("plant") ||
+                             itemName.Contains("lamp") ||
+                             itemName.Contains("bookstack") ||
+                             itemName.Contains("bottle") ||
+                             itemName.Contains("cup");
+            bool largeItem = body.mass >= 18f ||
+                             itemName.Contains("fridge") ||
+                             itemName.Contains("refrigerator") ||
+                             itemName.Contains("wardrobe") ||
+                             itemName.Contains("wandrobe") ||
+                             itemName.Contains("cabinet") ||
+                             itemName.Contains("bookcase") ||
+                             itemName.Contains("shelf") ||
+                             itemName.Contains("sofa") ||
+                             itemName.Contains("bed") ||
+                             itemName.Contains("table") ||
+                             itemName.Contains("desk") ||
+                             itemName.Contains("stove") ||
+                             itemName.Contains("sink");
+
+            anchoredHouseFurniture = largeItem && !looseItem;
+            looseHouseFurniture = !anchoredHouseFurniture;
+            // Gravity is harmless for kinematic furniture, but crucial when
+            // loose bodies are released by the earthquake or by player input.
+            body.useGravity = true;
+
+            if (anchoredHouseFurniture)
+            {
+                houseAnchorPosition = body.position;
+                houseAnchorRotation = body.rotation;
+                body.isKinematic = true;
+            }
+        }
+
+        private void UpdateAnchoredHouseFurniture()
+        {
+            if (body == null) return;
+            // The hazard system may try releasing old tall furniture as a
+            // falling hazard. Keep the *heavy* body physically anchored.
+            if (!body.isKinematic) body.isKinematic = true;
+
+            if (motionSource != null && motionSource.IsPlaying)
+            {
+                Vector3 acceleration = motionSource.CurrentFloorAccelerationMs2;
+                float normalized = 1f / Mathf.Max(0.01f, 0.16f * Physics.gravity.magnitude);
+                float strength = Mathf.Clamp(responseScale, 0f, 2f);
+                Vector3 offset = Vector3.ClampMagnitude(
+                    new Vector3(acceleration.x, 0f, acceleration.z) * normalized *
+                    (0.008f * strength), 0.018f);
+                float yaw = Mathf.Clamp(acceleration.x * normalized *
+                    (0.30f * strength), -0.65f, 0.65f);
+                body.MovePosition(houseAnchorPosition + offset);
+                body.MoveRotation(houseAnchorRotation * Quaternion.Euler(0f, yaw, 0f));
+            }
+            else
+            {
+                // No offset accumulates; after the quake the exact authored
+                // position and orientation are restored.
+                body.MovePosition(houseAnchorPosition);
+                body.MoveRotation(houseAnchorRotation);
+            }
         }
 
         private void Start()
@@ -102,7 +184,19 @@ namespace ChulaEarthquakeVR
         {
             if (!wakeOnlyWhenEarthquakeStarts || body == null ||
                 GetComponent<FallingHazard>() != null) return;
-            // The current scene Rigidbody, not a duplicate, receives the wave.
+            // Large House furniture never tips or drifts from its authored
+            // location. Loose props and chairs use actual gravity.
+            if (anchoredHouseFurniture) return;
+            if (looseHouseFurniture)
+            {
+                body.useGravity = true;
+                body.constraints &= ~RigidbodyConstraints.FreezePositionY;
+                // Keep chairs upright for the existing grab mechanic; all
+                // other small props can tip and land naturally.
+                if (!name.ToLowerInvariant().Contains("chair"))
+                    body.constraints &= ~(RigidbodyConstraints.FreezeRotationX |
+                                          RigidbodyConstraints.FreezeRotationZ);
+            }
             body.isKinematic = false;
         }
 
@@ -110,6 +204,9 @@ namespace ChulaEarthquakeVR
         {
             if (!wakeOnlyWhenEarthquakeStarts || body == null ||
                 manualInteractionActive || GetComponent<FallingHazard>() != null) return;
+            // Never freeze a loose object mid-air. Let it keep falling after
+            // shaking stops until it settles on the floor.
+            if (looseHouseFurniture || anchoredHouseFurniture) return;
             if (!body.isKinematic)
             {
                 body.linearVelocity = Vector3.zero;
@@ -140,6 +237,13 @@ namespace ChulaEarthquakeVR
             manualInteractionActive = false;
             if (body == null) body = GetComponent<Rigidbody>();
             if (body == null || (motionSource != null && motionSource.IsPlaying)) return;
+            if (looseHouseFurniture)
+            {
+                body.useGravity = true;
+                body.constraints &= ~RigidbodyConstraints.FreezePositionY;
+                body.isKinematic = false;
+                return;
+            }
             body.linearVelocity = Vector3.zero;
             body.angularVelocity = Vector3.zero;
             body.isKinematic = true;
@@ -157,6 +261,11 @@ namespace ChulaEarthquakeVR
 
         private void FixedUpdate()
         {
+            if (anchoredHouseFurniture)
+            {
+                UpdateAnchoredHouseFurniture();
+                return;
+            }
             if (motionSource == null || !motionSource.IsPlaying) return;
 
             // The global motion still drives the exact same 20-second quake,

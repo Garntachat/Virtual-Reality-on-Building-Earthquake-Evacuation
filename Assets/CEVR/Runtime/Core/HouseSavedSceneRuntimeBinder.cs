@@ -134,11 +134,11 @@ namespace ChulaEarthquakeVR
             Rigidbody fridge = BindCenterPhysicsVisual(savedRoot, gameplayRoot,
                 new[] { "HouseLayout_Fridge", "EDITOR_Fridge" },
                 "HouseTallCabinet_Left", motion, "house-fridge", 42f, true);
-            if (fridge != null) activeHazards.Add(fridge);
+            // Heavy fridge stays anchored: do not queue it as a falling hazard.
             Rigidbody wardrobe = BindCenterPhysicsVisual(savedRoot, gameplayRoot,
                 new[] { "HouseLayout_Wandrobe", "EDITOR_Wandrobe" },
                 "HouseBookcase_Right", motion, "house-wardrobe", 42f, true);
-            if (wardrobe != null) activeHazards.Add(wardrobe);
+            // Heavy wardrobe stays anchored: only loose overhead props fall.
             for (int i = 1; i <= HouseSceneLayout.OverheadHazards.Length; i++)
             {
                 Rigidbody books = BindCenterPhysicsVisual(savedRoot, gameplayRoot,
