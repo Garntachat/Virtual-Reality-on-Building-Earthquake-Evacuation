@@ -134,12 +134,22 @@ namespace ChulaEarthquakeVR
                 new[] { "HouseLayout_Wandrobe", "EDITOR_Wandrobe" },
                 "HouseBookcase_Right", motion);
 
+            // Tall furniture (fridge/wardrobe) is anchored: it only sways
+            // visually in place. Only the small overhead hazards may fall.
+            // Reconfigure the existing stage list without touching scene meshes.
+            var looseHazards = new List<Rigidbody>();
             for (int i = 1; i <= HouseSceneLayout.OverheadHazards.Length; i++)
             {
+                string proxyName = "HouseFallingObject_" + i;
                 BindCenterPhysicsVisual(savedRoot, gameplayRoot,
                     new[] { "HouseLayout_HazardBooks_" + i },
-                    "HouseFallingObject_" + i, motion);
+                    proxyName, motion);
+                GameObject fallingProxy = FindRuntimeObject(gameplayRoot, proxyName);
+                if (fallingProxy != null && fallingProxy.TryGetComponent(out Rigidbody body))
+                    looseHazards.Add(body);
             }
+            HazardDirector director = gameplayRoot.GetComponentInChildren<HazardDirector>(true);
+            if (director != null) director.Configure(looseHazards);
 
             BuildRuntimeStaticCollider(gameplayRoot, savedRoot,
                 "HouseLayout_Sofa", "EDITOR_Sofa");
@@ -464,6 +474,13 @@ namespace ChulaEarthquakeVR
                 visual.GetComponent<HouseProxyEarthquakeSettings>();
             if (settings != null)
                 settings.ApplyToExistingProxy(proxy, motion);
+
+            // Heavy authored models cannot follow falling physical proxies:
+            // the House sofa, cupboards, fridge and wardrobe stay grounded.
+            // Their DecorativeQuakeResponse does a tiny anchored rotation.
+            if (proxyName == "HouseTallCabinet_Left" ||
+                proxyName == "HouseBookcase_Right")
+                return;
 
             AttachRuntimeFollower(visual, proxy);
         }
