@@ -44,6 +44,14 @@ namespace ChulaEarthquakeVR
         private Vector3 houseAnchorPosition;
         private Quaternion houseAnchorRotation;
 
+        // Tutorial-only: large teaching-room furniture stays upright and in
+        // place; loose props are released with gravity and never frozen midair.
+        private bool anchoredTutorialFurniture;
+        private bool looseTutorialFurniture;
+        private Vector3 tutorialAnchorPosition;
+        private Quaternion tutorialAnchorRotation;
+        public bool IsEarthquakeAnchored => anchoredHouseFurniture || anchoredTutorialFurniture;
+
         public float ShakeStrength => responseScale;
         public float ForceNewtons => forceNewtons;
         public float TorqueNewtonMeters => torqueNewtonMeters;
@@ -66,6 +74,7 @@ namespace ChulaEarthquakeVR
             body = GetComponent<Rigidbody>();
             topple = GetComponent<ToppleableFurniture>();
             ConfigureHouseFurniturePhysics();
+            ConfigureTutorialFurniturePhysics();
             if (motionSource == null) motionSource = FindFirstObjectByType<GroundMotionPlayer>();
             // Saved quake-activated furniture must not fall or settle during the
             // preparation countdown. FallingHazard bodies are staged separately.
@@ -121,6 +130,73 @@ namespace ChulaEarthquakeVR
             }
         }
 
+        private void ConfigureTutorialFurniturePhysics()
+        {
+            if (body == null ||
+                gameObject.scene.name != "CEVR_ChulaEngineering_Tutorial") return;
+
+            // Hanging lights have a ConfigurableJoint and should remain
+            // suspended from that joint; player and task logic is unchanged.
+            if (GetComponent<ConfigurableJoint>() != null ||
+                GetComponent<WearableShoes>() != null) return;
+
+            string itemName = name.ToLowerInvariant();
+            bool isSmall = itemName.Contains("chair") ||
+                           itemName.Contains("stagedfallinghazard") ||
+                           itemName.Contains("falling") ||
+                           itemName.Contains("taskitem") ||
+                           itemName.Contains("pillow") ||
+                           itemName.Contains("cushion") ||
+                           itemName.Contains("vase") ||
+                           itemName.Contains("bottle") ||
+                           itemName.Contains("cup") ||
+                           itemName.Contains("bookstack") ||
+                           itemName.Contains("small");
+            bool isLarge = body.mass >= 18f ||
+                           itemName.Contains("cabinet") ||
+                           itemName.Contains("bookcase") ||
+                           itemName.Contains("wardrobe") ||
+                           itemName.Contains("shelf") ||
+                           itemName.Contains("desk") ||
+                           itemName.Contains("table") ||
+                           itemName.Contains("sofa") ||
+                           itemName.Contains("bench") ||
+                           itemName.Contains("locker") ||
+                           itemName.Contains("fridge");
+
+            anchoredTutorialFurniture = isLarge && !isSmall;
+            looseTutorialFurniture = !anchoredTutorialFurniture;
+            body.useGravity = true;
+            if (anchoredTutorialFurniture)
+            {
+                tutorialAnchorPosition = body.position;
+                tutorialAnchorRotation = body.rotation;
+                body.isKinematic = true;
+            }
+        }
+
+        private void UpdateAnchoredTutorialFurniture()
+        {
+            if (body == null) return;
+            if (!body.isKinematic) body.isKinematic = true;
+            if (motionSource != null && motionSource.IsPlaying)
+            {
+                Vector3 wave = motionSource.CurrentFloorAccelerationMs2 /
+                    Mathf.Max(0.01f, 0.16f * Physics.gravity.magnitude);
+                float strength = Mathf.Clamp(responseScale, 0f, 2f);
+                Vector3 offset = Vector3.ClampMagnitude(
+                    new Vector3(wave.x, 0f, wave.z) * (0.008f * strength), 0.018f);
+                float yaw = Mathf.Clamp(wave.x * (0.3f * strength), -0.65f, 0.65f);
+                body.MovePosition(tutorialAnchorPosition + offset);
+                body.MoveRotation(tutorialAnchorRotation * Quaternion.Euler(0f, yaw, 0f));
+            }
+            else
+            {
+                body.MovePosition(tutorialAnchorPosition);
+                body.MoveRotation(tutorialAnchorRotation);
+            }
+        }
+
         private void UpdateAnchoredHouseFurniture()
         {
             if (body == null) return;
@@ -165,7 +241,8 @@ namespace ChulaEarthquakeVR
 
         private void SubscribeToQuake()
         {
-            if (!Application.isPlaying || !wakeOnlyWhenEarthquakeStarts) return;
+            if (!Application.isPlaying ||
+                (!wakeOnlyWhenEarthquakeStarts && !looseTutorialFurniture)) return;
             if (motionSource == null) motionSource = FindFirstObjectByType<GroundMotionPlayer>();
             if (motionSource == subscribedMotion) return;
             if (subscribedMotion != null)
@@ -182,12 +259,12 @@ namespace ChulaEarthquakeVR
 
         private void OnQuakeStarted()
         {
-            if (!wakeOnlyWhenEarthquakeStarts || body == null ||
-                GetComponent<FallingHazard>() != null) return;
+            if ((!wakeOnlyWhenEarthquakeStarts && !looseTutorialFurniture) ||
+                body == null || GetComponent<FallingHazard>() != null) return;
             // Large House furniture never tips or drifts from its authored
             // location. Loose props and chairs use actual gravity.
-            if (anchoredHouseFurniture) return;
-            if (looseHouseFurniture)
+            if (anchoredHouseFurniture || anchoredTutorialFurniture) return;
+            if (looseHouseFurniture || looseTutorialFurniture)
             {
                 body.useGravity = true;
                 body.constraints &= ~RigidbodyConstraints.FreezePositionY;
@@ -206,7 +283,8 @@ namespace ChulaEarthquakeVR
                 manualInteractionActive || GetComponent<FallingHazard>() != null) return;
             // Never freeze a loose object mid-air. Let it keep falling after
             // shaking stops until it settles on the floor.
-            if (looseHouseFurniture || anchoredHouseFurniture) return;
+            if (looseHouseFurniture || anchoredHouseFurniture ||
+                looseTutorialFurniture || anchoredTutorialFurniture) return;
             if (!body.isKinematic)
             {
                 body.linearVelocity = Vector3.zero;
@@ -237,7 +315,7 @@ namespace ChulaEarthquakeVR
             manualInteractionActive = false;
             if (body == null) body = GetComponent<Rigidbody>();
             if (body == null || (motionSource != null && motionSource.IsPlaying)) return;
-            if (looseHouseFurniture)
+            if (looseHouseFurniture || looseTutorialFurniture)
             {
                 body.useGravity = true;
                 body.constraints &= ~RigidbodyConstraints.FreezePositionY;
@@ -261,6 +339,11 @@ namespace ChulaEarthquakeVR
 
         private void FixedUpdate()
         {
+            if (anchoredTutorialFurniture)
+            {
+                UpdateAnchoredTutorialFurniture();
+                return;
+            }
             if (anchoredHouseFurniture)
             {
                 UpdateAnchoredHouseFurniture();
