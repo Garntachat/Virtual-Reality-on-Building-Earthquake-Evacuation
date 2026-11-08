@@ -720,6 +720,34 @@ def check_quake_sync_saved_scenes(errors: list[str]) -> None:
             fail(errors, "House needs exactly its 29 currently authored physical furniture roots")
 
 
+def check_house_pet_quake_walking(errors: list[str]) -> None:
+    """Protect the House pet's bark/head lift AND short quake movement."""
+    path = ROOT / "Assets/CEVR/Runtime/Player/HouseSavedCatController.cs"
+    pet = path.read_text(encoding="utf-8")
+    expected = (
+        "moveDuringEarthquake = true",
+        "houseScenario.IsQuaking",
+        "WalkAlongRoute(true);",
+        "PickNextTarget(earthquake);",
+        "body.MovePosition(next);",
+        "if (!HasGroundAt(next) || ObstacleAhead(position, direction) ||",
+        "IsClearOfSavedFurniture(next)",
+        "Quaternion.Euler(-22f * reaction",
+        'Resources.Load<AudioClip>("PetAudio/DogBark")',
+    )
+    for fragment in expected:
+        if fragment not in pet:
+            fail(errors, "House pet earthquake movement/bark regression: " + fragment)
+    # The quake-only path must actually reach the walking helper, rather than
+    # returning immediately after the bark as in the previous implementation.
+    quake_block = pet.split("if (shaking)", 1)[-1].split("if (wasShaking)", 1)[0]
+    if "WalkAlongRoute(true);" not in quake_block:
+        fail(errors, "House pet still returns before quake walking")
+    # Do not enable roaming before shaking unless the designer explicitly opts in.
+    if "enableRoaming = false" not in pet:
+        fail(errors, "House pet should remain normally idle before an earthquake")
+
+
 def check_main_menu(errors: list[str]) -> None:
     scene_dir = "Assets/CEVR/Generated/Scenes/"
     expected = ["CEVR_MainMenu", "CEVR_ChulaEngineering_Tutorial", "House"]
@@ -787,6 +815,7 @@ def main() -> int:
     check_team_furniture(errors)
     check_house_layout_analyzer(errors)
     check_quake_sync_saved_scenes(errors)
+    check_house_pet_quake_walking(errors)
     check_main_menu(errors)
     check_git_hygiene(errors)
     check_english_only(errors)
