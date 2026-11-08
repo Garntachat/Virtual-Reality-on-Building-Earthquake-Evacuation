@@ -46,15 +46,34 @@ namespace ChulaEarthquakeVR.Editor
                 new GUIContent("Shake Strength", "0 = off, 1 = normal, 2 = double force."));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("includeVertical"),
                 new GUIContent("Allow Vertical Shake"));
-            EditorGUILayout.Space(4f);
 
-            if (body != null && body.isKinematic)
-                EditorGUILayout.HelpBox("Kinematic is enabled: the object is held by gameplay and will not shake until it is released.", MessageType.Warning);
+            EditorGUILayout.Space(4f);
+            SerializedProperty houseMode = serializedObject.FindProperty("houseMotionMode");
+            EditorGUILayout.PropertyField(houseMode,
+                new GUIContent("House Motion Mode", "Standard = existing chair physics; Anchored Sway = heavy furniture rocks at the original pivot; Gravity Loose = small objects fall to the floor."));
+            if (houseMode.enumValueIndex == (int)HouseFurnitureMotionMode.AnchoredSway)
+            {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("anchoredSwayDegrees"),
+                    new GUIContent("Anchored Rocking (degrees)", "Maximum small tilt; the object's center stays at the saved position."));
+                EditorGUILayout.HelpBox(
+                    "Large furniture stays kinematic and rooted at its saved position, but rocks gently with the shared quake. Force/Torque do not launch it. Edit this angle to change its visual shake.",
+                    MessageType.Info);
+            }
+            else if (houseMode.enumValueIndex == (int)HouseFurnitureMotionMode.GravityLoose)
+            {
+                EditorGUILayout.HelpBox(
+                    "Small loose object: stays parked before the earthquake, then moves with the shared quake and falls naturally under gravity. It keeps falling/settling after shaking ends.",
+                    MessageType.Info);
+            }
+            else if (body != null && body.isKinematic)
+                EditorGUILayout.HelpBox(
+                    "Parked until the earthquake starts. Table chairs can still be moved deliberately using the player grab control.",
+                    MessageType.Info);
             else
                 EditorGUILayout.HelpBox(
-                    "One shared earthquake wave + one force/torque per object. " +
-                    "Edit outside Play mode and save. Unity's actual Rigidbody Mass, " +
-                    "Linear Damping and Angular Damping control the response.", MessageType.Info);
+                    "Standard shared earthquake Force/Torque response. Edit Rigidbody Mass and Damping outside Play mode.",
+                    MessageType.Info);
+            EditorGUILayout.Space(4f);
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("motionSource"),
                 new GUIContent("Shared Earthquake Source (advanced)"));
