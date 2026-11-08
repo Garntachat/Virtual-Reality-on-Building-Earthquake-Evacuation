@@ -493,16 +493,24 @@ namespace ChulaEarthquakeVR
                 // Do not attach a follower: it would overwrite the physics motion.
                 EnsureAuthoredHouseCollider(visual);
                 authoredShaker.ConnectMotionIfMissing(motion);
-                if (tallFurniture && visual.GetComponent<ToppleableFurniture>() == null)
+                bool anchored = authoredShaker.HouseMotionMode ==
+                    HouseFurnitureMotionMode.AnchoredSway;
+                // Heavy cabinets/fridges are now grounded wobbling furniture:
+                // do not arm them as falling hazards or give them a competing
+                // ToppleableFurniture force. Only loose overhead books fall.
+                if (!anchored)
                 {
-                    ToppleableFurniture oldTopple = proxy.GetComponent<ToppleableFurniture>();
-                    visual.gameObject.AddComponent<ToppleableFurniture>().Configure(motion,
-                        oldTopple == null ? 1.35f : oldTopple.UpperForceScale,
-                        oldTopple == null ? 1.2f : oldTopple.ForceHeight);
+                    if (tallFurniture && visual.GetComponent<ToppleableFurniture>() == null)
+                    {
+                        ToppleableFurniture oldTopple = proxy.GetComponent<ToppleableFurniture>();
+                        visual.gameObject.AddComponent<ToppleableFurniture>().Configure(motion,
+                            oldTopple == null ? 1.35f : oldTopple.UpperForceScale,
+                            oldTopple == null ? 1.2f : oldTopple.ForceHeight);
+                    }
+                    FallingHazard hazard = visual.GetComponent<FallingHazard>();
+                    if (hazard == null) hazard = visual.gameObject.AddComponent<FallingHazard>();
+                    hazard.Configure(hazardId, damage);
                 }
-                FallingHazard hazard = visual.GetComponent<FallingHazard>();
-                if (hazard == null) hazard = visual.gameObject.AddComponent<FallingHazard>();
-                hazard.Configure(hazardId, damage);
 
                 // Disable ONLY the invisible duplicate's physics/collision. It is
                 // still kept in the runtime hierarchy for legacy gameplay hooks.
@@ -518,7 +526,7 @@ namespace ChulaEarthquakeVR
                     proxyBody.isKinematic = true;
                     proxyBody.useGravity = false;
                 }
-                return authoredBody;
+                return anchored ? null : authoredBody;
             }
 
             // Old scenes without authored physics retain their original proxy behavior.
