@@ -669,7 +669,7 @@ def check_quake_sync_saved_scenes(errors: list[str]) -> None:
                      "MovableChair_StrongTableApproach"},
     }
     for label, file_name, minimum_bodies, minimum_gated in (
-        ("House", "House.unity", 29, 29),
+        ("House", "House.unity", 4, 4),
         ("Tutorial", "CEVR_ChulaEngineering_Tutorial.unity", 25, 15),
     ):
         scene = (ROOT / "Assets/CEVR/Generated/Scenes" / file_name).read_text(encoding="utf-8")
@@ -716,8 +716,25 @@ def check_quake_sync_saved_scenes(errors: list[str]) -> None:
             fail(errors, label + " saved scene lost Rigidbody furniture roots")
         if gated < minimum_gated:
             fail(errors, label + " lost quake-gated pre-earthquake furniture")
-        if label == "House" and bodies != 29:
-            fail(errors, "House needs exactly its 29 currently authored physical furniture roots")
+        if label == "House":
+            # Only the four intentionally grabbable House chairs are physical
+            # furniture. The 25 other authored roots use the original safe
+            # visual responses / staged hazard proxies, avoiding levitation.
+            if bodies != 4 or gated != 4:
+                fail(errors, "House must keep only four quake-gated chair Rigidbodies")
+            legacy_proxy_guid = "30af19df1f384c9c9dfc6038a3ec24d0"
+            original_visual_guid = "ab961bf228304a69ae2992a024c85f25"
+            proxy_count = scene.count("guid: " + legacy_proxy_guid)
+            visual_count = scene.count("guid: " + original_visual_guid)
+            if proxy_count != 6 or visual_count < 19:
+                fail(errors, "House original non-chair visual/proxy vibration was replaced")
+            editor = (ROOT / "Assets/CEVR/Editor/EditableRigidbodyEarthquakeSetup.cs").read_text()
+            binder = (ROOT / "Assets/CEVR/Runtime/Core/HouseSavedSceneRuntimeBinder.cs").read_text()
+            if "Undo.AddComponent<HouseProxyEarthquakeSettings>" not in editor or (
+                    "Undo.AddComponent<DecorativeQuakeResponse>" not in editor):
+                fail(errors, "House editor should retain original non-chair response components")
+            if "AttachRuntimeFollower(visual, proxy)" not in binder:
+                fail(errors, "House staged hazards should retain the old visual/proxy behavior")
 
 
 def check_main_menu(errors: list[str]) -> None:
