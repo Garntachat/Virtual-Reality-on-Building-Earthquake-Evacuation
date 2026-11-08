@@ -242,6 +242,16 @@ namespace ChulaEarthquakeVR
                 if (t.name == "HouseSturdyTableLeg")
                     legs.Add(t.gameObject);
 
+            // The saved dining table now owns its single native Rigidbody.
+            // The previous invisible table collision stand-in must not pin it
+            // in place or fight its shaker during the earthquake.
+            bool usingAuthoredTablePhysics = visual.GetComponent<Rigidbody>() != null;
+            if (usingAuthoredTablePhysics && top != null)
+            {
+                foreach (Collider duplicate in top.GetComponentsInChildren<Collider>(true))
+                    duplicate.enabled = false;
+            }
+
             float lx = Mathf.Max(0.08f, local.extents.x - 0.10f);
             float lz = Mathf.Max(0.08f, local.extents.z - 0.10f);
             float legHeight = Mathf.Max(0.25f, local.size.y - 0.12f);
@@ -261,7 +271,11 @@ namespace ChulaEarthquakeVR
                 legs[i].transform.localScale = new Vector3(0.10f, legHeight, 0.10f);
 
                 BoxCollider box = legs[i].GetComponent<BoxCollider>();
-                if (box != null) box.size = Vector3.one;
+                if (box != null)
+                {
+                    box.size = Vector3.one;
+                    if (usingAuthoredTablePhysics) box.enabled = false;
+                }
             }
 
             Vector3 floorCenter =
