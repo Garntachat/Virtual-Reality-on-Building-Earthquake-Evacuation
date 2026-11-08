@@ -150,8 +150,11 @@ namespace ChulaEarthquakeVR
             if (hazardDirector != null && activeHazards.Count > 0)
                 hazardDirector.Configure(activeHazards);
 
+            // Build compound sofa colliders (seat/back/arms) instead of a
+            // giant bounding box that makes the decorative pillows hover.
             BuildRuntimeStaticCollider(gameplayRoot, savedRoot,
                 "HouseLayout_Sofa", "EDITOR_Sofa");
+            PrepareHouseSofaPillows(savedRoot);
             BuildRuntimeStaticCollider(gameplayRoot, savedRoot,
                 "HouseLayout_tableCoffee", "EDITOR_tableCoffee", "EDITOR_CoffeeTable");
             BuildRuntimeStaticCollider(gameplayRoot, savedRoot,
@@ -568,6 +571,11 @@ namespace ChulaEarthquakeVR
 
         private static void EnsureAuthoredHouseCollider(Transform visual)
         {
+            // A single full-height sofa BoxCollider covers the EMPTY air
+            // over its seats. It pushes the pillows above the backrest during
+            // Play. Use colliders on the visible sofa components instead.
+            if (visual.name == "HouseLayout_Sofa" && EnsureSofaCompoundColliders(visual))
+                return;
             if (visual.GetComponent<Collider>() != null) return;
             if (!TryLocalVisibleBounds(visual, out Bounds local)) return;
             BoxCollider box = visual.gameObject.AddComponent<BoxCollider>();
@@ -576,6 +584,75 @@ namespace ChulaEarthquakeVR
                 Mathf.Max(0.08f, local.size.x),
                 Mathf.Max(0.08f, local.size.y),
                 Mathf.Max(0.08f, local.size.z));
+        }
+
+        private static bool EnsureSofaCompoundColliders(Transform sofa)
+        {
+            int created = 0;
+            foreach (Renderer renderer in sofa.GetComponentsInChildren<Renderer>(true))
+            {
+                if (renderer == null || !renderer.enabled ||
+                    !renderer.gameObject.activeInHierarchy) continue;
+                string part = renderer.name;
+                bool structure = part.StartsWith("SeatCushion", StringComparison.Ordinal) ||
+                                 part.StartsWith("BackCushion", StringComparison.Ordinal) ||
+                                 part.StartsWith("ArmL", StringComparison.Ordinal) ||
+                                 part.StartsWith("ArmR", StringComparison.Ordinal) ||
+                                 part == "Base";
+                if (!structure) continue;
+                if (EnsureVisiblePartCollider(renderer)) created++;
+            }
+            if (created == 0) return false;
+
+            // Never leave the old full-sofa root box active at the same time:
+            // it would recreate a phantom horizontal surface above the seats.
+            foreach (Collider previous in sofa.GetComponents<Collider>())
+                previous.enabled = false;
+            return true;
+        }
+
+        private static bool EnsureVisiblePartCollider(Renderer renderer)
+        {
+            MeshFilter mesh = renderer.GetComponent<MeshFilter>();
+            if (mesh == null || mesh.sharedMesh == null) return false;
+            BoxCollider collider = renderer.GetComponent<BoxCollider>();
+            if (collider == null)
+                collider = renderer.gameObject.AddComponent<BoxCollider>();
+            Bounds bounds = mesh.sharedMesh.bounds;
+            collider.center = bounds.center;
+            collider.size = new Vector3(
+                Mathf.Max(0.0005f, bounds.size.x),
+                Mathf.Max(0.0005f, bounds.size.y),
+                Mathf.Max(0.0005f, bounds.size.z));
+            collider.isTrigger = false;
+            collider.enabled = true;
+            return true;
+        }
+
+        private static void PrepareHouseSofaPillows(Transform savedRoot)
+        {
+            Transform pillows = FindFurniture(savedRoot, "HouseLayout_Sofa_Pillows");
+            if (pillows == null) return;
+            Rigidbody body = pillows.GetComponent<Rigidbody>();
+            if (body == null) return;
+
+            int colliders = 0;
+            foreach (Renderer renderer in pillows.GetComponentsInChildren<Renderer>(true))
+            {
+                if (renderer == null || !renderer.enabled ||
+                    !renderer.gameObject.activeInHierarchy ||
+                    (renderer.name != "PillowL" && renderer.name != "PillowR")) continue;
+                if (EnsureVisiblePartCollider(renderer)) colliders++;
+            }
+            // Do not release anything unless the two visible pillows have
+            // actual collision shapes to rest on the upholstered seat.
+            if (colliders < 2) return;
+            // In Play mode only; the authored scene hierarchy and position are
+            // untouched. The cushion collider supports the pillows while
+            // Unity gravity naturally corrects their initial hover.
+            body.useGravity = true;
+            body.constraints &= ~RigidbodyConstraints.FreezePositionY;
+            body.isKinematic = false;
         }
 
         private static void AttachRuntimeFollower(Transform visual, GameObject proxy)
