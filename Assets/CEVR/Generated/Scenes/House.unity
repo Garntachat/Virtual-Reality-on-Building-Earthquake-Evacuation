@@ -8932,6 +8932,7 @@ MonoBehaviour:
   forceNewtons: 22
   torqueNewtonMeters: 6
   includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
   starterPresetProcessed: 1
 --- !u!65 &566439716
 BoxCollider:
@@ -22089,6 +22090,7 @@ MonoBehaviour:
   forceNewtons: 22
   torqueNewtonMeters: 6
   includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
   starterPresetProcessed: 1
 --- !u!65 &1306048166
 BoxCollider:
@@ -24989,6 +24991,7 @@ MonoBehaviour:
   forceNewtons: 22
   torqueNewtonMeters: 6
   includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
   starterPresetProcessed: 1
 --- !u!65 &1493009754
 BoxCollider:
@@ -83875,6 +83878,7 @@ MonoBehaviour:
   forceNewtons: 22
   torqueNewtonMeters: 6
   includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
   starterPresetProcessed: 1
 --- !u!65 &1963756529
 BoxCollider:

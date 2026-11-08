@@ -225,7 +225,14 @@ namespace ChulaEarthquakeVR
                 ? item.GetComponent<Rigidbody>()
                 : furniture != null ? furniture.GetComponent<Rigidbody>() : pillow.GetComponent<Rigidbody>();
             ClaimedBodies.RemoveWhere(claimed => claimed == null);
-            if (body == null || body.isKinematic || ClaimedBodies.Contains(body)) return;
+            if (body == null || ClaimedBodies.Contains(body)) return;
+            // Most parked furniture is intentionally kinematic until the quake.
+            // Permit only a deliberate participant grab to unpark a chair;
+            // idle collision physics must never move it during preparation.
+            if (body.isKinematic && (furniture == null ||
+                body.GetComponent<InertialRigidbody>() == null ||
+                !body.GetComponent<InertialRigidbody>().BeginManualInteraction()))
+                return;
 
             heldBody = body;
             ClaimedBodies.Add(body);
@@ -263,6 +270,9 @@ namespace ChulaEarthquakeVR
                 heldBody.linearDamping = previousLinearDamping;
                 heldBody.angularDamping = previousAngularDamping;
             }
+            // Re-park the chair only if the earthquake has not begun or has
+            // ended. A chair in an active earthquake must stay physically free.
+            releasedBody.GetComponent<InertialRigidbody>()?.EndManualInteraction();
             heldBody = null;
             ClaimedBodies.Remove(releasedBody);
         }

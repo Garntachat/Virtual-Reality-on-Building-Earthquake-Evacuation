@@ -629,6 +629,97 @@ def check_house_layout_analyzer(errors: list[str]) -> None:
         fail(errors, "unverified hard-coded HouseResourceFurnitureLayout.cs must not return")
 
 
+def check_quake_sync_saved_scenes(errors: list[str]) -> None:
+    """Check both serialized scenes, quake timing, sound and editable physics coverage."""
+    inertial_guid = "4fcb2a684a902af495449f4d76111487"
+    motion = (ROOT / "Assets/CEVR/Runtime/Earthquake/GroundMotionPlayer.cs").read_text()
+    shaker = (ROOT / "Assets/CEVR/Runtime/Earthquake/InertialRigidbody.cs").read_text()
+    audio = (ROOT / "Assets/CEVR/Runtime/Audio/GameplayAudioDirector.cs").read_text()
+    house_flow = (ROOT / "Assets/CEVR/Runtime/Core/HouseScenarioController.cs").read_text()
+    tutorial_flow = (ROOT / "Assets/CEVR/Runtime/Core/GameFlowController.cs").read_text()
+
+    # The scenario countdown must finish before a single shared quake signal.
+    if ("yield return Countdown(preparationSeconds);" not in house_flow or
+            house_flow.index("yield return Countdown(preparationSeconds);") >
+            house_flow.index("motion.StartQuake();")):
+        fail(errors, "House quake starts before the preparation countdown")
+    for file_name, source in (("GroundMotionPlayer", motion), ("GameFlowController", tutorial_flow)):
+        if "StartQuake(" not in source:
+            fail(errors, file_name + " must expose a shared earthquake onset")
+    grabber = (ROOT / "Assets/CEVR/Runtime/Player/DesktopGrabInteractor.cs").read_text()
+    for token in ("BeginManualInteraction()", "EndManualInteraction()"):
+        if token not in shaker or token not in grabber:
+            fail(errors, "pre-quake chair dragging must remain available: " + token)
+    for token in ("if (motionSource == null || !motionSource.IsPlaying) return;",
+                  "wakeOnlyWhenEarthquakeStarts", "QuakeStarted += OnQuakeStarted",
+                  "QuakeEnded += OnQuakeEnded", "private void OnEnable()"):
+        if token not in shaker:
+            fail(errors, "saved furniture must follow the shared quake start/stop: " + token)
+    for token in ("motion.QuakeStarted += OnQuakeStarted",
+                  "motion.QuakeEnded += OnQuakeEnded",
+                  "motion != null && motion.IsPlaying",
+                  "CEVR_HouseEarthquakeSoundtrack"):
+        if token not in audio:
+            fail(errors, "earthquake soundtrack is not synchronized: " + token)
+
+    protected_chairs = {
+        "House": {"HouseLayout_DiningChair_Left", "HouseLayout_DiningChair_Right",
+                  "HouseLayout_DiningChair_Spare", "HouseLayout_DiningChair_CoverObstacle"},
+        "Tutorial": {"MovableChair_LabBenchSouth", "MovableChair_Spare",
+                     "MovableChair_StrongTableApproach"},
+    }
+    for label, file_name, minimum_bodies, minimum_gated in (
+        ("House", "House.unity", 29, 29),
+        ("Tutorial", "CEVR_ChulaEngineering_Tutorial.unity", 25, 15),
+    ):
+        scene = (ROOT / "Assets/CEVR/Generated/Scenes" / file_name).read_text(encoding="utf-8")
+        parts = re.split(r"(?=^--- !u!\d+ &\d+\n)", scene, flags=re.MULTILINE)
+        components = {}
+        gameobjects = []
+        for part in parts:
+            header = re.match(r"^--- !u!(\d+) &(\d+)\n", part)
+            if not header:
+                continue
+            component_type, file_id = header.groups()
+            components[file_id] = (component_type, part)
+            if component_type == "1":
+                gameobjects.append(part)
+
+        bodies = 0
+        gated = 0
+        seen_chairs = set()
+        for go in gameobjects:
+            name_match = re.search(r"^  m_Name: (.+)$", go, re.MULTILINE)
+            name = name_match.group(1) if name_match else "unknown"
+            refs = re.findall(r"^  - component: \{fileID: (\d+)\}", go, re.MULTILINE)
+            owned = [components[ref] for ref in refs if ref in components]
+            if not any(kind == "54" for kind, _ in owned):
+                continue
+            bodies += 1
+            responses = [body for kind, body in owned
+                         if kind == "114" and "guid: " + inertial_guid in body]
+            if not responses:
+                # LampAnchor is an immobile ConfigurableJoint support, not moving furniture.
+                if label != "Tutorial" or not name.startswith("LampAnchor_"):
+                    fail(errors, label + " physical furniture missing InertialRigidbody: " + name)
+            elif "wakeOnlyWhenEarthquakeStarts: 1" in responses[0]:
+                gated += 1
+            if name in protected_chairs[label]:
+                seen_chairs.add(name)
+                if not responses or "wakeOnlyWhenEarthquakeStarts: 1" not in responses[0]:
+                    fail(errors, label + " chair must stay parked until the quake: " + name)
+        missing_chairs = protected_chairs[label] - seen_chairs
+        if missing_chairs:
+            fail(errors, label + " saved chairs missing: " + ", ".join(sorted(missing_chairs)))
+
+        if bodies < minimum_bodies:
+            fail(errors, label + " saved scene lost Rigidbody furniture roots")
+        if gated < minimum_gated:
+            fail(errors, label + " lost quake-gated pre-earthquake furniture")
+        if label == "House" and bodies != 29:
+            fail(errors, "House needs exactly its 29 currently authored physical furniture roots")
+
+
 def check_main_menu(errors: list[str]) -> None:
     scene_dir = "Assets/CEVR/Generated/Scenes/"
     expected = ["CEVR_MainMenu", "CEVR_ChulaEngineering_Tutorial", "House"]
@@ -695,6 +786,7 @@ def main() -> int:
     check_one_time_earthquake_presets(errors)
     check_team_furniture(errors)
     check_house_layout_analyzer(errors)
+    check_quake_sync_saved_scenes(errors)
     check_main_menu(errors)
     check_git_hygiene(errors)
     check_english_only(errors)

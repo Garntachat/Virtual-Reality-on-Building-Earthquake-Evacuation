@@ -35,6 +35,7 @@ namespace ChulaEarthquakeVR
         private Rigidbody body;
         private ToppleableFurniture topple;
         private GroundMotionPlayer subscribedMotion;
+        private bool manualInteractionActive;
 
         public float ShakeStrength => responseScale;
         public float ForceNewtons => forceNewtons;
@@ -73,6 +74,13 @@ namespace ChulaEarthquakeVR
             SubscribeToQuake();
         }
 
+        private void OnEnable()
+        {
+            // OnDisable removes event handlers. A furniture component switched
+            // back on during Play must reconnect to the SAME shared quake source.
+            SubscribeToQuake();
+        }
+
         private void SubscribeToQuake()
         {
             if (!Application.isPlaying || !wakeOnlyWhenEarthquakeStarts) return;
@@ -101,13 +109,40 @@ namespace ChulaEarthquakeVR
         private void OnQuakeEnded()
         {
             if (!wakeOnlyWhenEarthquakeStarts || body == null ||
-                GetComponent<FallingHazard>() != null) return;
+                manualInteractionActive || GetComponent<FallingHazard>() != null) return;
             if (!body.isKinematic)
             {
                 body.linearVelocity = Vector3.zero;
                 body.angularVelocity = Vector3.zero;
                 body.isKinematic = true;
             }
+        }
+
+        /// <summary>
+        /// Let the participant deliberately slide a pre-quake chair while it is
+        /// otherwise parked. Only the player interaction can unfreeze it.
+        /// All settings and the last manually selected position are preserved.
+        /// </summary>
+        public bool BeginManualInteraction()
+        {
+            if (!wakeOnlyWhenEarthquakeStarts ||
+                GetComponent<MovableFurniture>() == null) return false;
+            if (body == null) body = GetComponent<Rigidbody>();
+            if (body == null || GetComponent<FallingHazard>() != null) return false;
+            manualInteractionActive = true;
+            body.isKinematic = false;
+            return true;
+        }
+
+        public void EndManualInteraction()
+        {
+            if (!manualInteractionActive) return;
+            manualInteractionActive = false;
+            if (body == null) body = GetComponent<Rigidbody>();
+            if (body == null || (motionSource != null && motionSource.IsPlaying)) return;
+            body.linearVelocity = Vector3.zero;
+            body.angularVelocity = Vector3.zero;
+            body.isKinematic = true;
         }
 
         private void OnDisable()
