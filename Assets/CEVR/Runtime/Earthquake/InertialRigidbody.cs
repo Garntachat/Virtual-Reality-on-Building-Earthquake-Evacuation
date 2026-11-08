@@ -22,6 +22,10 @@ namespace ChulaEarthquakeVR
         [Tooltip("Off for chairs and heavy furniture. On allows a small up/down component.")]
         [SerializeField] private bool includeVertical = true;
 
+        [Header("Earthquake onset")]
+        [Tooltip("For saved House furniture: keep the Rigidbody still in preparation, release it when the shared earthquake starts. Hazards use their own staggered release.")]
+        [SerializeField] private bool wakeOnlyWhenEarthquakeStarts;
+
         // Previous scenes already serialize responseScale / includeVertical; keep them intact.
         // Internal one-time marker: future Play sessions must never replace
         // a user's saved Mass, Damping, Force or Torque settings.
@@ -30,6 +34,7 @@ namespace ChulaEarthquakeVR
         public bool StarterPresetProcessed => starterPresetProcessed;
         private Rigidbody body;
         private ToppleableFurniture topple;
+        private GroundMotionPlayer subscribedMotion;
 
         public float ShakeStrength => responseScale;
         public float ForceNewtons => forceNewtons;
@@ -38,6 +43,14 @@ namespace ChulaEarthquakeVR
         public void ConnectMotionIfMissing(GroundMotionPlayer source)
         {
             if (motionSource == null) motionSource = source;
+            SubscribeToQuake();
+        }
+
+        // Used by the one-time House editor bake. Does not touch Mass or Damping.
+        public void ConfigureQuakeActivation(bool enabled)
+        {
+            wakeOnlyWhenEarthquakeStarts = enabled;
+            SubscribeToQuake();
         }
 
         private void Awake()
@@ -45,8 +58,66 @@ namespace ChulaEarthquakeVR
             body = GetComponent<Rigidbody>();
             topple = GetComponent<ToppleableFurniture>();
             if (motionSource == null) motionSource = FindFirstObjectByType<GroundMotionPlayer>();
+            // Saved quake-activated furniture must not fall or settle during the
+            // preparation countdown. FallingHazard bodies are staged separately.
+            if (wakeOnlyWhenEarthquakeStarts && body != null &&
+                GetComponent<FallingHazard>() == null && !body.isKinematic)
+                body.isKinematic = true;
             // DO NOT overwrite Rigidbody mass, linear/angular damping, constraints,
             // collision mode or interpolation. All remain editable in the Inspector.
+        }
+
+        private void Start()
+        {
+            if (motionSource == null) motionSource = FindFirstObjectByType<GroundMotionPlayer>();
+            SubscribeToQuake();
+        }
+
+        private void SubscribeToQuake()
+        {
+            if (!Application.isPlaying || !wakeOnlyWhenEarthquakeStarts) return;
+            if (motionSource == null) motionSource = FindFirstObjectByType<GroundMotionPlayer>();
+            if (motionSource == subscribedMotion) return;
+            if (subscribedMotion != null)
+            {
+                subscribedMotion.QuakeStarted -= OnQuakeStarted;
+                subscribedMotion.QuakeEnded -= OnQuakeEnded;
+            }
+            subscribedMotion = motionSource;
+            if (subscribedMotion == null) return;
+            subscribedMotion.QuakeStarted += OnQuakeStarted;
+            subscribedMotion.QuakeEnded += OnQuakeEnded;
+            if (subscribedMotion.IsPlaying) OnQuakeStarted();
+        }
+
+        private void OnQuakeStarted()
+        {
+            if (!wakeOnlyWhenEarthquakeStarts || body == null ||
+                GetComponent<FallingHazard>() != null) return;
+            // The current scene Rigidbody, not a duplicate, receives the wave.
+            body.isKinematic = false;
+        }
+
+        private void OnQuakeEnded()
+        {
+            if (!wakeOnlyWhenEarthquakeStarts || body == null ||
+                GetComponent<FallingHazard>() != null) return;
+            if (!body.isKinematic)
+            {
+                body.linearVelocity = Vector3.zero;
+                body.angularVelocity = Vector3.zero;
+                body.isKinematic = true;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (subscribedMotion != null)
+            {
+                subscribedMotion.QuakeStarted -= OnQuakeStarted;
+                subscribedMotion.QuakeEnded -= OnQuakeEnded;
+                subscribedMotion = null;
+            }
         }
 
         private void FixedUpdate()
@@ -95,6 +166,7 @@ namespace ChulaEarthquakeVR
         public void Configure(GroundMotionPlayer source, float scale = 1f, bool vertical = true)
         {
             motionSource = source;
+            SubscribeToQuake();
             responseScale = Mathf.Clamp(scale, 0f, 3f);
             includeVertical = vertical;
         }
