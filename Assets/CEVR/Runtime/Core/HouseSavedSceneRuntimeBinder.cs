@@ -487,6 +487,43 @@ namespace ChulaEarthquakeVR
 
             Rigidbody authoredBody = visual.GetComponent<Rigidbody>();
             InertialRigidbody authoredShaker = visual.GetComponent<InertialRigidbody>();
+
+            // A few saved House overhead-book roots have no rendered mesh and no
+            // collider. Do not release an invisible, colliderless Rigidbody.
+            // Instead keep the existing runtime falling prop (with a visible cube,
+            // collider, gravity and damage) at the authored book position.
+            if (!tallFurniture && visual.name.StartsWith("HouseLayout_HazardBooks_", StringComparison.Ordinal) &&
+                proxyBody != null && authoredBody != null)
+            {
+                bool hasVisibleMesh = false;
+                foreach (Renderer renderer in visual.GetComponentsInChildren<Renderer>(true))
+                {
+                    if (renderer != null && renderer.enabled && renderer.gameObject.activeInHierarchy)
+                    {
+                        hasVisibleMesh = true;
+                        break;
+                    }
+                }
+                if (!hasVisibleMesh)
+                {
+                    if (!authoredBody.isKinematic)
+                    {
+                        authoredBody.linearVelocity = Vector3.zero;
+                        authoredBody.angularVelocity = Vector3.zero;
+                    }
+                    authoredBody.isKinematic = true;
+                    authoredBody.useGravity = false;
+                    if (authoredShaker != null) authoredShaker.enabled = false;
+                    foreach (Collider authoredCollider in visual.GetComponentsInChildren<Collider>(true))
+                        authoredCollider.enabled = false;
+                    SetRenderers(proxy, true);
+                    foreach (Collider proxyCollider in proxy.GetComponentsInChildren<Collider>(true))
+                        proxyCollider.enabled = true;
+                    Debug.Log("CEVR House: using visible, collidable fallback for " + visual.name);
+                    return proxyBody;
+                }
+            }
+
             if (authoredBody != null && authoredShaker != null)
             {
                 // The scene-authored Rigidbody is authoritative in Edit AND Play.
