@@ -206,6 +206,14 @@ namespace ChulaEarthquakeVR
         private bool IsSafeDecorativeRenderer(Renderer renderer)
         {
             if (renderer == null || renderer.gameObject.scene != gameObject.scene) return false;
+            // Decorative sofa pillows no longer own a Rigidbody in Play Mode.
+            // Without this exclusion the general quake installer can attach a
+            // new sway component to PillowL/PillowR and make them float again.
+            if (renderer.gameObject.scene.name == "House")
+            {
+                for (Transform current = renderer.transform; current != null; current = current.parent)
+                    if (current.name == "HouseLayout_Sofa_Pillows") return false;
+            }
             if (renderer.GetComponentInParent<Rigidbody>() != null) return false;
             // Saved House fridge/wardrobe/overhead props follow the ONE
             // Rigidbody on their gameplay proxy. Never add a second visual
