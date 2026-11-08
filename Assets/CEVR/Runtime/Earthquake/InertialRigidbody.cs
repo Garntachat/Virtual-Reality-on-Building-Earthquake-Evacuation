@@ -73,6 +73,13 @@ namespace ChulaEarthquakeVR
             SubscribeToQuake();
         }
 
+        private void OnEnable()
+        {
+            // OnDisable removes event handlers. A furniture component switched
+            // back on during Play must reconnect to the SAME shared quake source.
+            SubscribeToQuake();
+        }
+
         private void SubscribeToQuake()
         {
             if (!Application.isPlaying || !wakeOnlyWhenEarthquakeStarts) return;
