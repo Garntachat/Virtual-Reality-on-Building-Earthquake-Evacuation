@@ -72,11 +72,18 @@ namespace ChulaEarthquakeVR
             Vector3 localWave = transform.parent == null
                 ? wave : transform.parent.InverseTransformDirection(wave);
             float sway = responseScale * ModeStrength();
-            Vector3 offset = new Vector3(localWave.x, 0f, localWave.z) * (0.025f * sway);
+            // Heavy/bolted furniture must sway at its EXACT authored position,
+            // never drift, rise, translate or simulate unsupported falling.
+            // Smaller loose objects are real Rigidbodies with gravity instead.
+            Vector3 offset = responseMode == DecorativeQuakeMode.Heavy
+                ? Vector3.zero
+                : new Vector3(localWave.x, 0f, localWave.z) * (0.025f * sway);
             Quaternion tilt = Quaternion.Euler(localWave.z * 5f * sway, 0f,
                 -localWave.x * 5f * sway);
             float blend = Mathf.Clamp01(Time.deltaTime * 14f / (1f + visualDamping));
-            transform.localPosition = Vector3.Lerp(transform.localPosition, restPosition + offset, blend);
+            transform.localPosition = responseMode == DecorativeQuakeMode.Heavy
+                ? restPosition
+                : Vector3.Lerp(transform.localPosition, restPosition + offset, blend);
             transform.localRotation = Quaternion.Slerp(transform.localRotation, restRotation * tilt, blend);
         }
 
