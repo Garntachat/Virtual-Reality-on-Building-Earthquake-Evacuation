@@ -26,6 +26,9 @@ namespace ChulaEarthquakeVR
         [Tooltip("For saved House furniture: keep the Rigidbody still in preparation, release it when the shared earthquake starts. Hazards use their own staggered release.")]
         [SerializeField] private bool wakeOnlyWhenEarthquakeStarts;
 
+        [Tooltip("For loose House items only: enable gravity at the quake onset and keep the Rigidbody dynamic after the quake so it can land on the floor.")]
+        [SerializeField] private bool releaseUnderGravityAndSettle;
+
         // Previous scenes already serialize responseScale / includeVertical; keep them intact.
         // Internal one-time marker: future Play sessions must never replace
         // a user's saved Mass, Damping, Force or Torque settings.
@@ -48,6 +51,11 @@ namespace ChulaEarthquakeVR
         }
 
         // Used by the one-time House editor bake. Does not touch Mass or Damping.
+        public void ConfigureGravityRelease(bool enabled)
+        {
+            releaseUnderGravityAndSettle = enabled;
+        }
+
         public void ConfigureQuakeActivation(bool enabled)
         {
             wakeOnlyWhenEarthquakeStarts = enabled;
@@ -103,6 +111,8 @@ namespace ChulaEarthquakeVR
             if (!wakeOnlyWhenEarthquakeStarts || body == null ||
                 GetComponent<FallingHazard>() != null) return;
             // The current scene Rigidbody, not a duplicate, receives the wave.
+            // Loose props need gravity NOW and must keep it after the shaking ends.
+            if (releaseUnderGravityAndSettle) body.useGravity = true;
             body.isKinematic = false;
         }
 
@@ -110,6 +120,9 @@ namespace ChulaEarthquakeVR
         {
             if (!wakeOnlyWhenEarthquakeStarts || body == null ||
                 manualInteractionActive || GetComponent<FallingHazard>() != null) return;
+            // Gravity is permanent for released loose items: never freeze them
+            // at a height after the earthquake signal stops.
+            if (releaseUnderGravityAndSettle) return;
             if (!body.isKinematic)
             {
                 body.linearVelocity = Vector3.zero;
