@@ -84,8 +84,13 @@ namespace ChulaEarthquakeVR
         private void Update()
         {
             if (motion == null) ConnectMotion();
-            float target = motion == null ? 0f : motion.PresentationIntensity;
-            smoothedIntensity = Mathf.Lerp(smoothedIntensity, target, 1f - Mathf.Exp(-5f * Time.unscaledDeltaTime));
+            // Do not let a lingering audio fade imply another earthquake after
+            // the shared ground-motion signal has stopped.
+            bool quaking = motion != null && motion.IsPlaying;
+            float target = quaking ? motion.PresentationIntensity : 0f;
+            smoothedIntensity = quaking
+                ? Mathf.Lerp(smoothedIntensity, target, 1f - Mathf.Exp(-5f * Time.unscaledDeltaTime))
+                : 0f;
             UpdateQuakeLayers(smoothedIntensity);
 
             if (Time.unscaledTime >= nextWalkerScan)
@@ -178,8 +183,23 @@ namespace ChulaEarthquakeVR
             }
         }
 
-        private void OnQuakeStarted() => PlayInternal(GameplayAudioCue.QuakeStart, 0.30f, 1.25f);
-        private void OnQuakeEnded() => PlayInternal(GameplayAudioCue.QuakeEnd, 0.22f, 1.35f);
+        private void OnQuakeStarted()
+        {
+            // Begin both layers on the SAME event that releases earthquake physics.
+            // Their volume follows the shared quake intensity from zero.
+            smoothedIntensity = 0f;
+            if (rumble != null && !rumble.isPlaying) { rumble.volume = 0f; rumble.Play(); }
+            if (structure != null && !structure.isPlaying) { structure.volume = 0f; structure.Play(); }
+            PlayInternal(GameplayAudioCue.QuakeStart, 0.30f, 1.25f);
+        }
+
+        private void OnQuakeEnded()
+        {
+            smoothedIntensity = 0f;
+            if (rumble != null) rumble.Stop();
+            if (structure != null) structure.Stop();
+            PlayInternal(GameplayAudioCue.QuakeEnd, 0.22f, 1.35f);
+        }
 
         public static void PlayCue(GameplayAudioCue cue, float volume = 1f, float pitch = 1f)
         {
@@ -195,11 +215,21 @@ namespace ChulaEarthquakeVR
 
         private void BuildLibrary()
         {
-            rumbleClip = Periodic("CEVR_Rumble", 4f, (t, i) =>
-                (Mathf.Sin(2f * Mathf.PI * 32f * t) * 0.52f +
-                 Mathf.Sin(2f * Mathf.PI * 47f * t) * 0.25f +
-                 Mathf.Sin(2f * Mathf.PI * 73f * t) * 0.12f) *
-                (0.72f + 0.28f * Mathf.Sin(2f * Mathf.PI * 2f * t)));
+            // Original synthesised soundtrack: bass building rumble plus
+            // gently filtered noise. No external audio file or license required.
+            int rumbleState = 20261108;
+            float filteredRumble = 0f;
+            rumbleClip = Periodic("CEVR_HouseEarthquakeSoundtrack", 4f, (t, i) =>
+            {
+                rumbleState = unchecked(rumbleState * 1664525 + 1013904223);
+                float white = ((rumbleState >> 8) & 65535) / 32767.5f - 1f;
+                filteredRumble = filteredRumble * 0.987f + white * 0.013f;
+                float bass = Mathf.Sin(2f * Mathf.PI * 32f * t) * 0.48f +
+                             Mathf.Sin(2f * Mathf.PI * 47f * t) * 0.22f +
+                             Mathf.Sin(2f * Mathf.PI * 73f * t) * 0.10f;
+                float breathing = 0.75f + 0.25f * Mathf.Sin(2f * Mathf.PI * 1.5f * t);
+                return (bass + filteredRumble * 0.34f) * breathing;
+            });
             structureClip = Periodic("CEVR_StructureCreak", 4f, (t, i) =>
                 Mathf.Sin(2f * Mathf.PI * (67f + 7f * Mathf.Sin(2f * Mathf.PI * 0.5f * t)) * t) *
                 (0.18f + 0.08f * Mathf.Sin(2f * Mathf.PI * 3f * t)));
