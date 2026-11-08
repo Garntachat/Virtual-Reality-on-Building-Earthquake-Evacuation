@@ -15,6 +15,10 @@ namespace ChulaEarthquakeVR
         [SerializeField] private Vector2 maximum = new Vector2(6.4f, 6.6f);
         [SerializeField] private AudioClip barkClip;
         [SerializeField] private bool enableRoaming = false;
+        [Header("Small earthquake movement")]
+        [Tooltip("Take short, collision-checked steps only during the earthquake. Normal idle roaming stays off.")]
+        [SerializeField] private bool moveDuringEarthquake = true;
+        [SerializeField, Range(0.15f, 1.25f)] private float quakeWalkSpeed = 0.58f;
         private HouseScenarioController houseScenario;
         private Transform barkHead;
         private Transform chest;
@@ -128,7 +132,8 @@ namespace ChulaEarthquakeVR
             }
             chest = FindChild("Cat_Chest");
             if (chest != null) chestRest = chest.localRotation;
-            Debug.Log("CEVR House pet ready: idle + earthquake bark; recorded audio=" + (barkClip != null), this);
+            Debug.Log("CEVR House pet ready: idle + quake bark + short quake walks; recorded audio=" +
+                (barkClip != null) + "; quake movement=" + moveDuringEarthquake, this);
         }
 
         private void Awake() => Configure();
@@ -146,15 +151,35 @@ namespace ChulaEarthquakeVR
             bool shaking = houseScenario != null ? houseScenario.IsQuaking : motion != null && motion.IsPlaying;
             if (shaking)
             {
-                if (!wasShaking || Time.time >= nextBark)
+                if (!wasShaking)
                 {
-                    voice.pitch = Random.Range(0.92f, 1.08f);
-                    voice.PlayOneShot(barkClip != null ? barkClip : generatedBark);
+                    // Preserve the first bark/head lift, then take small steps.
+                    wasShaking = true;
+                    route.Clear();
+                    target = body.position;
+                    waitUntil = Time.time + 0.6f;
+                }
+                if (Time.time >= nextBark)
+                {
+                    if (voice != null)
+                    {
+                        voice.pitch = Random.Range(0.92f, 1.08f);
+                        AudioClip clip = barkClip != null ? barkClip : generatedBark;
+                        if (clip != null) voice.PlayOneShot(clip);
+                    }
                     barkTime = Time.time;
                     nextBark = Time.time + Random.Range(3f, 6f);
                 }
-                wasShaking = true;
-                Animate(false);
+
+                // Stay mostly near the starting area, and pause while barking
+                // so the existing head/chest animation remains readable.
+                if (!moveDuringEarthquake || Time.time < waitUntil ||
+                    Time.time - barkTime < 0.55f)
+                {
+                    Animate(false);
+                    return;
+                }
+                WalkAlongRoute(true);
                 return;
             }
             if (wasShaking)
@@ -164,9 +189,16 @@ namespace ChulaEarthquakeVR
                 target = body.position;
                 waitUntil = Time.time + Random.Range(2f, 4f);
             }
-            if (Time.time < waitUntil) { Animate(false); return; }
-            if (!enableRoaming) { Animate(false); return; }
+            if (Time.time < waitUntil || !enableRoaming)
+            {
+                Animate(false);
+                return;
+            }
+            WalkAlongRoute(false);
+        }
 
+        private void WalkAlongRoute(bool earthquake)
+        {
             Vector3 position = body.position;
             Vector3 flat = target - position;
             flat.y = 0f;
@@ -176,21 +208,26 @@ namespace ChulaEarthquakeVR
                 if (route.Count > 0) target = route.Dequeue();
                 else
                 {
-                    PickNextTarget();
-                    waitUntil = Time.time + Random.Range(1.5f, 4f);
+                    PickNextTarget(earthquake);
+                    waitUntil = Time.time + (earthquake
+                        ? Random.Range(0.7f, 1.5f)
+                        : Random.Range(1.5f, 4f));
                 }
                 Animate(false);
                 return;
             }
 
             Vector3 direction = flat.normalized;
-            Vector3 next = position + direction * walkSpeed * Time.fixedDeltaTime;
+            float speed = earthquake ? quakeWalkSpeed : walkSpeed;
+            Vector3 next = position + direction * speed * Time.fixedDeltaTime;
             next.y = home.y;
 
-            if (!HasGroundAt(next) || ObstacleAhead(position, direction) || !IsClearOfSavedFurniture(next))
+            if (!HasGroundAt(next) || ObstacleAhead(position, direction) ||
+                !IsClearOfSavedFurniture(next))
             {
-                PickNextTarget();
-                waitUntil = Time.time + 0.8f;
+                // Never force the pet through saved House furniture or walls.
+                PickNextTarget(earthquake);
+                waitUntil = Time.time + (earthquake ? 0.6f : 0.8f);
                 Animate(false);
                 return;
             }
@@ -204,7 +241,7 @@ namespace ChulaEarthquakeVR
             Animate(true);
         }
 
-        private void PickNextTarget()
+        private void PickNextTarget(bool shortEarthquakeRoute = false)
         {
             route.Clear();
             Vector3 origin = body.position;
@@ -227,18 +264,22 @@ namespace ChulaEarthquakeVR
                     Vector2Int next = cell + offset;
                     if (!visited.Add(next)) continue;
                     Vector3 point = origin + new Vector3(next.x * step, 0, next.y * step);
+                    // During an earthquake this is nervous pacing, not a trip
+                    // across the House. Stay within about 1.5 metres.
+                    if (shortEarthquakeRoute && (point - origin).sqrMagnitude > 2.25f) continue;
                     if (point.x < minimum.x || point.x > maximum.x || point.z < minimum.y || point.z > maximum.y) continue;
                     if (!HasGroundAt(point) || !IsClearOfSavedFurniture(point)) continue;
                     Vector3 from = origin + new Vector3(cell.x * step, 0, cell.y * step);
                     if (ObstacleAhead(from, (point - from).normalized, step)) continue;
                     parents[next] = cell;
                     frontier.Enqueue(next);
-                    if ((point - origin).sqrMagnitude > 9f) candidates.Add(next);
+                    if ((point - origin).sqrMagnitude >
+                        (shortEarthquakeRoute ? 0.64f : 9f)) candidates.Add(next);
                 }
             }
             if (candidates.Count == 0)
                 foreach (var cell in parents.Keys)
-                    if (cell.sqrMagnitude > 2) candidates.Add(cell);
+                    if (cell.sqrMagnitude > 1) candidates.Add(cell);
             if (candidates.Count == 0) return;
             Vector2Int destination = candidates[Random.Range(0, candidates.Count)];
             var reverse = new Stack<Vector3>();
