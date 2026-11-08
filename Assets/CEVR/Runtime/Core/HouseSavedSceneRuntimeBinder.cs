@@ -154,7 +154,6 @@ namespace ChulaEarthquakeVR
             // giant bounding box that makes the decorative pillows hover.
             BuildRuntimeStaticCollider(gameplayRoot, savedRoot,
                 "HouseLayout_Sofa", "EDITOR_Sofa");
-            PrepareHouseSofaPillows(savedRoot);
             BuildRuntimeStaticCollider(gameplayRoot, savedRoot,
                 "HouseLayout_tableCoffee", "EDITOR_tableCoffee", "EDITOR_CoffeeTable");
             BuildRuntimeStaticCollider(gameplayRoot, savedRoot,
@@ -177,6 +176,11 @@ namespace ChulaEarthquakeVR
             int restored = RestoreChangedTransforms(snapshots);
             string signatureAfter = ComputeSnapshotSignature(snapshots);
             bool exact = signatureBefore == signatureAfter;
+
+            // Align the two loose sofa pillows only AFTER the saved furniture
+            // parity snapshot has been restored. Otherwise the normal House
+            // sync would undo their runtime-only grounding correction.
+            PrepareHouseSofaPillows(savedRoot, motion);
 
             if (restored > 0)
                 Debug.LogWarning(
@@ -629,30 +633,64 @@ namespace ChulaEarthquakeVR
             return true;
         }
 
-        private static void PrepareHouseSofaPillows(Transform savedRoot)
+        private static void PrepareHouseSofaPillows(
+            Transform savedRoot, GroundMotionPlayer motion)
         {
             Transform pillows = FindFurniture(savedRoot, "HouseLayout_Sofa_Pillows");
-            if (pillows == null) return;
+            Transform sofa = FindFurniture(savedRoot, "HouseLayout_Sofa", "EDITOR_Sofa");
+            if (pillows == null || sofa == null) return;
             Rigidbody body = pillows.GetComponent<Rigidbody>();
             if (body == null) return;
 
-            int colliders = 0;
+            // Two pillow models form one lightweight Rigidbody in the saved
+            // House scene. Give BOTH meshes a real collider, and use the top
+            // of the upholstered seat (not the top of the sofa's backrest) as
+            // the support surface. The old single root collider caused hovering.
+            float pillowBottom = float.PositiveInfinity;
+            int pillowCount = 0;
             foreach (Renderer renderer in pillows.GetComponentsInChildren<Renderer>(true))
             {
                 if (renderer == null || !renderer.enabled ||
                     !renderer.gameObject.activeInHierarchy ||
                     (renderer.name != "PillowL" && renderer.name != "PillowR")) continue;
-                if (EnsureVisiblePartCollider(renderer)) colliders++;
+                if (!EnsureVisiblePartCollider(renderer)) continue;
+                pillowBottom = Mathf.Min(pillowBottom, renderer.bounds.min.y);
+                pillowCount++;
             }
-            // Do not release anything unless the two visible pillows have
-            // actual collision shapes to rest on the upholstered seat.
-            if (colliders < 2) return;
-            // In Play mode only; the authored scene hierarchy and position are
-            // untouched. The cushion collider supports the pillows while
-            // Unity gravity naturally corrects their initial hover.
+            if (pillowCount < 2) return;
+
+            float seatTop = float.NegativeInfinity;
+            foreach (Renderer renderer in sofa.GetComponentsInChildren<Renderer>(true))
+            {
+                if (renderer == null || !renderer.enabled ||
+                    !renderer.gameObject.activeInHierarchy ||
+                    !renderer.name.StartsWith("SeatCushion", StringComparison.Ordinal))
+                    continue;
+                seatTop = Mathf.Max(seatTop, renderer.bounds.max.y);
+            }
+
+            if (!float.IsNegativeInfinity(seatTop) && !float.IsPositiveInfinity(pillowBottom))
+            {
+                // Drop the initial visual hover immediately when Play begins.
+                // A tiny clearance prevents initial collision penetration.
+                float shiftY = (seatTop + 0.008f) - pillowBottom;
+                if (Mathf.Abs(shiftY) > 0.003f)
+                    body.position += Vector3.up * shiftY;
+            }
+
+            // A 0.75 kg pillow group should not be hit by the same large
+            // upward force and torque used for furniture. Shake gently in XZ;
+            // gravity always remains active, including after quake end.
+            InertialRigidbody shaker = pillows.GetComponent<InertialRigidbody>();
+            if (shaker != null)
+            {
+                shaker.Configure(motion, 0.35f, false);
+                shaker.ConfigureForces(1.2f, 0.25f);
+            }
             body.useGravity = true;
             body.constraints &= ~RigidbodyConstraints.FreezePositionY;
             body.isKinematic = false;
+            body.WakeUp();
         }
 
         private static void AttachRuntimeFollower(Transform visual, GameObject proxy)
