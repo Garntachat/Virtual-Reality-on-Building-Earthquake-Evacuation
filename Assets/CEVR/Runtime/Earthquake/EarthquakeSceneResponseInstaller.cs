@@ -68,11 +68,52 @@ namespace ChulaEarthquakeVR
                 if (response.gameObject.scene == gameObject.scene)
                     response.ConnectMotionIfMissing(motion);
 
+            // Saved scene furniture may have a serialized Rigidbody/InertialRigidbody
+            // but no root collider until the Editor opens the scene for its
+            // one-time bake. Make direct Play from the Main Menu equally usable.
+            EnsureSavedFurnitureColliders();
             PhysicsObjectsBound = BindPhysicsObjects();
             DecorativeObjectsBound = BindDecorativeObjects();
             Debug.Log($"CEVR SIMPLE Rigidbody earthquake: {PhysicsObjectsBound} physics object(s), " +
                       $"{DecorativeObjectsBound} visual-only decoration(s). " +
                       "Mass, Linear/Angular Damping and per-object Force/Torque remain editable.");
+        }
+
+        private void EnsureSavedFurnitureColliders()
+        {
+            foreach (InertialRigidbody item in
+                FindObjectsByType<InertialRigidbody>(FindObjectsInactive.Include,
+                    FindObjectsSortMode.None))
+            {
+                if (item == null || item.gameObject.scene != gameObject.scene) continue;
+                if (item.GetComponent<Rigidbody>() == null ||
+                    item.GetComponent<Collider>() != null ||
+                    item.GetComponentInChildren<Collider>(true) != null) continue;
+                Renderer[] renderers = item.GetComponentsInChildren<Renderer>(true);
+                Vector3 min = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+                Vector3 max = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+                bool found = false;
+                foreach (Renderer renderer in renderers)
+                {
+                    if (renderer == null || !renderer.enabled) continue;
+                    Bounds bounds = renderer.bounds;
+                    foreach (float x in new[] {bounds.min.x, bounds.max.x})
+                    foreach (float y in new[] {bounds.min.y, bounds.max.y})
+                    foreach (float z in new[] {bounds.min.z, bounds.max.z})
+                    {
+                        Vector3 local = item.transform.InverseTransformPoint(new Vector3(x, y, z));
+                        min = Vector3.Min(min, local);
+                        max = Vector3.Max(max, local);
+                        found = true;
+                    }
+                }
+                if (!found) continue;
+                BoxCollider box = item.gameObject.AddComponent<BoxCollider>();
+                box.center = (min + max) * 0.5f;
+                Vector3 size = max - min;
+                box.size = new Vector3(Mathf.Max(0.08f, size.x),
+                    Mathf.Max(0.08f, size.y), Mathf.Max(0.08f, size.z));
+            }
         }
 
         private int BindPhysicsObjects()
