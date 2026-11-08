@@ -1,5 +1,11 @@
 # House pet roaming and earthquake reaction
 
+## November 8 quake-walk update
+
+The authored House pet now keeps its idle behavior before an earthquake, barks and raises its head at the first shake, and **walks a few short first-floor steps during the earthquake**. Quake walks are enabled by default (Move During Earthquake) even though ordinary pre-quake roaming remains off. It pauses for each bark, follows nearby collision/ground-checked grid paths within 1.5 m per trip and 2.5 m of its home position, waits briefly between trips, and does not teleport or walk through furniture intentionally. A narrow or completely blocked location will make it stay put rather than cross a wall.
+
+It preserves the existing bark audio clip, bark head/chest movements, leg gait and tail motion. Only the existing House pet movement script changes; House.unity, object positions, ProBuilder geometry, table chairs, earthquake physics and Tutorial are unchanged. Runtime Play-mode movement still requires a check inside Unity on the local machine.
+
 ## November 8 follow-up
 
 Idle is now the default (Enable Roaming is optional). The House scene-load hook attaches the controller directly to the authored HouseLayout_Cat even if the furniture bootstrap skips it. The HouseScenarioController earthquake phase drives barking, with GroundMotionPlayer as fallback. A public-domain Labrador recording is included at Resources/PetAudio/DogBark.ogg; license/source is beside it. Each bark tilts the head group and chest, then restores their rest rotations. Console prints `CEVR House pet ready` and whether recorded audio loaded. No scene regeneration is required. The roaming/synthesized-bark description below describes the earlier implementation; synthesized sound is now only a missing-asset fallback.
