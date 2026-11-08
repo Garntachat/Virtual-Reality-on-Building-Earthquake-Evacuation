@@ -669,7 +669,7 @@ def check_quake_sync_saved_scenes(errors: list[str]) -> None:
                      "MovableChair_StrongTableApproach"},
     }
     for label, file_name, minimum_bodies, minimum_gated in (
-        ("House", "House.unity", 4, 4),
+        ("House", "House.unity", 11, 11),
         ("Tutorial", "CEVR_ChulaEngineering_Tutorial.unity", 25, 15),
     ):
         scene = (ROOT / "Assets/CEVR/Generated/Scenes" / file_name).read_text(encoding="utf-8")
@@ -688,11 +688,23 @@ def check_quake_sync_saved_scenes(errors: list[str]) -> None:
         bodies = 0
         gated = 0
         seen_chairs = set()
+        settled_loose = {}
+        anchored_heavy = 0
         for go in gameobjects:
             name_match = re.search(r"^  m_Name: (.+)$", go, re.MULTILINE)
             name = name_match.group(1) if name_match else "unknown"
             refs = re.findall(r"^  - component: \{fileID: (\d+)\}", go, re.MULTILINE)
             owned = [components[ref] for ref in refs if ref in components]
+            if label == "House":
+                heavy = [component for kind, component in owned
+                         if kind == "114" and
+                         "guid: ab961bf228304a69ae2992a024c85f25" in component and
+                         "responseMode: 4" in component and
+                         "responseScale: 0.7" in component]
+                if heavy:
+                    if any(kind == "54" for kind, _ in owned):
+                        fail(errors, "Heavy House object must never have dynamic physics: " + name)
+                    anchored_heavy += 1
             if not any(kind == "54" for kind, _ in owned):
                 continue
             bodies += 1
@@ -704,6 +716,17 @@ def check_quake_sync_saved_scenes(errors: list[str]) -> None:
                     fail(errors, label + " physical furniture missing InertialRigidbody: " + name)
             elif "wakeOnlyWhenEarthquakeStarts: 1" in responses[0]:
                 gated += 1
+            if label == "House" and responses and name in (
+                    "HouseLayout_books", "HouseLayout_pottedPlant",
+                    "HouseLayout_Vase", "HouseLayout_televisionModern"):
+                body = next((body for kind, body in owned if kind == "54"), "")
+                has_box = any(kind == "65" for kind, _ in owned)
+                if not has_box or "m_IsKinematic: 1" not in body or (
+                        "m_UseGravity: 0" not in body or
+                        "releaseUnderGravityAndSettle: 1" not in responses[0] or
+                        "wakeOnlyWhenEarthquakeStarts: 1" not in responses[0]):
+                    fail(errors, "Loose House prop missing gravity-on-quake and collider: " + name)
+                settled_loose[name] = settled_loose.get(name, 0) + 1
             if name in protected_chairs[label]:
                 seen_chairs.add(name)
                 if not responses or "wakeOnlyWhenEarthquakeStarts: 1" not in responses[0]:
@@ -717,11 +740,15 @@ def check_quake_sync_saved_scenes(errors: list[str]) -> None:
         if gated < minimum_gated:
             fail(errors, label + " lost quake-gated pre-earthquake furniture")
         if label == "House":
-            # Only the four intentionally grabbable House chairs are physical
-            # furniture. The 25 other authored roots use the original safe
-            # visual responses / staged hazard proxies, avoiding levitation.
-            if bodies != 4 or gated != 4:
-                fail(errors, "House must keep only four quake-gated chair Rigidbodies")
+            # Four chairs remain gated. Seven lightweight loose props fall
+            # using gravity; big furniture has anchored visual sway instead.
+            if bodies != 11 or gated != 11:
+                fail(errors, "House must contain four chairs plus seven gravity-ready props")
+            if settled_loose != {"HouseLayout_books": 2, "HouseLayout_pottedPlant": 2,
+                                 "HouseLayout_Vase": 2, "HouseLayout_televisionModern": 1}:
+                fail(errors, "House lost one of its seven gravity-driven loose props")
+            if anchored_heavy < 13:
+                fail(errors, "House needs grounded sway for its heavy furniture")
             legacy_proxy_guid = "30af19df1f384c9c9dfc6038a3ec24d0"
             original_visual_guid = "ab961bf228304a69ae2992a024c85f25"
             proxy_count = scene.count("guid: " + legacy_proxy_guid)
@@ -733,8 +760,16 @@ def check_quake_sync_saved_scenes(errors: list[str]) -> None:
             if "Undo.AddComponent<HouseProxyEarthquakeSettings>" not in editor or (
                     "Undo.AddComponent<DecorativeQuakeResponse>" not in editor):
                 fail(errors, "House editor should retain original non-chair response components")
-            if "AttachRuntimeFollower(visual, proxy)" not in binder:
-                fail(errors, "House staged hazards should retain the old visual/proxy behavior")
+            if "AttachRuntimeFollower(visual, proxy)" not in binder or (
+                    "director.Configure(looseHazards)" not in binder or
+                    'proxyName == "HouseTallCabinet_Left"' not in binder):
+                fail(errors, "House must stage only falling small hazards, not tall furniture")
+            decor_source = (ROOT / "Assets/CEVR/Runtime/Effects/DecorativeQuakeResponse.cs").read_text()
+            if "responseMode == DecorativeQuakeMode.Heavy" not in decor_source:
+                fail(errors, "House heavy objects must sway without translating")
+            if "if (releaseUnderGravityAndSettle) body.useGravity = true;" not in shaker or (
+                    "if (releaseUnderGravityAndSettle) return;" not in shaker):
+                fail(errors, "Loose House props must continue falling after quake end")
 
 
 def check_main_menu(errors: list[str]) -> None:
