@@ -266,7 +266,9 @@ namespace ChulaEarthquakeVR
                     Vector3 point = origin + new Vector3(next.x * step, 0, next.y * step);
                     // During an earthquake this is nervous pacing, not a trip
                     // across the House. Stay within about 1.5 metres.
-                    if (shortEarthquakeRoute && (point - origin).sqrMagnitude > 2.25f) continue;
+                    if (shortEarthquakeRoute &&
+                        ((point - origin).sqrMagnitude > 2.25f ||
+                         (point - home).sqrMagnitude > 6.25f)) continue;
                     if (point.x < minimum.x || point.x > maximum.x || point.z < minimum.y || point.z > maximum.y) continue;
                     if (!HasGroundAt(point) || !IsClearOfSavedFurniture(point)) continue;
                     Vector3 from = origin + new Vector3(cell.x * step, 0, cell.y * step);
@@ -279,7 +281,7 @@ namespace ChulaEarthquakeVR
             }
             if (candidates.Count == 0)
                 foreach (var cell in parents.Keys)
-                    if (cell.sqrMagnitude > 1) candidates.Add(cell);
+                    if (cell.sqrMagnitude > (shortEarthquakeRoute ? 0 : 2)) candidates.Add(cell);
             if (candidates.Count == 0) return;
             Vector2Int destination = candidates[Random.Range(0, candidates.Count)];
             var reverse = new Stack<Vector3>();
