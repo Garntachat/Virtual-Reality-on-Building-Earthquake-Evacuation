@@ -1,5 +1,28 @@
 # House pet roaming and earthquake reaction
 
+## Short walking reaction during earthquake (November 8)
+
+The saved House pet stays idle before the earthquake, then continues its existing
+recorded barking and head/chest lift while making **small, interrupted walking steps**
+during the 20-second shaking phase. It chooses a clear position about 0.5–0.75 m
+away, walks toward it, waits roughly 1–3 seconds, then chooses another.
+The movement is capped to a 2.2 m radius around its original first-floor spawn.
+Ground checks, sphere casts and saved furniture bounds reject blocked destinations;
+if none is safe, the pet stays where it is instead of circling, teleporting or
+clipping through the house. The bark clip and head animation are unchanged.
+
+It only moves in Play mode after the House earthquake phase is active, and the
+saved `House.unity` pet and furniture transforms are not modified. The old
+full-floor roaming toggle remains disabled by default before and after shaking.
+The older "stops and barks" description below is historical.
+
+**Local recording check:** In House, wait through preparation (pet idle), watch
+for the immediate first bark when the earthquake starts, then a short walk/stop
+sequence while it keeps barking periodically. Confirm it neither crosses walls
+nor climbs stairs, and stops when the quake ends. Unity Play-mode testing is still
+required; CI is only a structural test.
+
+
 ## November 8 follow-up
 
 Idle is now the default (Enable Roaming is optional). The House scene-load hook attaches the controller directly to the authored HouseLayout_Cat even if the furniture bootstrap skips it. The HouseScenarioController earthquake phase drives barking, with GroundMotionPlayer as fallback. A public-domain Labrador recording is included at Resources/PetAudio/DogBark.ogg; license/source is beside it. Each bark tilts the head group and chest, then restores their rest rotations. Console prints `CEVR House pet ready` and whether recorded audio loaded. No scene regeneration is required. The roaming/synthesized-bark description below describes the earlier implementation; synthesized sound is now only a missing-asset fallback.
