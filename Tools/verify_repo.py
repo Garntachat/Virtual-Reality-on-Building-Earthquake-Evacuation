@@ -646,6 +646,10 @@ def check_quake_sync_saved_scenes(errors: list[str]) -> None:
     for file_name, source in (("GroundMotionPlayer", motion), ("GameFlowController", tutorial_flow)):
         if "StartQuake(" not in source:
             fail(errors, file_name + " must expose a shared earthquake onset")
+    grabber = (ROOT / "Assets/CEVR/Runtime/Player/DesktopGrabInteractor.cs").read_text()
+    for token in ("BeginManualInteraction()", "EndManualInteraction()"):
+        if token not in shaker or token not in grabber:
+            fail(errors, "pre-quake chair dragging must remain available: " + token)
     for token in ("if (motionSource == null || !motionSource.IsPlaying) return;",
                   "wakeOnlyWhenEarthquakeStarts", "QuakeStarted += OnQuakeStarted",
                   "QuakeEnded += OnQuakeEnded", "private void OnEnable()"):
@@ -658,9 +662,15 @@ def check_quake_sync_saved_scenes(errors: list[str]) -> None:
         if token not in audio:
             fail(errors, "earthquake soundtrack is not synchronized: " + token)
 
+    protected_chairs = {
+        "House": {"HouseLayout_DiningChair_Left", "HouseLayout_DiningChair_Right",
+                  "HouseLayout_DiningChair_Spare", "HouseLayout_DiningChair_CoverObstacle"},
+        "Tutorial": {"MovableChair_LabBenchSouth", "MovableChair_Spare",
+                     "MovableChair_StrongTableApproach"},
+    }
     for label, file_name, minimum_bodies, minimum_gated in (
-        ("House", "House.unity", 29, 25),
-        ("Tutorial", "CEVR_ChulaEngineering_Tutorial.unity", 25, 12),
+        ("House", "House.unity", 29, 29),
+        ("Tutorial", "CEVR_ChulaEngineering_Tutorial.unity", 25, 15),
     ):
         scene = (ROOT / "Assets/CEVR/Generated/Scenes" / file_name).read_text(encoding="utf-8")
         parts = re.split(r"(?=^--- !u!\d+ &\d+\n)", scene, flags=re.MULTILINE)
@@ -677,6 +687,7 @@ def check_quake_sync_saved_scenes(errors: list[str]) -> None:
 
         bodies = 0
         gated = 0
+        seen_chairs = set()
         for go in gameobjects:
             name_match = re.search(r"^  m_Name: (.+)$", go, re.MULTILINE)
             name = name_match.group(1) if name_match else "unknown"
@@ -693,6 +704,13 @@ def check_quake_sync_saved_scenes(errors: list[str]) -> None:
                     fail(errors, label + " physical furniture missing InertialRigidbody: " + name)
             elif "wakeOnlyWhenEarthquakeStarts: 1" in responses[0]:
                 gated += 1
+            if name in protected_chairs[label]:
+                seen_chairs.add(name)
+                if not responses or "wakeOnlyWhenEarthquakeStarts: 1" not in responses[0]:
+                    fail(errors, label + " chair must stay parked until the quake: " + name)
+        missing_chairs = protected_chairs[label] - seen_chairs
+        if missing_chairs:
+            fail(errors, label + " saved chairs missing: " + ", ".join(sorted(missing_chairs)))
 
         if bodies < minimum_bodies:
             fail(errors, label + " saved scene lost Rigidbody furniture roots")
