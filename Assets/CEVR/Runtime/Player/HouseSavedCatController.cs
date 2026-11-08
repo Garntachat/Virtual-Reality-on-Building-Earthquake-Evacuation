@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace ChulaEarthquakeVR
 {
@@ -9,25 +10,26 @@ namespace ChulaEarthquakeVR
     [DisallowMultipleComponent]
     public sealed class HouseSavedCatController : MonoBehaviour
     {
-        private static readonly Vector2[] PatrolOffsets =
-        {
-            new Vector2(0.00f, 0.00f),
-            new Vector2(0.85f, 0.45f),
-            new Vector2(0.30f, 1.10f),
-            new Vector2(-0.75f, 0.75f),
-            new Vector2(-0.95f, -0.10f),
-            new Vector2(-0.25f, -0.95f),
-            new Vector2(0.75f, -0.70f)
-        };
+        [Header("First-floor roaming (world X/Z bounds)")]
+        [SerializeField] private Vector2 minimum = new Vector2(-4.4f, -6.6f);
+        [SerializeField] private Vector2 maximum = new Vector2(6.4f, 6.6f);
+        [SerializeField] private AudioClip barkClip;
+        private readonly Queue<Vector3> route = new Queue<Vector3>();
+        private GroundMotionPlayer motion;
+        private AudioSource voice;
+        private AudioClip generatedBark;
+        private bool wasShaking;
+        private float nextBark;
+        private float retryAt;
+        private readonly List<Bounds> furnitureBounds = new List<Bounds>();
+        private float boundsRefreshAt;
 
         [SerializeField, Min(0.05f)] private float walkSpeed = 0.42f;
         [SerializeField, Min(10f)] private float turnSpeed = 150f;
-        [SerializeField, Min(0.5f)] private float patrolRadius = 1.0f;
 
         private Rigidbody body;
         private Vector3 home;
         private Vector3 target;
-        private int targetIndex;
         private float waitUntil;
         private Transform furnitureRoot;
         private Transform tailBase;
@@ -77,6 +79,15 @@ namespace ChulaEarthquakeVR
                 legRest[i] = legs[i] == null ? Quaternion.identity : legs[i].localRotation;
 
             PickNextTarget();
+            motion = FindFirstObjectByType<GroundMotionPlayer>();
+            voice = gameObject.AddComponent<AudioSource>();
+            voice.playOnAwake = false;
+            voice.spatialBlend = 1f;
+            voice.minDistance = 2f;
+            voice.maxDistance = 18f;
+            voice.rolloffMode = AudioRolloffMode.Linear;
+            voice.volume = 0.65f;
+            if (barkClip == null) generatedBark = MakeBark();
         }
 
         private void Awake() => Configure();
@@ -85,6 +96,32 @@ namespace ChulaEarthquakeVR
         {
             if (!configured) Configure();
             if (body == null) return;
+            if (motion == null && Time.time >= retryAt)
+            {
+                motion = FindFirstObjectByType<GroundMotionPlayer>();
+                retryAt = Time.time + 1f;
+            }
+            bool shaking = motion != null && motion.IsPlaying;
+            if (shaking)
+            {
+                if (!wasShaking || Time.time >= nextBark)
+                {
+                    voice.pitch = Random.Range(0.92f, 1.08f);
+                    voice.PlayOneShot(barkClip != null ? barkClip : generatedBark);
+                    nextBark = Time.time + Random.Range(3f, 6f);
+                }
+                wasShaking = true;
+                Animate(false);
+                return;
+            }
+            if (wasShaking)
+            {
+                wasShaking = false;
+                route.Clear();
+                target = body.position;
+                waitUntil = Time.time + Random.Range(2f, 4f);
+            }
+            if (Time.time < waitUntil) { Animate(false); return; }
 
             Vector3 position = body.position;
             Vector3 flat = target - position;
@@ -92,7 +129,12 @@ namespace ChulaEarthquakeVR
 
             if (flat.sqrMagnitude < 0.08f)
             {
-                if (Time.time >= waitUntil) PickNextTarget();
+                if (route.Count > 0) target = route.Dequeue();
+                else
+                {
+                    PickNextTarget();
+                    waitUntil = Time.time + Random.Range(1.5f, 4f);
+                }
                 Animate(false);
                 return;
             }
@@ -104,6 +146,7 @@ namespace ChulaEarthquakeVR
             if (!HasGroundAt(next) || ObstacleAhead(position, direction) || !IsClearOfSavedFurniture(next))
             {
                 PickNextTarget();
+                waitUntil = Time.time + 0.8f;
                 Animate(false);
                 return;
             }
@@ -119,13 +162,49 @@ namespace ChulaEarthquakeVR
 
         private void PickNextTarget()
         {
-            targetIndex = (targetIndex + 1) % PatrolOffsets.Length;
-            Vector2 offset = PatrolOffsets[targetIndex] * patrolRadius;
-            target = new Vector3(home.x + offset.x, home.y, home.z + offset.y);
-
-            target.x = Mathf.Clamp(target.x, -4.0f, 6.0f);
-            target.z = Mathf.Clamp(target.z, -6.4f, 6.4f);
-            waitUntil = Time.time + 0.65f;
+            route.Clear();
+            Vector3 origin = body.position;
+            target = origin;
+            // Flood-fill reachable floor cells, not a repeating circle around the spawn.
+            const float step = 0.55f;
+            var frontier = new Queue<Vector2Int>();
+            var parents = new Dictionary<Vector2Int, Vector2Int>();
+            var visited = new HashSet<Vector2Int>();
+            var candidates = new List<Vector2Int>();
+            var start = Vector2Int.zero;
+            frontier.Enqueue(start);
+            visited.Add(start);
+            Vector2Int[] directions = { Vector2Int.left, Vector2Int.right, Vector2Int.up, Vector2Int.down };
+            while (frontier.Count > 0 && visited.Count < 700)
+            {
+                Vector2Int cell = frontier.Dequeue();
+                foreach (var offset in directions)
+                {
+                    Vector2Int next = cell + offset;
+                    if (!visited.Add(next)) continue;
+                    Vector3 point = origin + new Vector3(next.x * step, 0, next.y * step);
+                    if (point.x < minimum.x || point.x > maximum.x || point.z < minimum.y || point.z > maximum.y) continue;
+                    if (!HasGroundAt(point) || !IsClearOfSavedFurniture(point)) continue;
+                    Vector3 from = origin + new Vector3(cell.x * step, 0, cell.y * step);
+                    if (ObstacleAhead(from, (point - from).normalized, step)) continue;
+                    parents[next] = cell;
+                    frontier.Enqueue(next);
+                    if ((point - origin).sqrMagnitude > 9f) candidates.Add(next);
+                }
+            }
+            if (candidates.Count == 0)
+                foreach (var cell in parents.Keys)
+                    if (cell.sqrMagnitude > 2) candidates.Add(cell);
+            if (candidates.Count == 0) return;
+            Vector2Int destination = candidates[Random.Range(0, candidates.Count)];
+            var reverse = new Stack<Vector3>();
+            while (destination != start)
+            {
+                reverse.Push(origin + new Vector3(destination.x * step, 0, destination.y * step));
+                destination = parents[destination];
+            }
+            while (reverse.Count > 0) route.Enqueue(reverse.Pop());
+            if (route.Count > 0) target = route.Dequeue();
         }
 
         private bool HasGroundAt(Vector3 position)
@@ -139,16 +218,17 @@ namespace ChulaEarthquakeVR
             foreach (RaycastHit hit in hits)
             {
                 if (hit.transform == transform || hit.transform.IsChildOf(transform)) continue;
-                if (hit.normal.y > 0.65f) return true;
+                // Reject stairs, tabletops, upper floors and drops; remain on spawn floor.
+                if (hit.normal.y > 0.85f && Mathf.Abs(hit.point.y - home.y) < 0.12f) return true;
             }
             return false;
         }
 
-        private bool ObstacleAhead(Vector3 position, Vector3 direction)
+        private bool ObstacleAhead(Vector3 position, Vector3 direction, float distance = 0.42f)
         {
             Vector3 origin = position + Vector3.up * 0.28f;
             RaycastHit[] hits = Physics.SphereCastAll(
-                origin, 0.15f, direction, 0.42f,
+                origin, 0.22f, direction, distance,
                 Physics.DefaultRaycastLayers,
                 QueryTriggerInteraction.Ignore);
 
@@ -164,6 +244,20 @@ namespace ChulaEarthquakeVR
         private bool IsClearOfSavedFurniture(Vector3 position)
         {
             if (furnitureRoot == null) return true;
+            if (Time.time >= boundsRefreshAt)
+            {
+                RefreshFurnitureBounds();
+                boundsRefreshAt = Time.time + 1f;
+            }
+            foreach (Bounds bounds in furnitureBounds)
+                if (position.x >= bounds.min.x && position.x <= bounds.max.x &&
+                    position.z >= bounds.min.z && position.z <= bounds.max.z) return false;
+            return true;
+        }
+
+        private void RefreshFurnitureBounds()
+        {
+            furnitureBounds.Clear();
             foreach (Transform sibling in furnitureRoot)
             {
                 if (sibling == null || sibling == transform || !sibling.gameObject.activeInHierarchy) continue;
@@ -184,10 +278,8 @@ namespace ChulaEarthquakeVR
                 if (bounds.max.y < catBottom || bounds.min.y > catTop) continue;
                 bounds.Expand(new Vector3(0.50f, 0f, 0.50f));
 
-                if (position.x >= bounds.min.x && position.x <= bounds.max.x &&
-                    position.z >= bounds.min.z && position.z <= bounds.max.z) return false;
+                furnitureBounds.Add(bounds);
             }
-            return true;
         }
 
         private void Animate(bool walking)
@@ -212,6 +304,32 @@ namespace ChulaEarthquakeVR
             foreach (Transform t in GetComponentsInChildren<Transform>(true))
                 if (t.name == exactName) return t;
             return null;
+        }
+
+        // Self-contained two-syllable synthetic bark; a recorded clip can override it in Inspector.
+        private static AudioClip MakeBark()
+        {
+            const int rate = 22050;
+            var samples = new float[rate];
+            var noise = new System.Random(1927);
+            for (int i = 0; i < samples.Length; i++)
+            {
+                float t = i / (float)rate;
+                float local = t < 0.42f ? t : t - 0.48f;
+                if (local < 0 || local > 0.30f) continue;
+                float envelope = Mathf.Min(1f, local / 0.012f) * Mathf.Exp(-local * 13f);
+                float phase = 2f * Mathf.PI * (180f * local - 90f * local * local);
+                float voiced = Mathf.Sin(phase) + 0.45f * Mathf.Sin(phase * 2f) + 0.25f * Mathf.Sin(phase * 5f);
+                samples[i] = envelope * (voiced * 0.35f + ((float)noise.NextDouble() * 2 - 1) * 0.22f);
+            }
+            var clip = AudioClip.Create("House Pet Double Bark", samples.Length, 1, rate, false);
+            clip.SetData(samples, 0);
+            return clip;
+        }
+
+        private void OnDestroy()
+        {
+            if (generatedBark != null) Destroy(generatedBark);
         }
     }
 }
