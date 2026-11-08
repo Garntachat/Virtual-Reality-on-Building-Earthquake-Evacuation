@@ -134,10 +134,10 @@ namespace ChulaEarthquakeVR.Editor
             foreach (Transform item in FindOtherHouseFurniture(scene))
             {
                 expected++;
-                bool present = IsHouseProxy(item)
-                    ? item.GetComponent<HouseProxyEarthquakeSettings>() != null
-                    : item.GetComponent<DecorativeQuakeResponse>() != null ||
-                      item.GetComponent<InertialRigidbody>() != null;
+                // Every eligible House furniture root is now a saved physics
+                // object, not a visual shaker or hidden-only proxy.
+                bool present = item.GetComponent<Rigidbody>() != null &&
+                    item.GetComponent<InertialRigidbody>() != null;
                 if (present) ready++;
                 else Debug.LogError("CEVR missing House furniture earthquake settings: " + item.name, item);
             }
