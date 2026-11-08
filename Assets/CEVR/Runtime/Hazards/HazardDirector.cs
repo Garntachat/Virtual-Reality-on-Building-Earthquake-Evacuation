@@ -28,6 +28,8 @@ namespace ChulaEarthquakeVR
             foreach (Rigidbody body in stagedHazards)
             {
                 if (body == null) continue;
+                InertialRigidbody furniture = body.GetComponent<InertialRigidbody>();
+                if (furniture != null && furniture.IsEarthquakeAnchored) continue;
                 FallingHazard hazard = body.GetComponent<FallingHazard>();
                 if (hazard != null) hazard.Arm(damageEnabled);
             }
@@ -84,6 +86,8 @@ namespace ChulaEarthquakeVR
             foreach (Rigidbody body in stagedHazards)
             {
                 if (body == null) continue;
+                InertialRigidbody furniture = body.GetComponent<InertialRigidbody>();
+                if (furniture != null && furniture.IsEarthquakeAnchored) continue;
                 body.isKinematic = false;
                 body.useGravity = true;
                 yield return new WaitForSecondsRealtime(releaseIntervalSeconds);
