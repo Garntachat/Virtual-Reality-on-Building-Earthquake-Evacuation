@@ -127,19 +127,28 @@ namespace ChulaEarthquakeVR
                 "house-chair-right-01", motion, logger);
             BindLegacyEditorChairsIfNeeded(savedRoot, gameplayRoot);
 
-            BindCenterPhysicsVisual(savedRoot, gameplayRoot,
+            // Use the EXACT Rigidbody saved on each House furniture root.
+            // Old runtime proxies remain as nonphysical hidden compatibility objects;
+            // they must not compete with editable House physics.
+            var activeHazards = new List<Rigidbody>();
+            Rigidbody fridge = BindCenterPhysicsVisual(savedRoot, gameplayRoot,
                 new[] { "HouseLayout_Fridge", "EDITOR_Fridge" },
-                "HouseTallCabinet_Left", motion);
-            BindCenterPhysicsVisual(savedRoot, gameplayRoot,
+                "HouseTallCabinet_Left", motion, "house-fridge", 42f, true);
+            if (fridge != null) activeHazards.Add(fridge);
+            Rigidbody wardrobe = BindCenterPhysicsVisual(savedRoot, gameplayRoot,
                 new[] { "HouseLayout_Wandrobe", "EDITOR_Wandrobe" },
-                "HouseBookcase_Right", motion);
-
+                "HouseBookcase_Right", motion, "house-wardrobe", 42f, true);
+            if (wardrobe != null) activeHazards.Add(wardrobe);
             for (int i = 1; i <= HouseSceneLayout.OverheadHazards.Length; i++)
             {
-                BindCenterPhysicsVisual(savedRoot, gameplayRoot,
+                Rigidbody books = BindCenterPhysicsVisual(savedRoot, gameplayRoot,
                     new[] { "HouseLayout_HazardBooks_" + i },
-                    "HouseFallingObject_" + i, motion);
+                    "HouseFallingObject_" + i, motion, "house-overhead-" + i, 26f, false);
+                if (books != null) activeHazards.Add(books);
             }
+            HazardDirector hazardDirector = gameplayRoot.GetComponentInChildren<HazardDirector>(true);
+            if (hazardDirector != null && activeHazards.Count > 0)
+                hazardDirector.Configure(activeHazards);
 
             BuildRuntimeStaticCollider(gameplayRoot, savedRoot,
                 "HouseLayout_Sofa", "EDITOR_Sofa");
@@ -233,6 +242,16 @@ namespace ChulaEarthquakeVR
                 if (t.name == "HouseSturdyTableLeg")
                     legs.Add(t.gameObject);
 
+            // The saved dining table now owns its single native Rigidbody.
+            // The previous invisible table collision stand-in must not pin it
+            // in place or fight its shaker during the earthquake.
+            bool usingAuthoredTablePhysics = visual.GetComponent<Rigidbody>() != null;
+            if (usingAuthoredTablePhysics && top != null)
+            {
+                foreach (Collider duplicate in top.GetComponentsInChildren<Collider>(true))
+                    duplicate.enabled = false;
+            }
+
             float lx = Mathf.Max(0.08f, local.extents.x - 0.10f);
             float lz = Mathf.Max(0.08f, local.extents.z - 0.10f);
             float legHeight = Mathf.Max(0.25f, local.size.y - 0.12f);
@@ -252,7 +271,11 @@ namespace ChulaEarthquakeVR
                 legs[i].transform.localScale = new Vector3(0.10f, legHeight, 0.10f);
 
                 BoxCollider box = legs[i].GetComponent<BoxCollider>();
-                if (box != null) box.size = Vector3.one;
+                if (box != null)
+                {
+                    box.size = Vector3.one;
+                    if (usingAuthoredTablePhysics) box.enabled = false;
+                }
             }
 
             Vector3 floorCenter =
@@ -433,16 +456,21 @@ namespace ChulaEarthquakeVR
             }
         }
 
-        private static void BindCenterPhysicsVisual(
+        private static Rigidbody BindCenterPhysicsVisual(
             Transform savedRoot,
             Transform gameplayRoot,
             string[] visualNames,
             string proxyName,
-            GroundMotionPlayer motion)
+            GroundMotionPlayer motion,
+            string hazardId,
+            float damage,
+            bool tallFurniture)
         {
             Transform visual = FindFurniture(savedRoot, visualNames);
             GameObject proxy = FindRuntimeObject(gameplayRoot, proxyName);
-            if (visual == null || proxy == null) return;
+            if (proxy == null) return visual == null ? null : visual.GetComponent<Rigidbody>();
+            Rigidbody proxyBody = proxy.GetComponent<Rigidbody>();
+            if (visual == null) return proxyBody;
 
             if (HouseFurnitureGeometry.TryVisibleBounds(visual, out Bounds world))
             {
@@ -451,21 +479,66 @@ namespace ChulaEarthquakeVR
                     Mathf.Max(0.05f, world.size.x),
                     Mathf.Max(0.05f, world.size.y),
                     Mathf.Max(0.05f, world.size.z));
-
                 BoxCollider box = proxy.GetComponent<BoxCollider>();
                 if (box != null) box.size = Vector3.one;
             }
             else
-            {
                 proxy.transform.SetPositionAndRotation(visual.position, visual.rotation);
+
+            Rigidbody authoredBody = visual.GetComponent<Rigidbody>();
+            InertialRigidbody authoredShaker = visual.GetComponent<InertialRigidbody>();
+            if (authoredBody != null && authoredShaker != null)
+            {
+                // The scene-authored Rigidbody is authoritative in Edit AND Play.
+                // Do not attach a follower: it would overwrite the physics motion.
+                EnsureAuthoredHouseCollider(visual);
+                authoredShaker.ConnectMotionIfMissing(motion);
+                if (tallFurniture && visual.GetComponent<ToppleableFurniture>() == null)
+                {
+                    ToppleableFurniture oldTopple = proxy.GetComponent<ToppleableFurniture>();
+                    visual.gameObject.AddComponent<ToppleableFurniture>().Configure(motion,
+                        oldTopple == null ? 1.35f : oldTopple.UpperForceScale,
+                        oldTopple == null ? 1.2f : oldTopple.ForceHeight);
+                }
+                FallingHazard hazard = visual.GetComponent<FallingHazard>();
+                if (hazard == null) hazard = visual.gameObject.AddComponent<FallingHazard>();
+                hazard.Configure(hazardId, damage);
+
+                // Disable ONLY the invisible duplicate's physics/collision. It is
+                // still kept in the runtime hierarchy for legacy gameplay hooks.
+                foreach (Collider duplicate in proxy.GetComponentsInChildren<Collider>(true))
+                    duplicate.enabled = false;
+                if (proxyBody != null)
+                {
+                    if (!proxyBody.isKinematic)
+                    {
+                        proxyBody.linearVelocity = Vector3.zero;
+                        proxyBody.angularVelocity = Vector3.zero;
+                    }
+                    proxyBody.isKinematic = true;
+                    proxyBody.useGravity = false;
+                }
+                return authoredBody;
             }
 
+            // Old scenes without authored physics retain their original proxy behavior.
             HouseProxyEarthquakeSettings settings =
                 visual.GetComponent<HouseProxyEarthquakeSettings>();
-            if (settings != null)
-                settings.ApplyToExistingProxy(proxy, motion);
-
+            if (settings != null) settings.ApplyToExistingProxy(proxy, motion);
             AttachRuntimeFollower(visual, proxy);
+            return proxyBody;
+        }
+
+        private static void EnsureAuthoredHouseCollider(Transform visual)
+        {
+            if (visual.GetComponent<Collider>() != null) return;
+            if (!TryLocalVisibleBounds(visual, out Bounds local)) return;
+            BoxCollider box = visual.gameObject.AddComponent<BoxCollider>();
+            box.center = local.center;
+            box.size = new Vector3(
+                Mathf.Max(0.08f, local.size.x),
+                Mathf.Max(0.08f, local.size.y),
+                Mathf.Max(0.08f, local.size.z));
         }
 
         private static void AttachRuntimeFollower(Transform visual, GameObject proxy)
@@ -490,8 +563,16 @@ namespace ChulaEarthquakeVR
             params string[] visualNames)
         {
             Transform visual = FindFurniture(savedRoot, visualNames);
-            if (visual == null ||
-                !HouseFurnitureGeometry.TryVisibleBounds(visual, out Bounds world))
+            if (visual == null) return;
+            // New saved House furniture has its own editable Rigidbody/collider.
+            // Generating another static collider in the same space would prevent
+            // physical shaking and would diverge from the Editor scene.
+            if (visual.GetComponent<Rigidbody>() != null)
+            {
+                EnsureAuthoredHouseCollider(visual);
+                return;
+            }
+            if (!HouseFurnitureGeometry.TryVisibleBounds(visual, out Bounds world))
                 return;
 
             GameObject proxy = new GameObject(

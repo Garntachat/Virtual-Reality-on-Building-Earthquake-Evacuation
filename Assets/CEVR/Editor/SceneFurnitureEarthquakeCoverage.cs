@@ -96,7 +96,15 @@ namespace ChulaEarthquakeVR.Editor
             if (!Supports(scene) || !HasPreparedFurniture(scene)) return false;
             foreach (Transform item in Candidates(scene))
             {
-                if (item.GetComponent<Rigidbody>() != null)
+                if (RequiresEditableTutorialPhysics(scene, item))
+                {
+                    if (item.GetComponent<Rigidbody>() == null ||
+                        item.GetComponent<InertialRigidbody>() == null ||
+                        item.GetComponent<DecorativeQuakeResponse>() != null ||
+                        item.GetComponent<Collider>() == null)
+                        return true;
+                }
+                else if (item.GetComponent<Rigidbody>() != null)
                 {
                     if (item.GetComponent<InertialRigidbody>() == null) return true;
                 }
@@ -109,6 +117,48 @@ namespace ChulaEarthquakeVR.Editor
 
         // Returns number of new settings components. Existing artist-edited
         // strengths, forces, masses, colliders and dampings are NEVER touched.
+        // Saved tutorial model roots get native Inspector physics. The frame,
+        // walls, windows, markers, lamps/fixture anchors and player are excluded.
+        private static bool RequiresEditableTutorialPhysics(Scene scene, Transform item)
+        {
+            if (scene.name != Tutorial || item == null) return false;
+            return item.name.StartsWith("Kenney_", StringComparison.Ordinal) ||
+                   item.name.StartsWith("TeamFurniture_", StringComparison.Ordinal);
+        }
+
+        private static bool EnsureRootCollider(Transform item)
+        {
+            if (item.GetComponent<Collider>() != null) return false;
+            Renderer[] renderers = item.GetComponentsInChildren<Renderer>(true);
+            bool haveBounds = false;
+            Vector3 min = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+            Vector3 max = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+            foreach (Renderer renderer in renderers)
+            {
+                if (renderer == null || !renderer.enabled) continue;
+                Bounds bounds = renderer.bounds;
+                // Convert all world AABB corners into local space to respect
+                // the authored object's original transform and rotation.
+                foreach (float x in new[] {bounds.min.x, bounds.max.x})
+                foreach (float y in new[] {bounds.min.y, bounds.max.y})
+                foreach (float z in new[] {bounds.min.z, bounds.max.z})
+                {
+                    Vector3 corner = item.InverseTransformPoint(new Vector3(x, y, z));
+                    min = Vector3.Min(min, corner);
+                    max = Vector3.Max(max, corner);
+                    haveBounds = true;
+                }
+            }
+            if (!haveBounds) return false;
+            BoxCollider collider = Undo.AddComponent<BoxCollider>(item.gameObject);
+            collider.center = (min + max) * 0.5f;
+            Vector3 size = max - min;
+            collider.size = new Vector3(Mathf.Max(0.08f, size.x),
+                Mathf.Max(0.08f, size.y), Mathf.Max(0.08f, size.z));
+            return true;
+        }
+
+        // Only edit real saved furniture roots, never transform hierarchy/meshes.
         public static int Apply(Scene scene)
         {
             if (!Supports(scene) || !HasPreparedFurniture(scene)) return 0;
@@ -116,7 +166,40 @@ namespace ChulaEarthquakeVR.Editor
             foreach (Transform item in Candidates(scene))
             {
                 if (item == null) continue;
+                bool physicalTutorial = RequiresEditableTutorialPhysics(scene, item);
                 Rigidbody body = item.GetComponent<Rigidbody>();
+                if (physicalTutorial)
+                {
+                    if (body == null)
+                    {
+                        EarthquakeStarterPresets.Values settings = EarthquakeStarterPresets.Suggest(item.name);
+                        body = Undo.AddComponent<Rigidbody>(item.gameObject);
+                        body.mass = settings.Mass;
+                        body.linearDamping = settings.LinearDamping;
+                        body.angularDamping = settings.AngularDamping;
+                        body.useGravity = false;
+                        body.isKinematic = true;
+                        added++;
+                    }
+                    if (item.GetComponent<Collider>() == null && EnsureRootCollider(item)) added++;
+                    InertialRigidbody inertial = item.GetComponent<InertialRigidbody>();
+                    if (inertial == null)
+                    {
+                        var settings = EarthquakeStarterPresets.Suggest(item.name);
+                        inertial = Undo.AddComponent<InertialRigidbody>(item.gameObject);
+                        inertial.Configure(null, 0.65f, false);
+                        inertial.ConfigureForces(settings.ForceNewtons, settings.TorqueNewtonMeters);
+                        inertial.ConfigureQuakeActivation(true);
+                        added++;
+                    }
+                    DecorativeQuakeResponse decorator = item.GetComponent<DecorativeQuakeResponse>();
+                    if (decorator != null)
+                    {
+                        Undo.DestroyObjectImmediate(decorator);
+                        added++;
+                    }
+                    continue;
+                }
                 if (body != null)
                 {
                     if (item.GetComponent<InertialRigidbody>() != null) continue;
@@ -127,7 +210,6 @@ namespace ChulaEarthquakeVR.Editor
                     added++;
                     continue;
                 }
-
                 if (item.GetComponent<DecorativeQuakeResponse>() != null ||
                     item.GetComponent<VisualQuakeSway>() != null) continue;
                 string name = item.name;

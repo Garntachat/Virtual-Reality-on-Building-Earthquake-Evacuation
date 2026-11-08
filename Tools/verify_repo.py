@@ -377,7 +377,7 @@ def check_cross_scene_feature_contract(errors: list[str]) -> None:
         "Assets/CEVR/Runtime/Effects/WindowView.cs": ("ApplyTransparentGlass", "BuildExteriorView", "ExteriorView"),
         "Assets/CEVR/Runtime/Hazards/FallingHazard.cs": ("CheckSweptPlayerContact", "Physics.OverlapBox", "ApplyDamage"),
         "Assets/CEVR/Runtime/Hazards/ToppleableFurniture.cs": ("UpperForceScale", "ForceHeight", "AnchoredToStructure"),
-        "Assets/CEVR/Runtime/Audio/GameplayAudioDirector.cs": ("PresentationIntensity", "CEVR_Rumble", "CEVR_Footstep", "CEVR_WindowCrack", "GameplayAudioCue.Success"),
+        "Assets/CEVR/Runtime/Audio/GameplayAudioDirector.cs": ("PresentationIntensity", "CEVR_HouseEarthquakeSoundtrack", "CEVR_Footstep", "CEVR_WindowCrack", "GameplayAudioCue.Success"),
         "Assets/CEVR/Runtime/Audio/FurnitureImpactAudio.cs": ("FurnitureScrape", "FurnitureImpact", "OnCollisionEnter"),
         "Assets/CEVR/Runtime/Player/WearableShoes.cs": ("EnsureAuthoredVisual()", "CEVR_LowPolySafetyShoe", "Equip(", "footwear_equipped"),
         "Assets/CEVR/Runtime/Player/ProtectivePillow.cs": ("SetProtection", "pillow_cover_started"),
@@ -493,7 +493,10 @@ def check_tutorial_condo_furniture_earthquake_coverage(errors: list[str]) -> Non
     ):
         if fragment not in editor:
             fail(errors, "Tutorial/Condo furniture response setup missing: " + fragment)
-    if "new GameObject(" in editor or "DestroyImmediate(" in editor or "localPosition =" in editor:
+    # Removing a deprecated DecorativeQuakeResponse through Unity Undo is
+    # allowed; destroying any saved GameObject/mesh/transform is never allowed.
+    safe_editor = editor.replace("Undo.DestroyObjectImmediate(decorator)", "")
+    if "new GameObject(" in safe_editor or "DestroyImmediate(" in safe_editor or "localPosition =" in safe_editor:
         fail(errors, "furniture coverage must not create/move/delete any scene furniture")
     if "SceneFurnitureEarthquakeCoverage.NeedsSetup(scene)" not in shared or (
         "SceneFurnitureEarthquakeCoverage.Apply(scene)" not in shared

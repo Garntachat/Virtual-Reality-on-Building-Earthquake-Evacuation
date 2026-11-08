@@ -128,7 +128,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 10897659}
-  - component: {fileID: 10897660}
+  - component: {fileID: 2145000000}
+  - component: {fileID: 2145000001}
   m_Layer: 0
   m_Name: HouseLayout_HazardBooks_4
   m_TagString: Untagged
@@ -152,26 +153,6 @@ Transform:
   - {fileID: 1533966214}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &10897660
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 10897658}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30af19df1f384c9c9dfc6038a3ec24d0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.HouseProxyEarthquakeSettings
-  mass: 2.2
-  linearDamping: 0.3
-  angularDamping: 0.5
-  forceNewtons: 7
-  torqueNewtonMeters: 2
-  shakeStrength: 1
-  includeVertical: 1
-  starterPresetProcessed: 1
 --- !u!1 &22693869
 GameObject:
   m_ObjectHideFlags: 0
@@ -2081,7 +2062,8 @@ GameObject:
   m_Component:
   - component: {fileID: 169547350}
   - component: {fileID: 169547351}
-  - component: {fileID: 169547352}
+  - component: {fileID: 2145000002}
+  - component: {fileID: 2145000003}
   m_Layer: 0
   m_Name: HouseLayout_Bed
   m_TagString: Untagged
@@ -2121,23 +2103,6 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
---- !u!114 &169547352
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 169547349}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 4
-  responseScale: 0
-  visualDamping: 4
-  starterPresetProcessed: 1
 --- !u!1 &170765181
 GameObject:
   m_ObjectHideFlags: 0
@@ -5807,7 +5772,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 432940114}
-  - component: {fileID: 432940115}
+  - component: {fileID: 2145000004}
+  - component: {fileID: 2145000005}
   m_Layer: 0
   m_Name: HouseLayout_kitchenCabinet
   m_TagString: Untagged
@@ -5834,23 +5800,6 @@ Transform:
   - {fileID: 65625073}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &432940115
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 432940113}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 4
-  responseScale: 0
-  visualDamping: 4
-  starterPresetProcessed: 1
 --- !u!1 &435659039
 GameObject:
   m_ObjectHideFlags: 0
@@ -5861,7 +5810,8 @@ GameObject:
   m_Component:
   - component: {fileID: 435659040}
   - component: {fileID: 435659041}
-  - component: {fileID: 435659042}
+  - component: {fileID: 2145000006}
+  - component: {fileID: 2145000007}
   m_Layer: 0
   m_Name: HouseLayout_Fridge
   m_TagString: Untagged
@@ -5907,26 +5857,6 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
---- !u!114 &435659042
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 435659039}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30af19df1f384c9c9dfc6038a3ec24d0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.HouseProxyEarthquakeSettings
-  mass: 65
-  linearDamping: 0.8
-  angularDamping: 1.2
-  forceNewtons: 100
-  torqueNewtonMeters: 45
-  shakeStrength: 1
-  includeVertical: 0
-  starterPresetProcessed: 1
 --- !u!1 &443785573
 GameObject:
   m_ObjectHideFlags: 0
@@ -8898,7 +8828,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 540471597}
-  - component: {fileID: 540471598}
+  - component: {fileID: 2145000008}
+  - component: {fileID: 2145000009}
   m_Layer: 0
   m_Name: HouseLayout_HazardBooks_3
   m_TagString: Untagged
@@ -8922,26 +8853,6 @@ Transform:
   - {fileID: 24324382}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &540471598
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 540471596}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30af19df1f384c9c9dfc6038a3ec24d0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.HouseProxyEarthquakeSettings
-  mass: 2.2
-  linearDamping: 0.3
-  angularDamping: 0.5
-  forceNewtons: 7
-  torqueNewtonMeters: 2
-  shakeStrength: 1
-  includeVertical: 1
-  starterPresetProcessed: 1
 --- !u!1 &566439712
 GameObject:
   m_ObjectHideFlags: 0
@@ -11133,7 +11044,8 @@ GameObject:
   m_Component:
   - component: {fileID: 752422599}
   - component: {fileID: 752422600}
-  - component: {fileID: 752422601}
+  - component: {fileID: 2145000010}
+  - component: {fileID: 2145000011}
   m_Layer: 0
   m_Name: HouseLayout_Sofa
   m_TagString: Untagged
@@ -11185,23 +11097,6 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
---- !u!114 &752422601
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 752422598}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 4
-  responseScale: 0
-  visualDamping: 4
-  starterPresetProcessed: 1
 --- !u!1 &754562289
 GameObject:
   m_ObjectHideFlags: 0
@@ -11724,7 +11619,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 767627334}
-  - component: {fileID: 767627335}
+  - component: {fileID: 2145000012}
+  - component: {fileID: 2145000013}
   m_Layer: 0
   m_Name: HouseLayout_lampRoundFloor
   m_TagString: Untagged
@@ -11750,23 +11646,6 @@ Transform:
   - {fileID: 1069614523}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &767627335
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 767627333}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 2
-  responseScale: 1
-  visualDamping: 1.5
-  starterPresetProcessed: 1
 --- !u!1 &774643165
 GameObject:
   m_ObjectHideFlags: 0
@@ -12318,7 +12197,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 807773104}
-  - component: {fileID: 807773105}
+  - component: {fileID: 2145000014}
+  - component: {fileID: 2145000015}
   m_Layer: 0
   m_Name: HouseLayout_televisionModern
   m_TagString: Untagged
@@ -12344,23 +12224,6 @@ Transform:
   - {fileID: 78110138}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &807773105
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 807773103}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 0
-  responseScale: 1
-  visualDamping: 1.8
-  starterPresetProcessed: 1
 --- !u!1 &810230504
 GameObject:
   m_ObjectHideFlags: 0
@@ -15841,7 +15704,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 905812950}
-  - component: {fileID: 905812951}
+  - component: {fileID: 2145000016}
+  - component: {fileID: 2145000017}
   m_Layer: 0
   m_Name: HouseLayout_books
   m_TagString: Untagged
@@ -15869,23 +15733,6 @@ Transform:
   - {fileID: 1643021589}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &905812951
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 905812949}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 0
-  responseScale: 1
-  visualDamping: 1
-  starterPresetProcessed: 1
 --- !u!43 &916851568
 Mesh:
   m_ObjectHideFlags: 0
@@ -18697,7 +18544,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1084263940}
-  - component: {fileID: 1084263941}
+  - component: {fileID: 2145000018}
+  - component: {fileID: 2145000019}
   m_Layer: 0
   m_Name: HouseLayout_kitchenSink
   m_TagString: Untagged
@@ -18727,23 +18575,6 @@ Transform:
   - {fileID: 994717848}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1084263941
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1084263939}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 4
-  responseScale: 0
-  visualDamping: 1.8
-  starterPresetProcessed: 1
 --- !u!1 &1086613318
 GameObject:
   m_ObjectHideFlags: 0
@@ -18953,7 +18784,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1094506161}
   - component: {fileID: 1094506162}
-  - component: {fileID: 1094506163}
+  - component: {fileID: 2145000020}
+  - component: {fileID: 2145000021}
   m_Layer: 0
   m_Name: HouseLayout_Sofa_Pillows
   m_TagString: Untagged
@@ -18995,23 +18827,6 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
---- !u!114 &1094506163
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1094506160}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 4
-  responseScale: 0
-  visualDamping: 4
-  starterPresetProcessed: 1
 --- !u!1 &1096182962
 GameObject:
   m_ObjectHideFlags: 0
@@ -19112,7 +18927,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1098941409}
   - component: {fileID: 1098941410}
-  - component: {fileID: 1098941411}
+  - component: {fileID: 2145000022}
+  - component: {fileID: 2145000023}
   m_Layer: 0
   m_Name: HouseLayout_DiningTable
   m_TagString: Untagged
@@ -19158,23 +18974,6 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
---- !u!114 &1098941411
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1098941408}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 4
-  responseScale: 0
-  visualDamping: 4
-  starterPresetProcessed: 1
 --- !u!1 &1101597012
 GameObject:
   m_ObjectHideFlags: 0
@@ -20046,7 +19845,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1154556035}
-  - component: {fileID: 1154556036}
+  - component: {fileID: 2145000024}
+  - component: {fileID: 2145000025}
   m_Layer: 0
   m_Name: HouseLayout_HazardBooks_2
   m_TagString: Untagged
@@ -20070,26 +19870,6 @@ Transform:
   - {fileID: 309484282}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1154556036
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1154556034}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30af19df1f384c9c9dfc6038a3ec24d0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.HouseProxyEarthquakeSettings
-  mass: 2.2
-  linearDamping: 0.3
-  angularDamping: 0.5
-  forceNewtons: 7
-  torqueNewtonMeters: 2
-  shakeStrength: 1
-  includeVertical: 1
-  starterPresetProcessed: 1
 --- !u!1 &1161780755
 GameObject:
   m_ObjectHideFlags: 0
@@ -20279,7 +20059,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1179722135}
-  - component: {fileID: 1179722136}
+  - component: {fileID: 2145000026}
+  - component: {fileID: 2145000027}
   m_Layer: 0
   m_Name: HouseLayout_tableCoffee
   m_TagString: Untagged
@@ -20304,23 +20085,6 @@ Transform:
   - {fileID: 412784442}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1179722136
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1179722134}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 4
-  responseScale: 0
-  visualDamping: 4
-  starterPresetProcessed: 1
 --- !u!1 &1187864727
 GameObject:
   m_ObjectHideFlags: 0
@@ -20512,7 +20276,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1198933909}
   - component: {fileID: 1198933910}
-  - component: {fileID: 1198933911}
+  - component: {fileID: 2145000028}
+  - component: {fileID: 2145000029}
   m_Layer: 0
   m_Name: HouseLayout_Wandrobe
   m_TagString: Untagged
@@ -20556,26 +20321,6 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
---- !u!114 &1198933911
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1198933908}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30af19df1f384c9c9dfc6038a3ec24d0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.HouseProxyEarthquakeSettings
-  mass: 42
-  linearDamping: 0.8
-  angularDamping: 1
-  forceNewtons: 100
-  torqueNewtonMeters: 45
-  shakeStrength: 1
-  includeVertical: 0
-  starterPresetProcessed: 1
 --- !u!1 &1204170819
 GameObject:
   m_ObjectHideFlags: 0
@@ -23480,7 +23225,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1370239187}
-  - component: {fileID: 1370239188}
+  - component: {fileID: 2145000030}
+  - component: {fileID: 2145000031}
   m_Layer: 0
   m_Name: HouseLayout_kitchenStove
   m_TagString: Untagged
@@ -23509,23 +23255,6 @@ Transform:
   - {fileID: 763886698}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1370239188
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1370239186}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 4
-  responseScale: 0
-  visualDamping: 1.8
-  starterPresetProcessed: 1
 --- !u!1 &1373365654
 GameObject:
   m_ObjectHideFlags: 0
@@ -24524,7 +24253,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1426961780}
-  - component: {fileID: 1426961781}
+  - component: {fileID: 2145000032}
+  - component: {fileID: 2145000033}
   m_Layer: 0
   m_Name: HouseLayout_books
   m_TagString: Untagged
@@ -24549,23 +24279,6 @@ Transform:
   - {fileID: 1674179976}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1426961781
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1426961779}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 0
-  responseScale: 1
-  visualDamping: 1
-  starterPresetProcessed: 1
 --- !u!1 &1439094390
 GameObject:
   m_ObjectHideFlags: 0
@@ -78333,7 +78046,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1531469907}
-  - component: {fileID: 1531469908}
+  - component: {fileID: 2145000034}
+  - component: {fileID: 2145000035}
   m_Layer: 0
   m_Name: HouseLayout_pottedPlant
   m_TagString: Untagged
@@ -78360,23 +78074,6 @@ Transform:
   - {fileID: 1845944451}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1531469908
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1531469906}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 0
-  responseScale: 1
-  visualDamping: 1
-  starterPresetProcessed: 1
 --- !u!1 &1533966213
 GameObject:
   m_ObjectHideFlags: 0
@@ -78961,7 +78658,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1568844032}
-  - component: {fileID: 1568844033}
+  - component: {fileID: 2145000036}
+  - component: {fileID: 2145000037}
   m_Layer: 0
   m_Name: HouseLayout_pottedPlant
   m_TagString: Untagged
@@ -78988,23 +78686,6 @@ Transform:
   - {fileID: 1312258338}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1568844033
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1568844031}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 0
-  responseScale: 1
-  visualDamping: 1
-  starterPresetProcessed: 1
 --- !u!1 &1574594943
 GameObject:
   m_ObjectHideFlags: 0
@@ -80457,7 +80138,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1703626165}
-  - component: {fileID: 1703626166}
+  - component: {fileID: 2145000038}
+  - component: {fileID: 2145000039}
   m_Layer: 0
   m_Name: HouseLayout_HazardBooks_1
   m_TagString: Untagged
@@ -80482,26 +80164,6 @@ Transform:
   - {fileID: 328831391}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1703626166
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1703626164}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30af19df1f384c9c9dfc6038a3ec24d0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.HouseProxyEarthquakeSettings
-  mass: 2.2
-  linearDamping: 0.3
-  angularDamping: 0.5
-  forceNewtons: 7
-  torqueNewtonMeters: 2
-  shakeStrength: 1
-  includeVertical: 1
-  starterPresetProcessed: 1
 --- !u!1 &1707557478
 GameObject:
   m_ObjectHideFlags: 0
@@ -80871,7 +80533,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1726025528}
-  - component: {fileID: 1726025529}
+  - component: {fileID: 2145000040}
+  - component: {fileID: 2145000041}
   m_Layer: 0
   m_Name: HouseLayout_cabinetTelevision
   m_TagString: Untagged
@@ -80896,23 +80559,6 @@ Transform:
   - {fileID: 443785574}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1726025529
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1726025527}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 4
-  responseScale: 0
-  visualDamping: 4
-  starterPresetProcessed: 1
 --- !u!1 &1727086616
 GameObject:
   m_ObjectHideFlags: 0
@@ -81013,7 +80659,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1732720935}
   - component: {fileID: 1732720936}
-  - component: {fileID: 1732720937}
+  - component: {fileID: 2145000042}
+  - component: {fileID: 2145000043}
   m_Layer: 0
   m_Name: HouseLayout_Vase
   m_TagString: Untagged
@@ -81057,23 +80704,6 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
---- !u!114 &1732720937
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1732720934}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 0
-  responseScale: 1
-  visualDamping: 1.8
-  starterPresetProcessed: 1
 --- !u!1 &1739801535
 GameObject:
   m_ObjectHideFlags: 0
@@ -82498,7 +82128,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1861971193}
-  - component: {fileID: 1861971194}
+  - component: {fileID: 2145000044}
+  - component: {fileID: 2145000045}
   m_Layer: 0
   m_Name: HouseLayout_tableCoffee
   m_TagString: Untagged
@@ -82523,23 +82154,6 @@ Transform:
   - {fileID: 391989325}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1861971194
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1861971192}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 4
-  responseScale: 0
-  visualDamping: 4
-  starterPresetProcessed: 1
 --- !u!1 &1862222050
 GameObject:
   m_ObjectHideFlags: 0
@@ -82845,7 +82459,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1882465186}
   - component: {fileID: 1882465187}
-  - component: {fileID: 1882465188}
+  - component: {fileID: 2145000046}
+  - component: {fileID: 2145000047}
   m_Layer: 0
   m_Name: HouseLayout_Vase
   m_TagString: Untagged
@@ -82888,23 +82503,6 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
---- !u!114 &1882465188
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1882465185}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 0
-  responseScale: 1
-  visualDamping: 1.8
-  starterPresetProcessed: 1
 --- !u!1 &1884799086
 GameObject:
   m_ObjectHideFlags: 0
@@ -87349,7 +86947,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2038952272}
-  - component: {fileID: 2038952273}
+  - component: {fileID: 2145000048}
+  - component: {fileID: 2145000049}
   m_Layer: 0
   m_Name: HouseLayout_bookcaseOpen
   m_TagString: Untagged
@@ -87374,23 +86973,6 @@ Transform:
   - {fileID: 697163283}
   m_Father: {fileID: 1606142843}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2038952273
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2038952271}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab961bf228304a69ae2992a024c85f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.DecorativeQuakeResponse
-  motion: {fileID: 0}
-  responseMode: 4
-  responseScale: 0
-  visualDamping: 1.8
-  starterPresetProcessed: 1
 --- !u!1 &2042934893
 GameObject:
   m_ObjectHideFlags: 0
@@ -91904,3 +91486,1153 @@ SceneRoots:
   - {fileID: 1606142843}
   - {fileID: 2126859816}
   - {fileID: 419657414}
+--- !u!54 &2145000000
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10897658}
+  serializedVersion: 5
+  m_Mass: 2.2
+  m_LinearDamping: 0.3
+  m_AngularDamping: 0.5
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10897658}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 7
+  torqueNewtonMeters: 2
+  includeVertical: 1
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000002
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 169547349}
+  serializedVersion: 5
+  m_Mass: 30
+  m_LinearDamping: 1.2
+  m_AngularDamping: 1.8
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 169547349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 40
+  torqueNewtonMeters: 11
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000004
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 432940113}
+  serializedVersion: 5
+  m_Mass: 38
+  m_LinearDamping: 0.8
+  m_AngularDamping: 1.1
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 432940113}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 95
+  torqueNewtonMeters: 40
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000006
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 435659039}
+  serializedVersion: 5
+  m_Mass: 65
+  m_LinearDamping: 0.8
+  m_AngularDamping: 1.2
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 435659039}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 100
+  torqueNewtonMeters: 45
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000008
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 540471596}
+  serializedVersion: 5
+  m_Mass: 2.2
+  m_LinearDamping: 0.3
+  m_AngularDamping: 0.5
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 540471596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 7
+  torqueNewtonMeters: 2
+  includeVertical: 1
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000010
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 752422598}
+  serializedVersion: 5
+  m_Mass: 30
+  m_LinearDamping: 1.2
+  m_AngularDamping: 1.8
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 752422598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 40
+  torqueNewtonMeters: 11
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000012
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 767627333}
+  serializedVersion: 5
+  m_Mass: 3
+  m_LinearDamping: 0.7
+  m_AngularDamping: 1.2
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 767627333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 7
+  torqueNewtonMeters: 2.5
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000014
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 807773103}
+  serializedVersion: 5
+  m_Mass: 5
+  m_LinearDamping: 0.8
+  m_AngularDamping: 1
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 807773103}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 12
+  torqueNewtonMeters: 3
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000016
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 905812949}
+  serializedVersion: 5
+  m_Mass: 2.2
+  m_LinearDamping: 0.3
+  m_AngularDamping: 0.5
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 905812949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 7
+  torqueNewtonMeters: 2
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000018
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1084263939}
+  serializedVersion: 5
+  m_Mass: 8
+  m_LinearDamping: 0.7
+  m_AngularDamping: 1
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1084263939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000020
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1094506160}
+  serializedVersion: 5
+  m_Mass: 0.75
+  m_LinearDamping: 1.2
+  m_AngularDamping: 1.1
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1094506160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 3.5
+  torqueNewtonMeters: 1
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000022
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1098941408}
+  serializedVersion: 5
+  m_Mass: 28
+  m_LinearDamping: 1.5
+  m_AngularDamping: 2
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1098941408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 45
+  torqueNewtonMeters: 12
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000024
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154556034}
+  serializedVersion: 5
+  m_Mass: 2.2
+  m_LinearDamping: 0.3
+  m_AngularDamping: 0.5
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154556034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 7
+  torqueNewtonMeters: 2
+  includeVertical: 1
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000026
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1179722134}
+  serializedVersion: 5
+  m_Mass: 28
+  m_LinearDamping: 1.5
+  m_AngularDamping: 2
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1179722134}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 45
+  torqueNewtonMeters: 12
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000028
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1198933908}
+  serializedVersion: 5
+  m_Mass: 42
+  m_LinearDamping: 0.8
+  m_AngularDamping: 1
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1198933908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 100
+  torqueNewtonMeters: 45
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000030
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1370239186}
+  serializedVersion: 5
+  m_Mass: 8
+  m_LinearDamping: 0.7
+  m_AngularDamping: 1
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1370239186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 15
+  torqueNewtonMeters: 5
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000032
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1426961779}
+  serializedVersion: 5
+  m_Mass: 2.2
+  m_LinearDamping: 0.3
+  m_AngularDamping: 0.5
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1426961779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 7
+  torqueNewtonMeters: 2
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000034
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1531469906}
+  serializedVersion: 5
+  m_Mass: 1.1
+  m_LinearDamping: 0.45
+  m_AngularDamping: 0.65
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1531469906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 6
+  torqueNewtonMeters: 1.8
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000036
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1568844031}
+  serializedVersion: 5
+  m_Mass: 1.1
+  m_LinearDamping: 0.45
+  m_AngularDamping: 0.65
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1568844031}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 6
+  torqueNewtonMeters: 1.8
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000038
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1703626164}
+  serializedVersion: 5
+  m_Mass: 2.2
+  m_LinearDamping: 0.3
+  m_AngularDamping: 0.5
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1703626164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 7
+  torqueNewtonMeters: 2
+  includeVertical: 1
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000040
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1726025527}
+  serializedVersion: 5
+  m_Mass: 38
+  m_LinearDamping: 0.8
+  m_AngularDamping: 1.1
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1726025527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 95
+  torqueNewtonMeters: 40
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000042
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1732720934}
+  serializedVersion: 5
+  m_Mass: 1.1
+  m_LinearDamping: 0.45
+  m_AngularDamping: 0.65
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1732720934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 6
+  torqueNewtonMeters: 1.8
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000044
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1861971192}
+  serializedVersion: 5
+  m_Mass: 28
+  m_LinearDamping: 1.5
+  m_AngularDamping: 2
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1861971192}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 45
+  torqueNewtonMeters: 12
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000046
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1882465185}
+  serializedVersion: 5
+  m_Mass: 1.1
+  m_LinearDamping: 0.45
+  m_AngularDamping: 0.65
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1882465185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 6
+  torqueNewtonMeters: 1.8
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
+--- !u!54 &2145000048
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2038952271}
+  serializedVersion: 5
+  m_Mass: 38
+  m_LinearDamping: 0.8
+  m_AngularDamping: 1.1
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &2145000049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2038952271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcb2a684a902af495449f4d76111487, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CEVR.Runtime::ChulaEarthquakeVR.InertialRigidbody
+  motionSource: {fileID: 0}
+  responseScale: 1
+  forceNewtons: 95
+  torqueNewtonMeters: 40
+  includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
+  starterPresetProcessed: 1
