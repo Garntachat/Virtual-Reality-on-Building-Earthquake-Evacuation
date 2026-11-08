@@ -15197,6 +15197,7 @@ MonoBehaviour:
   forceNewtons: 22
   torqueNewtonMeters: 6
   includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
   starterPresetProcessed: 1
 --- !u!54 &951328435
 Rigidbody:
@@ -31787,6 +31788,7 @@ MonoBehaviour:
   forceNewtons: 22
   torqueNewtonMeters: 6
   includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
   starterPresetProcessed: 1
 --- !u!54 &1931096616
 Rigidbody:
@@ -35335,6 +35337,7 @@ MonoBehaviour:
   forceNewtons: 22
   torqueNewtonMeters: 6
   includeVertical: 0
+  wakeOnlyWhenEarthquakeStarts: 1
   starterPresetProcessed: 1
 --- !u!54 &2126518004
 Rigidbody:
