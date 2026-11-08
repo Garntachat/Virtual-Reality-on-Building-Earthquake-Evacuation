@@ -678,18 +678,25 @@ namespace ChulaEarthquakeVR
                     body.position += Vector3.up * shiftY;
             }
 
-            // A 0.75 kg pillow group should not be hit by the same large
-            // upward force and torque used for furniture. Shake gently in XZ;
-            // gravity always remains active, including after quake end.
+            // At the start of shaking, torque used to rotate the TWO pillows
+            // as one object against the sofa backrest, launching the group.
+            // For this one decorative group, stop quake torque and keep it
+            // upright, while leaving gravity and downward falling available.
+            body.useGravity = true;
+            body.constraints &= ~RigidbodyConstraints.FreezePositionY;
+            body.constraints |= RigidbodyConstraints.FreezeRotationX |
+                                RigidbodyConstraints.FreezeRotationZ;
+            body.isKinematic = false;
+            body.angularVelocity = Vector3.zero;
             InertialRigidbody shaker = pillows.GetComponent<InertialRigidbody>();
             if (shaker != null)
             {
-                shaker.Configure(motion, 0.35f, false);
-                shaker.ConfigureForces(1.2f, 0.25f);
+                shaker.Configure(motion, 0f, false);
+                shaker.ConfigureForces(0f, 0f);
+                // Allow 2 cm for normal seating contact, but no visible
+                // upward jump when the kinematic sofa starts shaking.
+                shaker.StabilizeHouseSofaPillows(body.position.y + 0.02f);
             }
-            body.useGravity = true;
-            body.constraints &= ~RigidbodyConstraints.FreezePositionY;
-            body.isKinematic = false;
             body.WakeUp();
         }
 

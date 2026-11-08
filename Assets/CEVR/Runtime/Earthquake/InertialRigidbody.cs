@@ -44,6 +44,12 @@ namespace ChulaEarthquakeVR
         private Vector3 houseAnchorPosition;
         private Quaternion houseAnchorRotation;
 
+        // The authored House sofa has two visible pillows on ONE Rigidbody.
+        // Keep this decorative group grounded without restricting other loose
+        // items, chairs, or the Tutorial scene.
+        private bool stabilizeHouseSofaPillows;
+        private float houseSofaPillowCeilingY;
+
         // Tutorial-only: large teaching-room furniture stays upright and in
         // place; loose props are released with gravity and never frozen midair.
         private bool anchoredTutorialFurniture;
@@ -67,6 +73,24 @@ namespace ChulaEarthquakeVR
         {
             wakeOnlyWhenEarthquakeStarts = enabled;
             SubscribeToQuake();
+        }
+
+        public void StabilizeHouseSofaPillows(float maximumWorldPivotY)
+        {
+            if (gameObject.scene.name != "House" ||
+                name != "HouseLayout_Sofa_Pillows") return;
+
+            // The pair has two collision shapes attached to a single body.
+            // At quake onset, torque and unfreezing X/Z rotation can lever the
+            // pair against the sofa and launch it vertically. Disable only
+            // this object's quake forces while retaining genuine gravity.
+            stabilizeHouseSofaPillows = true;
+            houseSofaPillowCeilingY = maximumWorldPivotY;
+            wakeOnlyWhenEarthquakeStarts = false;
+            responseScale = 0f;
+            forceNewtons = 0f;
+            torqueNewtonMeters = 0f;
+            includeVertical = false;
         }
 
         private void Awake()
@@ -259,6 +283,9 @@ namespace ChulaEarthquakeVR
 
         private void OnQuakeStarted()
         {
+            // Never release rotation constraints for the sofa pillow pair:
+            // they already use gravity and can fall without being launched.
+            if (stabilizeHouseSofaPillows) return;
             if ((!wakeOnlyWhenEarthquakeStarts && !looseTutorialFurniture) ||
                 body == null || GetComponent<FallingHazard>() != null) return;
             // Large House furniture never tips or drifts from its authored
@@ -342,6 +369,25 @@ namespace ChulaEarthquakeVR
 
         private void FixedUpdate()
         {
+            if (stabilizeHouseSofaPillows && body != null && !body.isKinematic)
+            {
+                // Gravity is still active and falling downward is unrestricted.
+                // Reject only upward impulses from colliding with the moving
+                // sofa during the earthquake, never freeze the body midair.
+                Vector3 velocity = body.linearVelocity;
+                if (velocity.y > 0f)
+                {
+                    velocity.y = 0f;
+                    body.linearVelocity = velocity;
+                }
+                if (body.position.y > houseSofaPillowCeilingY)
+                {
+                    Vector3 position = body.position;
+                    position.y = houseSofaPillowCeilingY;
+                    body.position = position;
+                }
+                return;
+            }
             if (anchoredTutorialFurniture)
             {
                 UpdateAnchoredTutorialFurniture();
