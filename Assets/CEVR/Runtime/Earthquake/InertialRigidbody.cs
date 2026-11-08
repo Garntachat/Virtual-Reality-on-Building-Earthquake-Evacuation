@@ -280,7 +280,10 @@ namespace ChulaEarthquakeVR
         private void OnQuakeEnded()
         {
             if (!wakeOnlyWhenEarthquakeStarts || body == null ||
-                manualInteractionActive || GetComponent<FallingHazard>() != null) return;
+                manualInteractionActive || GetComponent<FallingHazard>() != null ||
+                GetComponent<ConfigurableJoint>() != null) return;
+            // A hanging lamp must stay under its physics joint after shaking;
+            // freezing its Rigidbody here would strand it mid-swing.
             // Never freeze a loose object mid-air. Let it keep falling after
             // shaking stops until it settles on the floor.
             if (looseHouseFurniture || anchoredHouseFurniture ||
