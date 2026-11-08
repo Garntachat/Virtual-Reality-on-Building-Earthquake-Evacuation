@@ -86,9 +86,19 @@ namespace ChulaEarthquakeVR
                     FindObjectsSortMode.None))
             {
                 if (item == null || item.gameObject.scene != gameObject.scene) continue;
-                if (item.GetComponent<Rigidbody>() == null ||
-                    item.GetComponent<Collider>() != null ||
-                    item.GetComponentInChildren<Collider>(true) != null) continue;
+                if (item.GetComponent<Rigidbody>() == null) continue;
+                // Disabled imported colliders do not stop a falling Rigidbody.
+                // Ensure each physics root has at least one enabled solid
+                // collider, otherwise add a root box from visual bounds.
+                bool hasSolidCollider = false;
+                foreach (Collider candidate in item.GetComponentsInChildren<Collider>(true))
+                    if (candidate != null && candidate.enabled && !candidate.isTrigger &&
+                        candidate.gameObject.activeInHierarchy)
+                    {
+                        hasSolidCollider = true;
+                        break;
+                    }
+                if (hasSolidCollider) continue;
                 Renderer[] renderers = item.GetComponentsInChildren<Renderer>(true);
                 Vector3 min = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
                 Vector3 max = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
