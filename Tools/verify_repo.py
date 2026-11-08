@@ -663,11 +663,11 @@ def check_quake_sync_saved_scenes(errors: list[str]) -> None:
         ("Tutorial", "CEVR_ChulaEngineering_Tutorial.unity", 25, 12),
     ):
         scene = (ROOT / "Assets/CEVR/Generated/Scenes" / file_name).read_text(encoding="utf-8")
-        parts = re.split(r"(?=^--- !u!\\d+ &\\d+\\n)", scene, flags=re.MULTILINE)
+        parts = re.split(r"(?=^--- !u!\d+ &\d+\n)", scene, flags=re.MULTILINE)
         components = {}
         gameobjects = []
         for part in parts:
-            header = re.match(r"^--- !u!(\\d+) &(\\d+)\\n", part)
+            header = re.match(r"^--- !u!(\d+) &(\d+)\n", part)
             if not header:
                 continue
             component_type, file_id = header.groups()
@@ -680,7 +680,7 @@ def check_quake_sync_saved_scenes(errors: list[str]) -> None:
         for go in gameobjects:
             name_match = re.search(r"^  m_Name: (.+)$", go, re.MULTILINE)
             name = name_match.group(1) if name_match else "unknown"
-            refs = re.findall(r"^  - component: \\{fileID: (\\d+)\\}", go, re.MULTILINE)
+            refs = re.findall(r"^  - component: \{fileID: (\d+)\}", go, re.MULTILINE)
             owned = [components[ref] for ref in refs if ref in components]
             if not any(kind == "54" for kind, _ in owned):
                 continue
