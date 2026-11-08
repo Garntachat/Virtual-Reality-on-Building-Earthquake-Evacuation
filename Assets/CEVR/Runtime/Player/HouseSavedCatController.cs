@@ -15,6 +15,13 @@ namespace ChulaEarthquakeVR
         [SerializeField] private Vector2 maximum = new Vector2(6.4f, 6.6f);
         [SerializeField] private AudioClip barkClip;
         [SerializeField] private bool enableRoaming = false;
+
+        [Header("Small earthquake-only movement")]
+        [Tooltip("Short step when shaking begins. The pet waits between steps and never teleports.")]
+        [SerializeField, Range(0.25f, 1.2f)] private float earthquakeStepMetres = 0.75f;
+        [SerializeField, Range(0.15f, 1f)] private float earthquakeWalkSpeed = 0.48f;
+        [SerializeField, Range(0.8f, 4f)] private float earthquakeRestSeconds = 1.7f;
+        [SerializeField, Range(1f, 4f)] private float earthquakeHomeRadius = 2.2f;
         private HouseScenarioController houseScenario;
         private Transform barkHead;
         private Transform chest;
@@ -45,6 +52,9 @@ namespace ChulaEarthquakeVR
         private float retryAt;
         private readonly List<Bounds> furnitureBounds = new List<Bounds>();
         private float boundsRefreshAt;
+        private Vector3 earthquakeTarget;
+        private float nextEarthquakeStepAt;
+        private Vector3 lastEarthquakeDirection;
 
         [SerializeField, Min(0.05f)] private float walkSpeed = 0.42f;
         [SerializeField, Min(10f)] private float turnSpeed = 150f;
@@ -70,6 +80,7 @@ namespace ChulaEarthquakeVR
             furnitureRoot = transform.parent;
             home = transform.position;
             target = home;
+            earthquakeTarget = home;
 
             CapsuleCollider capsule = GetComponent<CapsuleCollider>();
             if (capsule == null) capsule = gameObject.AddComponent<CapsuleCollider>();
@@ -146,6 +157,15 @@ namespace ChulaEarthquakeVR
             bool shaking = houseScenario != null ? houseScenario.IsQuaking : motion != null && motion.IsPlaying;
             if (shaking)
             {
+                if (!wasShaking)
+                {
+                    // Keep the authored first-floor spawn. Start taking short steps
+                    // only after the earthquake signal has actually begun.
+                    route.Clear();
+                    earthquakeTarget = body.position;
+                    lastEarthquakeDirection = Vector3.zero;
+                    nextEarthquakeStepAt = Time.time + 0.65f;
+                }
                 if (!wasShaking || Time.time >= nextBark)
                 {
                     voice.pitch = Random.Range(0.92f, 1.08f);
@@ -154,12 +174,13 @@ namespace ChulaEarthquakeVR
                     nextBark = Time.time + Random.Range(3f, 6f);
                 }
                 wasShaking = true;
-                Animate(false);
+                MoveSmallEarthquakeStep();
                 return;
             }
             if (wasShaking)
             {
                 wasShaking = false;
+                earthquakeTarget = body.position;
                 route.Clear();
                 target = body.position;
                 waitUntil = Time.time + Random.Range(2f, 4f);
@@ -202,6 +223,99 @@ namespace ChulaEarthquakeVR
             body.MoveRotation(rotation);
             body.MovePosition(next);
             Animate(true);
+        }
+
+        private void MoveSmallEarthquakeStep()
+        {
+            // The original pet is kinematic. MovePosition changes only its Play
+            // pose; we never alter the saved House scene or trigger furniture.
+            Vector3 position = body.position;
+            Vector3 flat = earthquakeTarget - position;
+            flat.y = 0f;
+
+            if (flat.sqrMagnitude < 0.035f)
+            {
+                if (Time.time < nextEarthquakeStepAt)
+                {
+                    Animate(false);
+                    return;
+                }
+                if (!PickSmallEarthquakeTarget(position))
+                {
+                    nextEarthquakeStepAt = Time.time + earthquakeRestSeconds;
+                    Animate(false);
+                    return;
+                }
+                flat = earthquakeTarget - position;
+                flat.y = 0f;
+            }
+
+            Vector3 direction = flat.normalized;
+            float distance = Mathf.Min(flat.magnitude, earthquakeWalkSpeed * Time.fixedDeltaTime);
+            Vector3 next = position + direction * distance;
+            next.y = home.y;
+
+            // Check every actual step, not just the destination. This prevents
+            // walking through authored furniture, walls, stairs or floor drops.
+            if (!HasGroundAt(next) ||
+                !IsClearOfSavedFurniture(next) ||
+                ObstacleAhead(position, direction, distance + 0.10f))
+            {
+                earthquakeTarget = position;
+                nextEarthquakeStepAt = Time.time + earthquakeRestSeconds;
+                Animate(false);
+                return;
+            }
+
+            Quaternion wanted = Quaternion.LookRotation(direction, Vector3.up);
+            body.MoveRotation(Quaternion.RotateTowards(
+                body.rotation, wanted, turnSpeed * Time.fixedDeltaTime));
+            body.MovePosition(next);
+            Animate(true);
+
+            if (flat.magnitude <= distance + 0.02f)
+            {
+                earthquakeTarget = next;
+                nextEarthquakeStepAt = Time.time + Random.Range(
+                    earthquakeRestSeconds * 0.8f, earthquakeRestSeconds * 1.5f);
+            }
+        }
+
+        private bool PickSmallEarthquakeTarget(Vector3 origin)
+        {
+            // Walk a little, pause and bark. No full-house roaming, circular
+            // route, NavMesh dependency or displacement before the earthquake.
+            // Try alternative directions if furniture blocks the first choice.
+            for (int attempt = 0; attempt < 16; attempt++)
+            {
+                float angle = Random.Range(0f, Mathf.PI * 2f);
+                Vector3 direction = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
+                if (lastEarthquakeDirection != Vector3.zero &&
+                    Vector3.Dot(direction, lastEarthquakeDirection) > 0.85f)
+                    continue;
+                float length = Random.Range(earthquakeStepMetres * 0.65f, earthquakeStepMetres);
+                Vector3 candidate = origin + direction * length;
+                candidate.y = home.y;
+                Vector3 homeOffset = candidate - home;
+                homeOffset.y = 0f;
+                if (homeOffset.sqrMagnitude > earthquakeHomeRadius * earthquakeHomeRadius)
+                    continue;
+                if (candidate.x < minimum.x || candidate.x > maximum.x ||
+                    candidate.z < minimum.y || candidate.z > maximum.y)
+                    continue;
+                Vector3 midpoint = origin + direction * (length * 0.5f);
+                midpoint.y = home.y;
+                if (!HasGroundAt(midpoint) || !HasGroundAt(candidate) ||
+                    !IsClearOfSavedFurniture(midpoint) ||
+                    !IsClearOfSavedFurniture(candidate) ||
+                    ObstacleAhead(origin, direction, length + 0.10f))
+                    continue;
+
+                lastEarthquakeDirection = direction;
+                earthquakeTarget = candidate;
+                return true;
+            }
+            return false;
         }
 
         private void PickNextTarget()
