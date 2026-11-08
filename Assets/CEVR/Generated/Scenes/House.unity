@@ -8933,6 +8933,8 @@ MonoBehaviour:
   torqueNewtonMeters: 6
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 0
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!65 &566439716
 BoxCollider:
@@ -8977,8 +8979,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 0
+  m_UseGravity: 1
+  m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 84
   m_CollisionDetection: 1
@@ -22091,6 +22093,8 @@ MonoBehaviour:
   torqueNewtonMeters: 6
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 0
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!65 &1306048166
 BoxCollider:
@@ -22135,8 +22139,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 0
+  m_UseGravity: 1
+  m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 84
   m_CollisionDetection: 1
@@ -24992,6 +24996,8 @@ MonoBehaviour:
   torqueNewtonMeters: 6
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 0
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!65 &1493009754
 BoxCollider:
@@ -25036,8 +25042,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 0
+  m_UseGravity: 1
+  m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 84
   m_CollisionDetection: 1
@@ -83879,6 +83885,8 @@ MonoBehaviour:
   torqueNewtonMeters: 6
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 0
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!65 &1963756529
 BoxCollider:
@@ -83923,8 +83931,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 0
+  m_UseGravity: 1
+  m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 84
   m_CollisionDetection: 1
@@ -91535,6 +91543,8 @@ MonoBehaviour:
   torqueNewtonMeters: 2
   includeVertical: 1
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 0
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000002
 Rigidbody:
@@ -91581,6 +91591,8 @@ MonoBehaviour:
   torqueNewtonMeters: 11
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 1
+  anchoredSwayDegrees: 0.4
   starterPresetProcessed: 1
 --- !u!54 &2145000004
 Rigidbody:
@@ -91627,6 +91639,8 @@ MonoBehaviour:
   torqueNewtonMeters: 40
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 1
+  anchoredSwayDegrees: 0.35
   starterPresetProcessed: 1
 --- !u!54 &2145000006
 Rigidbody:
@@ -91673,6 +91687,8 @@ MonoBehaviour:
   torqueNewtonMeters: 45
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 1
+  anchoredSwayDegrees: 0.75
   starterPresetProcessed: 1
 --- !u!54 &2145000008
 Rigidbody:
@@ -91719,6 +91735,8 @@ MonoBehaviour:
   torqueNewtonMeters: 2
   includeVertical: 1
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 0
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000010
 Rigidbody:
@@ -91765,6 +91783,8 @@ MonoBehaviour:
   torqueNewtonMeters: 11
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 1
+  anchoredSwayDegrees: 0.55
   starterPresetProcessed: 1
 --- !u!54 &2145000012
 Rigidbody:
@@ -91788,7 +91808,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 0
@@ -91811,6 +91831,8 @@ MonoBehaviour:
   torqueNewtonMeters: 2.5
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 2
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000014
 Rigidbody:
@@ -91834,7 +91856,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 0
@@ -91857,6 +91879,8 @@ MonoBehaviour:
   torqueNewtonMeters: 3
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 2
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000016
 Rigidbody:
@@ -91880,7 +91904,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 0
@@ -91903,6 +91927,8 @@ MonoBehaviour:
   torqueNewtonMeters: 2
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 2
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000018
 Rigidbody:
@@ -91949,6 +91975,8 @@ MonoBehaviour:
   torqueNewtonMeters: 5
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 1
+  anchoredSwayDegrees: 0.35
   starterPresetProcessed: 1
 --- !u!54 &2145000020
 Rigidbody:
@@ -91972,7 +92000,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 0
@@ -91995,6 +92023,8 @@ MonoBehaviour:
   torqueNewtonMeters: 1
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 2
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000022
 Rigidbody:
@@ -92041,6 +92071,8 @@ MonoBehaviour:
   torqueNewtonMeters: 12
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 1
+  anchoredSwayDegrees: 0.55
   starterPresetProcessed: 1
 --- !u!54 &2145000024
 Rigidbody:
@@ -92087,6 +92119,8 @@ MonoBehaviour:
   torqueNewtonMeters: 2
   includeVertical: 1
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 0
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000026
 Rigidbody:
@@ -92133,6 +92167,8 @@ MonoBehaviour:
   torqueNewtonMeters: 12
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 1
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000028
 Rigidbody:
@@ -92179,6 +92215,8 @@ MonoBehaviour:
   torqueNewtonMeters: 45
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 1
+  anchoredSwayDegrees: 0.75
   starterPresetProcessed: 1
 --- !u!54 &2145000030
 Rigidbody:
@@ -92225,6 +92263,8 @@ MonoBehaviour:
   torqueNewtonMeters: 5
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 1
+  anchoredSwayDegrees: 0.35
   starterPresetProcessed: 1
 --- !u!54 &2145000032
 Rigidbody:
@@ -92248,7 +92288,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 0
@@ -92271,6 +92311,8 @@ MonoBehaviour:
   torqueNewtonMeters: 2
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 2
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000034
 Rigidbody:
@@ -92294,7 +92336,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 0
@@ -92317,6 +92359,8 @@ MonoBehaviour:
   torqueNewtonMeters: 1.8
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 2
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000036
 Rigidbody:
@@ -92340,7 +92384,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 0
@@ -92363,6 +92407,8 @@ MonoBehaviour:
   torqueNewtonMeters: 1.8
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 2
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000038
 Rigidbody:
@@ -92409,6 +92455,8 @@ MonoBehaviour:
   torqueNewtonMeters: 2
   includeVertical: 1
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 0
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000040
 Rigidbody:
@@ -92455,6 +92503,8 @@ MonoBehaviour:
   torqueNewtonMeters: 40
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 1
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000042
 Rigidbody:
@@ -92478,7 +92528,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 0
@@ -92501,6 +92551,8 @@ MonoBehaviour:
   torqueNewtonMeters: 1.8
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 2
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000044
 Rigidbody:
@@ -92547,6 +92599,8 @@ MonoBehaviour:
   torqueNewtonMeters: 12
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 1
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000046
 Rigidbody:
@@ -92570,7 +92624,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 0
@@ -92593,6 +92647,8 @@ MonoBehaviour:
   torqueNewtonMeters: 1.8
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 2
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
 --- !u!54 &2145000048
 Rigidbody:
@@ -92639,4 +92695,6 @@ MonoBehaviour:
   torqueNewtonMeters: 40
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
+  houseMotionMode: 1
+  anchoredSwayDegrees: 0.7
   starterPresetProcessed: 1
