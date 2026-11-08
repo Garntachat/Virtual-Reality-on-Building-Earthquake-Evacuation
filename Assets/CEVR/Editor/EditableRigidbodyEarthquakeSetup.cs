@@ -211,14 +211,16 @@ namespace ChulaEarthquakeVR.Editor
             // Do NOT turn building structure, camera, door, window or pet
             // controllers into physical furniture. They have their own behavior.
             string name = item.name.ToLowerInvariant();
-            bool hangingFixture = name.Contains("lamp") || name.Contains("light");
+            // Architectural fixtures, windows, floor rugs, doors, artwork and
+            // animals are NOT free-standing physical furniture.
             return name == "houselayout_cat" || name.Contains("window") ||
                 name.Contains("door") || name.Contains("wall") ||
-                (name.Contains("floor") && !hangingFixture) ||
-                (name.Contains("ceiling") && !hangingFixture) ||
-                name.Contains("ground") || name.Contains("camera") ||
-                name.Contains("player") || name.Contains("assembly") ||
-                name.Contains("safetyzone") || name.Contains("foundation");
+                name.Contains("floor") || name.Contains("ceiling") ||
+                name.Contains("warmlight") || name.Contains("livingart") ||
+                name.Contains("rug") || name.Contains("ground") ||
+                name.Contains("camera") || name.Contains("player") ||
+                name.Contains("assembly") || name.Contains("safetyzone") ||
+                name.Contains("foundation");
         }
 
         private static System.Collections.Generic.List<Transform> FindOtherHouseFurniture(Scene scene)
@@ -253,6 +255,12 @@ namespace ChulaEarthquakeVR.Editor
                 name.IndexOf("stove", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
+        private static bool RequiresHouseCollider(Transform item) =>
+            item != null && item.name.IndexOf("DiningTable", StringComparison.OrdinalIgnoreCase) < 0;
+
+        // A single saved source of truth: every eligible House furniture root gets
+        // native Rigidbody + InertialRigidbody fields in Edit mode. We never
+        // create physics on window/door/rug/animal/building shell objects.
         private static int AddOtherHouseFurnitureSettings(
             System.Collections.Generic.List<Transform> items)
         {
@@ -260,27 +268,61 @@ namespace ChulaEarthquakeVR.Editor
             foreach (Transform item in items)
             {
                 if (item == null) continue;
-                if (IsHouseProxy(item))
+                Rigidbody body = item.GetComponent<Rigidbody>();
+                InertialRigidbody inertial = item.GetComponent<InertialRigidbody>();
+                HouseProxyEarthquakeSettings legacy = item.GetComponent<HouseProxyEarthquakeSettings>();
+                DecorativeQuakeResponse decorative = item.GetComponent<DecorativeQuakeResponse>();
+                EarthquakeStarterPresets.Values suggested = EarthquakeStarterPresets.Suggest(item.name);
+                bool createdBody = body == null;
+                if (createdBody)
                 {
-                    if (item.GetComponent<HouseProxyEarthquakeSettings>() != null) continue;
-                    var proxySettings = Undo.AddComponent<HouseProxyEarthquakeSettings>(item.gameObject);
-                    proxySettings.SetDefaultsForNewComponent(
-                        item.name.StartsWith("HouseLayout_HazardBooks_", StringComparison.Ordinal));
+                    body = Undo.AddComponent<Rigidbody>(item.gameObject);
+                    body.mass = legacy == null ? suggested.Mass : legacy.Mass;
+                    body.linearDamping = legacy == null ? suggested.LinearDamping : legacy.LinearDamping;
+                    body.angularDamping = legacy == null ? suggested.AngularDamping : legacy.AngularDamping;
+                    body.useGravity = false;
+                    body.isKinematic = true; // never move before the earthquake
+                    body.interpolation = RigidbodyInterpolation.Interpolate;
+                    body.collisionDetectionMode = CollisionDetectionMode.Continuous;
                     added++;
                 }
-                else if (item.GetComponent<Rigidbody>() == null &&
-                         item.GetComponent<DecorativeQuakeResponse>() == null)
+
+                if (RequiresHouseCollider(item) && item.GetComponent<Collider>() == null &&
+                    TryLocalFurnitureBounds(item, out Bounds bounds))
                 {
-                    // Static interior decor moves only visually. It never gets a
-                    // fake Rigidbody or competes with an authored floor collider.
-                    DecorativeQuakeMode mode = item.name.IndexOf("lamp", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                               item.name.IndexOf("light", StringComparison.OrdinalIgnoreCase) >= 0
-                        ? DecorativeQuakeMode.Hanging
-                        : IsFixedDecoration(item.name) ? DecorativeQuakeMode.Heavy
-                        : DecorativeQuakeMode.Loose;
-                    float strength = IsFixedDecoration(item.name) ? 0f : 1f;
-                    Undo.AddComponent<DecorativeQuakeResponse>(item.gameObject)
-                        .Configure(null, mode, strength);
+                    BoxCollider box = Undo.AddComponent<BoxCollider>(item.gameObject);
+                    box.center = bounds.center;
+                    box.size = new Vector3(Mathf.Max(0.08f, bounds.size.x),
+                        Mathf.Max(0.08f, bounds.size.y),
+                        Mathf.Max(0.08f, bounds.size.z));
+                    added++;
+                }
+
+                if (inertial == null)
+                {
+                    inertial = Undo.AddComponent<InertialRigidbody>(item.gameObject);
+                    bool overhead = item.name.IndexOf("HazardBooks_", StringComparison.OrdinalIgnoreCase) >= 0;
+                    float strength = legacy == null ? 1f : legacy.ShakeStrength;
+                    inertial.Configure(null, strength, overhead);
+                    inertial.ConfigureForces(
+                        legacy == null ? suggested.ForceNewtons : legacy.ForceNewtons,
+                        legacy == null ? suggested.TorqueNewtonMeters : legacy.TorqueNewtonMeters);
+                    // Allow the staged hazards to release later. Other furniture
+                    // wakes on the shared ground-motion QuakeStarted event.
+                    inertial.ConfigureQuakeActivation(true);
+                    added++;
+                }
+
+                // Old proxy/visual shakers would otherwise fight the saved physics.
+                // Their custom Mass/Damping/Force values were migrated above.
+                if (legacy != null)
+                {
+                    Undo.DestroyObjectImmediate(legacy);
+                    added++;
+                }
+                if (decorative != null)
+                {
+                    Undo.DestroyObjectImmediate(decorative);
                     added++;
                 }
             }
@@ -396,10 +438,11 @@ namespace ChulaEarthquakeVR.Editor
             bool missingHouseFurniture = false;
             foreach (Transform item in otherHouseFurniture)
             {
-                if (IsHouseProxy(item)
-                    ? item.GetComponent<HouseProxyEarthquakeSettings>() == null
-                    : item.GetComponent<DecorativeQuakeResponse>() == null &&
-                      item.GetComponent<InertialRigidbody>() == null)
+                if (item.GetComponent<Rigidbody>() == null ||
+                    item.GetComponent<InertialRigidbody>() == null ||
+                    item.GetComponent<HouseProxyEarthquakeSettings>() != null ||
+                    item.GetComponent<DecorativeQuakeResponse>() != null ||
+                    (RequiresHouseCollider(item) && item.GetComponent<Collider>() == null))
                 {
                     missingHouseFurniture = true;
                     break;
