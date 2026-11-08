@@ -180,7 +180,7 @@ namespace ChulaEarthquakeVR
             // Align the two loose sofa pillows only AFTER the saved furniture
             // parity snapshot has been restored. Otherwise the normal House
             // sync would undo their runtime-only grounding correction.
-            PrepareHouseSofaPillows(savedRoot, motion);
+            PrepareHouseSofaPillows(savedRoot);
 
             if (restored > 0)
                 Debug.LogWarning(
@@ -633,31 +633,24 @@ namespace ChulaEarthquakeVR
             return true;
         }
 
-        private static void PrepareHouseSofaPillows(
-            Transform savedRoot, GroundMotionPlayer motion)
+        private static void PrepareHouseSofaPillows(Transform savedRoot)
         {
             Transform pillows = FindFurniture(savedRoot, "HouseLayout_Sofa_Pillows");
             Transform sofa = FindFurniture(savedRoot, "HouseLayout_Sofa", "EDITOR_Sofa");
             if (pillows == null || sofa == null) return;
-            Rigidbody body = pillows.GetComponent<Rigidbody>();
-            if (body == null) return;
 
-            // Two pillow models form one lightweight Rigidbody in the saved
-            // House scene. Give BOTH meshes a real collider, and use the top
-            // of the upholstered seat (not the top of the sofa's backrest) as
-            // the support surface. The old single root collider caused hovering.
+            // This is only decorative sofa dressing. The two pillows share
+            // ONE saved Rigidbody; letting that body react to the quake makes
+            // the pair launch upward. Attach it to the moving sofa instead.
+            // Only runtime changes are made, after the saved-scene parity check.
             float pillowBottom = float.PositiveInfinity;
-            int pillowCount = 0;
             foreach (Renderer renderer in pillows.GetComponentsInChildren<Renderer>(true))
             {
                 if (renderer == null || !renderer.enabled ||
                     !renderer.gameObject.activeInHierarchy ||
                     (renderer.name != "PillowL" && renderer.name != "PillowR")) continue;
-                if (!EnsureVisiblePartCollider(renderer)) continue;
                 pillowBottom = Mathf.Min(pillowBottom, renderer.bounds.min.y);
-                pillowCount++;
             }
-            if (pillowCount < 2) return;
 
             float seatTop = float.NegativeInfinity;
             foreach (Renderer renderer in sofa.GetComponentsInChildren<Renderer>(true))
@@ -669,35 +662,38 @@ namespace ChulaEarthquakeVR
                 seatTop = Mathf.Max(seatTop, renderer.bounds.max.y);
             }
 
-            if (!float.IsNegativeInfinity(seatTop) && !float.IsPositiveInfinity(pillowBottom))
+            if (!float.IsNegativeInfinity(seatTop) &&
+                !float.IsPositiveInfinity(pillowBottom))
             {
-                // Drop the initial visual hover immediately when Play begins.
-                // A tiny clearance prevents initial collision penetration.
                 float shiftY = (seatTop + 0.008f) - pillowBottom;
                 if (Mathf.Abs(shiftY) > 0.003f)
-                    body.position += Vector3.up * shiftY;
+                    pillows.position += Vector3.up * shiftY;
             }
 
-            // At the start of shaking, torque used to rotate the TWO pillows
-            // as one object against the sofa backrest, launching the group.
-            // For this one decorative group, stop quake torque and keep it
-            // upright, while leaving gravity and downward falling available.
-            body.useGravity = true;
-            body.constraints &= ~RigidbodyConstraints.FreezePositionY;
-            body.constraints |= RigidbodyConstraints.FreezeRotationX |
-                                RigidbodyConstraints.FreezeRotationZ;
-            body.isKinematic = false;
-            body.angularVelocity = Vector3.zero;
+            // Absolutely no independent shaking, gravity, or contact impulses.
+            // A child of the sofa follows its motion rigidly in Play Mode.
             InertialRigidbody shaker = pillows.GetComponent<InertialRigidbody>();
-            if (shaker != null)
+            if (shaker != null) shaker.enabled = false;
+
+            Rigidbody body = pillows.GetComponent<Rigidbody>();
+            if (body != null)
             {
-                shaker.Configure(motion, 0f, false);
-                shaker.ConfigureForces(0f, 0f);
-                // Allow 2 cm for normal seating contact, but no visible
-                // upward jump when the kinematic sofa starts shaking.
-                shaker.StabilizeHouseSofaPillows(body.position.y + 0.02f);
+                if (!body.isKinematic)
+                {
+                    body.linearVelocity = Vector3.zero;
+                    body.angularVelocity = Vector3.zero;
+                }
+                body.isKinematic = true;
+                body.useGravity = false;
+                body.detectCollisions = false;
+                body.constraints = RigidbodyConstraints.FreezeAll;
             }
-            body.WakeUp();
+            foreach (Collider collider in pillows.GetComponentsInChildren<Collider>(true))
+                collider.enabled = false;
+
+            // Keep the exact on-sofa world pose, then lock it to the sofa
+            // transform; the House quake can no longer throw the pillows.
+            pillows.SetParent(sofa, true);
         }
 
         private static void AttachRuntimeFollower(Transform visual, GameObject proxy)

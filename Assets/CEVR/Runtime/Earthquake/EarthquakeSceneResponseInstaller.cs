@@ -86,6 +86,11 @@ namespace ChulaEarthquakeVR
                     FindObjectsSortMode.None))
             {
                 if (item == null || item.gameObject.scene != gameObject.scene) continue;
+                // The House sofa pillows are decorative children of the sofa,
+                // not independent physics props. Never recreate a collider on
+                // this intentionally non-colliding group.
+                if (item.gameObject.scene.name == "House" &&
+                    item.name == "HouseLayout_Sofa_Pillows") continue;
                 if (item.GetComponent<Rigidbody>() == null) continue;
                 // Disabled imported colliders do not stop a falling Rigidbody.
                 // Ensure each physics root has at least one enabled solid
