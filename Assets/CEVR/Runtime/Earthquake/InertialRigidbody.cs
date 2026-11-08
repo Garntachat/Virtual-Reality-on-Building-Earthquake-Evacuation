@@ -51,6 +51,7 @@ namespace ChulaEarthquakeVR
         private ToppleableFurniture topple;
         private GroundMotionPlayer subscribedMotion;
         private bool manualInteractionActive;
+        private bool earthquakeHasStarted;
         private Vector3 anchoredPosition;
         private Quaternion anchoredRotation;
 
@@ -129,6 +130,7 @@ namespace ChulaEarthquakeVR
         {
             if (!wakeOnlyWhenEarthquakeStarts || body == null ||
                 GetComponent<FallingHazard>() != null) return;
+            earthquakeHasStarted = true;
             if (houseMotionMode == HouseFurnitureMotionMode.AnchoredSway) return;
             // Only physical loose objects/chairs are released. Gravity remains
             // enabled AFTER the wave ends, so nothing freezes while airborne.
@@ -188,6 +190,14 @@ namespace ChulaEarthquakeVR
             manualInteractionActive = false;
             if (body == null) body = GetComponent<Rigidbody>();
             if (body == null || (motionSource != null && motionSource.IsPlaying)) return;
+            if (earthquakeHasStarted)
+            {
+                // Post-quake chair release still falls/settles under gravity.
+                // Only PRE-quake chairs are parked when the user lets go.
+                body.useGravity = true;
+                body.isKinematic = false;
+                return;
+            }
             body.linearVelocity = Vector3.zero;
             body.angularVelocity = Vector3.zero;
             body.isKinematic = true;
