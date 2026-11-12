@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 10897659}
   - component: {fileID: 2145000000}
   - component: {fileID: 2145000001}
+  - component: {fileID: 1463552124}
   m_Layer: 0
   m_Name: HouseLayout_HazardBooks_4
   m_TagString: Untagged
@@ -814,6 +815,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 55545388}
   m_Mesh: {fileID: 6534642237742725504, guid: 58aea377fbf64ad6aff0bf27fd441f8d, type: 3}
+--- !u!65 &63189774
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1179722134}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0000004, y: 1.0000001, z: 1.0000006}
+  m_Center: {x: 0, y: 0.50000006, z: 0}
 --- !u!1 &65625072
 GameObject:
   m_ObjectHideFlags: 0
@@ -4914,6 +4936,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 370234184}
   m_Mesh: {fileID: 1392481745700551798, guid: 09e366fbcbb14d2cb8da9e5a994540a1, type: 3}
+--- !u!65 &371454622
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1426961779}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1.0000007, z: 1.0000011}
+  m_Center: {x: 20.580006, y: 2.2900004, z: -2.0200014}
 --- !u!1 &375675667
 GameObject:
   m_ObjectHideFlags: 0
@@ -5518,6 +5561,27 @@ Transform:
   - {fileID: 1944477339}
   m_Father: {fileID: 1179722135}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &413733312
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 432940113}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0000002, y: 1.0000001, z: 1.000001}
+  m_Center: {x: 0.000000059604645, y: 0.50000006, z: -1.0499998}
 --- !u!1 &415507850
 GameObject:
   m_ObjectHideFlags: 0
@@ -5774,6 +5838,7 @@ GameObject:
   - component: {fileID: 432940114}
   - component: {fileID: 2145000004}
   - component: {fileID: 2145000005}
+  - component: {fileID: 413733312}
   m_Layer: 0
   m_Name: HouseLayout_kitchenCabinet
   m_TagString: Untagged
@@ -5812,6 +5877,7 @@ GameObject:
   - component: {fileID: 435659041}
   - component: {fileID: 2145000006}
   - component: {fileID: 2145000007}
+  - component: {fileID: 1648384012}
   m_Layer: 0
   m_Name: HouseLayout_Fridge
   m_TagString: Untagged
@@ -9235,6 +9301,27 @@ Transform:
   - {fileID: 1947175744}
   m_Father: {fileID: 1493009751}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &624968647
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1732720934}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.08774356, y: 0.36545414, z: 0.09715651}
+  m_Center: {x: 0, y: 0.94272685, z: -0.0035783947}
 --- !u!1 &660371028
 GameObject:
   m_ObjectHideFlags: 0
@@ -11047,6 +11134,7 @@ GameObject:
   - component: {fileID: 752422600}
   - component: {fileID: 2145000010}
   - component: {fileID: 2145000011}
+  - component: {fileID: 1873376443}
   m_Layer: 0
   m_Name: HouseLayout_Sofa
   m_TagString: Untagged
@@ -12200,6 +12288,7 @@ GameObject:
   - component: {fileID: 807773104}
   - component: {fileID: 2145000014}
   - component: {fileID: 2145000015}
+  - component: {fileID: 1721283474}
   m_Layer: 0
   m_Name: HouseLayout_televisionModern
   m_TagString: Untagged
@@ -15707,6 +15796,7 @@ GameObject:
   - component: {fileID: 905812950}
   - component: {fileID: 2145000016}
   - component: {fileID: 2145000017}
+  - component: {fileID: 2018093793}
   m_Layer: 0
   m_Name: HouseLayout_books
   m_TagString: Untagged
@@ -16002,6 +16092,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 920486149}
   m_Mesh: {fileID: 2436452000509941120, guid: c871aea6a7e048b4b8e6f8c311fd9043, type: 3}
+--- !u!65 &921672080
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1726025527}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0000002, y: 1.0000001, z: 1.0000013}
+  m_Center: {x: -0.000000029802322, y: 0.50000006, z: -0.000000059604645}
 --- !u!1 &924649058
 GameObject:
   m_ObjectHideFlags: 0
@@ -18547,6 +18658,7 @@ GameObject:
   - component: {fileID: 1084263940}
   - component: {fileID: 2145000018}
   - component: {fileID: 2145000019}
+  - component: {fileID: 1633451107}
   m_Layer: 0
   m_Name: HouseLayout_kitchenSink
   m_TagString: Untagged
@@ -18787,6 +18899,7 @@ GameObject:
   - component: {fileID: 1094506162}
   - component: {fileID: 2145000020}
   - component: {fileID: 2145000021}
+  - component: {fileID: 1284397723}
   m_Layer: 0
   m_Name: HouseLayout_Sofa_Pillows
   m_TagString: Untagged
@@ -20062,6 +20175,7 @@ GameObject:
   - component: {fileID: 1179722135}
   - component: {fileID: 2145000026}
   - component: {fileID: 2145000027}
+  - component: {fileID: 63189774}
   m_Layer: 0
   m_Name: HouseLayout_tableCoffee
   m_TagString: Untagged
@@ -20279,6 +20393,7 @@ GameObject:
   - component: {fileID: 1198933910}
   - component: {fileID: 2145000028}
   - component: {fileID: 2145000029}
+  - component: {fileID: 1738790389}
   m_Layer: 0
   m_Name: HouseLayout_Wandrobe
   m_TagString: Untagged
@@ -21743,6 +21858,48 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1278884262}
   m_Mesh: {fileID: 4300000, guid: 9fe59f756d94b454192cd76d0afd75a2, type: 2}
+--- !u!65 &1280911354
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1861971192}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0000002, y: 1.0000001, z: 1.0000004}
+  m_Center: {x: -2.8200002, y: 0.50000006, z: 0.7300001}
+--- !u!65 &1284397723
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1094506160}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.5460005, y: 0.21004891, z: 0.24555032}
+  m_Center: {x: -0.0060360134, y: 0.58, z: -0.12758468}
 --- !u!43 &1294737043
 Mesh:
   m_ObjectHideFlags: 0
@@ -23128,6 +23285,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1355923380}
   m_Mesh: {fileID: 52655110331233331, guid: 09e366fbcbb14d2cb8da9e5a994540a1, type: 3}
+--- !u!65 &1357600892
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1568844031}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.99999917, y: 0.99999994, z: 0.9999991}
+  m_Center: {x: 1.7500005, y: 0.49999997, z: 0}
 --- !u!1 &1363770451
 GameObject:
   m_ObjectHideFlags: 0
@@ -23229,6 +23407,7 @@ GameObject:
   - component: {fileID: 1370239187}
   - component: {fileID: 2145000030}
   - component: {fileID: 2145000031}
+  - component: {fileID: 1811866072}
   m_Layer: 0
   m_Name: HouseLayout_kitchenStove
   m_TagString: Untagged
@@ -24257,6 +24436,7 @@ GameObject:
   - component: {fileID: 1426961780}
   - component: {fileID: 2145000032}
   - component: {fileID: 2145000033}
+  - component: {fileID: 371454622}
   m_Layer: 0
   m_Name: HouseLayout_books
   m_TagString: Untagged
@@ -24732,6 +24912,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1456703682}
   m_Mesh: {fileID: 4300000, guid: 86e366d498ef54f40ae1f5a59563a5e8, type: 2}
+--- !u!65 &1463552124
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10897658}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.16750075, y: 0.84887344, z: 0.79999983}
+  m_Center: {x: 0.08124959, y: 0.42443672, z: 0.10000028}
 --- !u!1 &1481505678
 GameObject:
   m_ObjectHideFlags: 0
@@ -78051,6 +78252,7 @@ GameObject:
   - component: {fileID: 1531469907}
   - component: {fileID: 2145000034}
   - component: {fileID: 2145000035}
+  - component: {fileID: 1680176145}
   m_Layer: 0
   m_Name: HouseLayout_pottedPlant
   m_TagString: Untagged
@@ -78663,6 +78865,7 @@ GameObject:
   - component: {fileID: 1568844032}
   - component: {fileID: 2145000036}
   - component: {fileID: 2145000037}
+  - component: {fileID: 1357600892}
   m_Layer: 0
   m_Name: HouseLayout_pottedPlant
   m_TagString: Untagged
@@ -79408,6 +79611,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1611999259}
   m_Mesh: {fileID: 181546014383638800, guid: 09e366fbcbb14d2cb8da9e5a994540a1, type: 3}
+--- !u!65 &1633451107
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1084263939}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0000002, y: 1.0000001, z: 1.000001}
+  m_Center: {x: 0.000000059604645, y: 0.50000006, z: -1.0499998}
 --- !u!1 &1643021588
 GameObject:
   m_ObjectHideFlags: 0
@@ -79443,6 +79667,27 @@ Transform:
   - {fileID: 1304330341}
   m_Father: {fileID: 905812950}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1648384012
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 435659039}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.7104974, y: 1.7844228, z: 0.71385074}
+  m_Center: {x: -0.6662487, y: 0.8801802, z: -0.000000059604645}
 --- !u!1 &1663157262
 GameObject:
   m_ObjectHideFlags: 0
@@ -80042,6 +80287,27 @@ MonoBehaviour:
   responseScale: 1
   visualDamping: 1.5
   starterPresetProcessed: 1
+--- !u!65 &1680176145
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1531469906}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.9999999, y: 0.9999999, z: 1}
+  m_Center: {x: 0, y: 0.49999994, z: 0}
 --- !u!1 &1700525216
 GameObject:
   m_ObjectHideFlags: 0
@@ -80437,6 +80703,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1720797635}
   m_Mesh: {fileID: 4300000, guid: b8768ee095b8d433fa8059a4d443fb14, type: 2}
+--- !u!65 &1721283474
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 807773103}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0000002, y: 0.9999998, z: 1.0000012}
+  m_Center: {x: 0, y: 0.50000006, z: 0}
 --- !u!1 &1722076690
 GameObject:
   m_ObjectHideFlags: 0
@@ -80538,6 +80825,7 @@ GameObject:
   - component: {fileID: 1726025528}
   - component: {fileID: 2145000040}
   - component: {fileID: 2145000041}
+  - component: {fileID: 921672080}
   m_Layer: 0
   m_Name: HouseLayout_cabinetTelevision
   m_TagString: Untagged
@@ -80664,6 +80952,7 @@ GameObject:
   - component: {fileID: 1732720936}
   - component: {fileID: 2145000042}
   - component: {fileID: 2145000043}
+  - component: {fileID: 624968647}
   m_Layer: 0
   m_Name: HouseLayout_Vase
   m_TagString: Untagged
@@ -80707,6 +80996,27 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
+--- !u!65 &1738790389
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1198933908}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0141317, y: 2.028263, z: 0.6834645}
+  m_Center: {x: 0.011717603, y: 0.99999976, z: 0.038267985}
 --- !u!1 &1739801535
 GameObject:
   m_ObjectHideFlags: 0
@@ -81533,6 +81843,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1807184187}
   m_Mesh: {fileID: -6037834795605609229, guid: 906eb55e1cfa41369221ae8eed981673, type: 3}
+--- !u!65 &1811866072
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1370239186}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.9999997, y: 0.9999999, z: 0.9999995}
+  m_Center: {x: 0.000000059604645, y: 0.49999994, z: -1.0500005}
 --- !u!1 &1813007620
 GameObject:
   m_ObjectHideFlags: 0
@@ -82133,6 +82464,7 @@ GameObject:
   - component: {fileID: 1861971193}
   - component: {fileID: 2145000044}
   - component: {fileID: 2145000045}
+  - component: {fileID: 1280911354}
   m_Layer: 0
   m_Name: HouseLayout_tableCoffee
   m_TagString: Untagged
@@ -82247,6 +82579,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1862222050}
   m_Mesh: {fileID: 52655110331233331, guid: 09e366fbcbb14d2cb8da9e5a994540a1, type: 3}
+--- !u!65 &1873376443
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 752422598}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.9000008, y: 0.8112506, z: 0.94239426}
+  m_Center: {x: -0.000000029802322, y: 0.4056253, z: -0.011196747}
 --- !u!1 &1874630051
 GameObject:
   m_ObjectHideFlags: 0
@@ -82464,6 +82817,7 @@ GameObject:
   - component: {fileID: 1882465187}
   - component: {fileID: 2145000046}
   - component: {fileID: 2145000047}
+  - component: {fileID: 2145000050}
   m_Layer: 0
   m_Name: HouseLayout_Vase
   m_TagString: Untagged
@@ -86582,6 +86936,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2009242593}
   m_Mesh: {fileID: -4970314844425073803, guid: 09e366fbcbb14d2cb8da9e5a994540a1, type: 3}
+--- !u!65 &2018093793
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 905812949}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.4000002, y: 0.9999991, z: 1.6250002}
+  m_Center: {x: 0, y: 0.49999955, z: 0}
 --- !u!1 &2020650010
 GameObject:
   m_ObjectHideFlags: 0
@@ -86953,6 +87328,7 @@ GameObject:
   - component: {fileID: 2038952272}
   - component: {fileID: 2145000048}
   - component: {fileID: 2145000049}
+  - component: {fileID: 2145000051}
   m_Layer: 0
   m_Name: HouseLayout_bookcaseOpen
   m_TagString: Untagged
@@ -91476,20 +91852,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2142417826}
   m_Mesh: {fileID: 2596511768774672152, guid: 58aea377fbf64ad6aff0bf27fd441f8d, type: 3}
---- !u!1660057539 &9223372036854775807
-SceneRoots:
-  m_ObjectHideFlags: 0
-  m_Roots:
-  - {fileID: 765754370}
-  - {fileID: 1212233271}
-  - {fileID: 843116009}
-  - {fileID: 1499200898}
-  - {fileID: 458446357}
-  - {fileID: 1988309568}
-  - {fileID: 2136594672}
-  - {fileID: 1606142843}
-  - {fileID: 2126859816}
-  - {fileID: 419657414}
 --- !u!54 &2145000000
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -92640,3 +93002,59 @@ MonoBehaviour:
   includeVertical: 0
   wakeOnlyWhenEarthquakeStarts: 1
   starterPresetProcessed: 1
+--- !u!65 &2145000050
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1882465185}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.08774352, y: 0.36328465, z: 0.094685525}
+  m_Center: {x: -1.4846197, y: 0.9416423, z: 0.17733198}
+--- !u!65 &2145000051
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2038952271}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.000001, y: 1, z: 1.0000012}
+  m_Center: {x: 6.6800017, y: 0.49999997, z: 0.0000005662441}
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 765754370}
+  - {fileID: 1212233271}
+  - {fileID: 843116009}
+  - {fileID: 1499200898}
+  - {fileID: 458446357}
+  - {fileID: 1988309568}
+  - {fileID: 2136594672}
+  - {fileID: 1606142843}
+  - {fileID: 2126859816}
+  - {fileID: 419657414}
